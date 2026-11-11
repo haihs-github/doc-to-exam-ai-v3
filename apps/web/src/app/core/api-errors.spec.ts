@@ -2,25 +2,17 @@
 // Tests for errorMessage. Source client/tests has no apiErrors test; cases derive from describeApiError (client/src/utils/apiErrors.js:23-30).
 import { errorMessage } from './api-errors';
 
-const fail = (code: string, message: string, extra: object = {}) => ({
-  success: false,
-  code,
-  message,
-  ...extra,
-});
+const fail = (code: string, message: string, extra: object = {}) => ({ success: false, code, message, ...extra });
 
 describe('errorMessage', () => {
   it('mất kết nối (status 0) -> thông báo mạng (apiErrors.js:24)', () => {
-    expect(errorMessage(fail('INTERNAL', 'x', { status: 0 }))).toBe(
-      'Không kết nối được máy chủ. Vui lòng kiểm tra mạng và thử lại.',
-    );
+    expect(errorMessage(fail('INTERNAL', 'x', { status: 0 }))).toBe('Không kết nối được máy chủ. Vui lòng kiểm tra mạng và thử lại.');
   });
 
   it('RATE_LIMITED -> quá nhiều lần, kèm giây chờ từ Retry-After (apiErrors.js:26)', () => {
     expect(errorMessage(fail('RATE_LIMITED', 'x'))).toBe('Bạn thao tác quá nhiều lần.');
     expect(errorMessage(fail('RATE_LIMITED', 'x', { status: 429, retryAfter: '3' }))).toBe(
-      'Bạn thao tác quá nhiều lần. Vui lòng thử lại sau khoảng 3 giây.',
-    );
+      'Bạn thao tác quá nhiều lần. Vui lòng thử lại sau khoảng 3 giây.');
   });
 
   it('503 -> hệ thống bận (apiErrors.js:27)', () => {

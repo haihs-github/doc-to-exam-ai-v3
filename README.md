@@ -16,7 +16,9 @@ npm install
 npm run dev      # chạy apps/api và apps/web
 ```
 
-Scripts gốc: `lint`, `format`, `format:check`, `test:api`, `test:web`, `test:contract`, `build`, `dev`.
+Scripts gốc: `lint`, `format` (thủ công, ví dụ `npm run format -- <file>`), `test:api`, `test:web`, `test:contract`, `build`, `dev`.
+
+Prettier chỉ áp cho file mới/sửa từ M1; M0 chưa format.
 
 ## Giới hạn tài nguyên (D6)
 

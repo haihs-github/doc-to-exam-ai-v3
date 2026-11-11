@@ -7,5 +7,5 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideHttpClient(), // Haihs: ApiClient cần HttpClient - start - end
-  ],
+  ]
 };

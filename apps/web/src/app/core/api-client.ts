@@ -13,11 +13,7 @@ export type ApiFailure = ApiError & { status: number; retryAfter?: string | null
 
 const GENERIC = 'Có lỗi xảy ra. Vui lòng thử lại!';
 const internal = (status: number, retryAfter?: string | null): ApiFailure => ({
-  success: false,
-  code: 'INTERNAL',
-  message: GENERIC,
-  status,
-  retryAfter,
+  success: false, code: 'INTERNAL', message: GENERIC, status, retryAfter,
 });
 
 type Params = Record<string, string | number>;

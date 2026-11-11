@@ -11,9 +11,7 @@ describe('ApiClient', () => {
   let api: ApiClient;
   let http: HttpTestingController;
   beforeEach(() => {
-    TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting()],
-    });
+    TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting()] });
     api = TestBed.inject(ApiClient);
     http = TestBed.inject(HttpTestingController);
   });
@@ -52,21 +50,11 @@ describe('ApiClient', () => {
 
   it('contract error body -> throws ApiError', async () => {
     const p = firstValueFrom(api.get('/api/x'));
-    http
-      .expectOne('/api/x')
-      .flush(
-        { success: false, code: 'NOT_FOUND', message: 'Không tìm thấy', field: 'id' },
-        { status: 404, statusText: 'Not Found' },
-      );
+    http.expectOne('/api/x').flush(
+      { success: false, code: 'NOT_FOUND', message: 'Không tìm thấy', field: 'id' }, { status: 404, statusText: 'Not Found' });
     const e = await p.catch((x) => x);
     expect(isApiError(e)).toBe(true);
-    expect(e).toMatchObject({
-      success: false,
-      code: 'NOT_FOUND',
-      message: 'Không tìm thấy',
-      field: 'id',
-      status: 404,
-    });
+    expect(e).toMatchObject({ success: false, code: 'NOT_FOUND', message: 'Không tìm thấy', field: 'id', status: 404 });
   });
 
   it('HTML body -> INTERNAL with generic Vietnamese message', async () => {
@@ -80,9 +68,7 @@ describe('ApiClient', () => {
 
   it('null body on error -> INTERNAL; Retry-After kept for 503', async () => {
     const p = firstValueFrom(api.get('/api/x'));
-    http
-      .expectOne('/api/x')
-      .flush(null, { status: 503, statusText: 'x', headers: { 'Retry-After': '4' } });
+    http.expectOne('/api/x').flush(null, { status: 503, statusText: 'x', headers: { 'Retry-After': '4' } });
     const e = await p.catch((x) => x);
     expect(e).toMatchObject({ code: 'INTERNAL', status: 503, retryAfter: '4' });
   });
