@@ -9,6 +9,7 @@ import { decideRoute } from '../shared/utils/auth-routing';
 import { AuthService } from './auth.service';
 
 // TODO(web): Task 13 — dựng trang /session-error (message loadError + Thử lại + Đăng xuất)
+// Haihs: đã xử lý ở pages/session-error.ts - start - end
 export const SESSION_ERROR_PATH = '/session-error';
 
 export const authGuard =

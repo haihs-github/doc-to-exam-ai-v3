@@ -41,6 +41,7 @@ const ACTIVE = 'bg-primary-100 !text-primary-900 dark:bg-sky-900/50 dark:!text-s
           >
             @if (!auth.isAuthenticated()) {
               <!-- TODO(web): M4 — route /about chưa tồn tại -->
+              <!-- Haihs: đã xử lý, route /about đã có ở app.routes.ts - start - end -->
               <a
                 routerLink="/about"
                 [class]="link"
