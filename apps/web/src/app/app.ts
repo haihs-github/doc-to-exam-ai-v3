@@ -11,6 +11,7 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { AlertHost } from './shared/ui/alert-modal';
+import { ApiKeyModal } from './shared/ui/api-key-modal';
 import { ApiProgress } from './shared/ui/api-progress';
 import { ConfirmHost } from './shared/ui/confirm-modal';
 import { Navbar } from './shared/ui/navbar';
@@ -18,7 +19,8 @@ import { Navbar } from './shared/ui/navbar';
 
 @Component({
   // imports: [], // Haihs: đóng code cũ, component không import gì - start - end
-  imports: [ApiProgress, Navbar, RouterOutlet, AlertHost, ConfirmHost], // Haihs: vỏ ứng dụng cần các thành phần UI chung - start - end
+  // imports: [ApiProgress, Navbar, RouterOutlet, AlertHost, ConfirmHost], // Haihs: đóng code cũ, thêm modal API Key vào vỏ ứng dụng (Task 13b) - start - end
+  imports: [ApiProgress, Navbar, RouterOutlet, AlertHost, ConfirmHost, ApiKeyModal], // Haihs: vỏ ứng dụng cần các thành phần UI chung, thêm modal API Key (Task 13b) - start - end
   selector: 'app-root',
   // styleUrl: './app.css', // Haihs: đóng code cũ, app.css rỗng đã bị xóa khi tối giản scaffold - start - end
   // templateUrl: './app.html', // Haihs: đóng code cũ, app.html là trang placeholder 20KB của CLI - start - end
@@ -39,6 +41,7 @@ import { Navbar } from './shared/ui/navbar';
     </main>
     <app-alert-host />
     <app-confirm-host />
+    <app-api-key-modal />
   `,
   // Haihs: hiển thị tiêu đề + trạng thái API health - end
 })

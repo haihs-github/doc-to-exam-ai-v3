@@ -1,5 +1,5 @@
 // Created by Haihs on 11/11/2026
-// Temporary pages so every route target exists: logged-in home (until M2/M3) and About (until Task 13b).
+// Temporary pages so every route target exists: logged-in home (until M2/M3).
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../core/auth.service';
@@ -28,15 +28,3 @@ import { AuthService } from '../core/auth.service';
 export class HomePlaceholder {
   protected readonly auth = inject(AuthService);
 }
-
-// TODO(web): Task 13b thay bằng trang About thật (và gắn <app-api-health> vào đó)
-@Component({
-  selector: 'app-about-placeholder',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <div class="mx-auto max-w-md px-4 py-10">
-      <h1 class="text-xl font-extrabold text-gray-900 dark:text-gray-100">Giới thiệu</h1>
-    </div>
-  `,
-})
-export class AboutPlaceholder {}

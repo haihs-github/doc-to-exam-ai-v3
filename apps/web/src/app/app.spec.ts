@@ -37,7 +37,7 @@ describe('App', () => {
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();
     const el = fixture.nativeElement as HTMLElement;
-    for (const tag of ['app-api-progress', 'app-navbar', 'router-outlet', 'app-alert-host', 'app-confirm-host'])
+    for (const tag of ['app-api-progress', 'app-navbar', 'router-outlet', 'app-alert-host', 'app-confirm-host', 'app-api-key-modal'])
       expect(el.querySelectorAll(tag).length, tag).toBe(1);
     expect(el.querySelector('app-api-health')).toBeNull();
   });

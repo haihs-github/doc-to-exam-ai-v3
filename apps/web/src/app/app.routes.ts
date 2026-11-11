@@ -8,7 +8,8 @@ import { AuthService } from './core/auth.service';
 import { authGuard } from './core/auth.guard';
 import { ChangePassword } from './pages/change-password';
 import { Login } from './pages/login';
-import { AboutPlaceholder, HomePlaceholder } from './pages/placeholders';
+import { About } from './pages/about';
+import { HomePlaceholder } from './pages/placeholders';
 import { Register } from './pages/register';
 import { SessionError } from './pages/session-error';
 
@@ -50,7 +51,7 @@ const sessionErrorGuard: CanActivateFn = () => {
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', canActivate: [rootGuard], component: HomePlaceholder },
-  { path: 'about', component: AboutPlaceholder },
+  { path: 'about', component: About },
   { path: 'login', component: Login, data: { audience: 'student' } },
   { path: 'register', component: Register, data: { audience: 'student' } },
   { path: 'teacher/login', component: Login, data: { audience: 'teacher' } },
