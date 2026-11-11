@@ -9,6 +9,7 @@ export interface Env {
   apiKeyEncryptionSecret: string;
   teacherSecretKey: string;
   allowInMemoryDb: boolean;
+  trustProxy: number; // Haihs: số proxy tin cậy phía trước app (X-Forwarded-For), dùng cho rate limit - start - end
 }
 
 const MIN_SECRET = 16;
@@ -55,5 +56,14 @@ export function loadEnv(src: Record<string, string | undefined> = process.env): 
     teacherSecretKey: teacherSecretKey || DEV.teacherSecretKey,
     // in-memory DB loses data: never outside dev/test (source env.js:164-166, hardened for production)
     allowInMemoryDb: !isProd && get('ALLOW_IN_MEMORY_DB') !== 'false',
+    trustProxy: Number.isInteger(Number(get('TRUST_PROXY'))) && get('TRUST_PROXY') !== '' && Number(get('TRUST_PROXY')) >= 0 ? Number(get('TRUST_PROXY')) : isProd ? 1 : 0, // Haihs: trust proxy mặc định 1 ở production, 0 nơi khác - start - end
   };
 }
+
+// Haihs: ghi đè ngưỡng rate limit bằng RATE_LIMIT_<NAME>_MAX - start
+// Positive integer only; anything else is ignored (source rateLimit.js resolveMax).
+export function rateLimitMax(name: string, fallback: number, src: Record<string, string | undefined> = process.env): number {
+  const v = Number(src[`RATE_LIMIT_${name}_MAX`]);
+  return Number.isInteger(v) && v > 0 ? v : fallback;
+}
+// Haihs: ghi đè ngưỡng rate limit bằng RATE_LIMIT_<NAME>_MAX - end
