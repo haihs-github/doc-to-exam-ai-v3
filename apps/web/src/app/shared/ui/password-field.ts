@@ -17,6 +17,7 @@ import { ChangeDetectionStrategy, Component, input, model, output, signal } from
       [attr.autocomplete]="autocomplete()"
       [attr.placeholder]="placeholder() || null"
       [attr.name]="name() || null"
+      [attr.id]="inputId() || null"
       [disabled]="disabled()"
     />
     <button
@@ -49,6 +50,8 @@ export class PasswordField {
   readonly autocomplete = input('current-password');
   readonly placeholder = input('');
   readonly name = input('');
+  /** Stable id for the inner input (form-field keeps an author id). */
+  readonly inputId = input('');
   readonly disabled = input(false);
   /** Fires when the input loses focus (validate on blur). */
   readonly blurred = output<void>();

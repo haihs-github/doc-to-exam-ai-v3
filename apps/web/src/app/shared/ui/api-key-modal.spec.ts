@@ -152,6 +152,7 @@ describe('ApiKeyModal', () => {
     await s.submit();
     expect(spy).toHaveBeenCalledWith('AIzaKEY-abcd');
     expect(s.alertDlg()?.textContent).toContain('Đã lưu API Key thành công vào tài khoản của bạn!');
+    expect(s.input()!.value).toBe(''); // the key leaves the DOM before the popup is acknowledged
     expect(s.dialog()).not.toBeNull(); // still open until the alert is acknowledged
     s.alertBtn()!.click();
     await s.f.whenStable();
@@ -213,6 +214,33 @@ describe('ApiKeyModal', () => {
       .click();
     await s.f.whenStable();
     expect(spy).toHaveBeenCalledWith('');
+    expect(s.alertDlg()?.textContent).toContain('Đã xóa API Key khỏi tài khoản.');
+    s.alertBtn()!.click();
+    await s.f.whenStable();
+    expect(s.dialog()).toBeNull();
+  });
+
+  it('the key field has a stable id (author id kept by form-field) and its label points at it', async () => {
+    const s = await setup();
+    await s.open();
+    expect(s.input()!.id).toBe('geminiApiKey');
+    expect(s.dialog()!.querySelector('label')!.getAttribute('for')).toBe('geminiApiKey');
+  });
+
+  it('session end closes the modal and drops the typed key; logging in again does not reopen it', async () => {
+    const s = await setup();
+    await s.open();
+    await s.type('secret-key');
+    const user = (s.auth as unknown as { _user: { set(u: AuthUser | null): void } })._user;
+    user.set(null); // logout / 401
+    await s.f.whenStable();
+    expect(s.dialog()).toBeNull();
+    user.set(teacher);
+    await s.f.whenStable();
+    expect(s.dialog()).toBeNull();
+    expect(s.el.innerHTML).not.toContain('secret-key');
+    await s.open();
+    expect(s.input()!.value).toBe('');
   });
 
   it('Esc closes and clears the input', async () => {
