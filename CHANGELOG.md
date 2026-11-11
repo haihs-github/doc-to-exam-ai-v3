@@ -35,6 +35,9 @@
 - Prettier áp dụng toàn repo, `.prettierignore`, `apps/web/.prettierrc` chuyển YAML, header cho `tsconfig.json` (`e30bb15`, `201bda9`).
 - `apiResponse` dùng `satisfies`, README (D6), `npm run dev` dọn tiến trình khi Ctrl-C (`2455d51`).
 
+### Reverted
+- Hoàn tác format Prettier toàn repo (`201bda9`) và bước CI `format:check` theo quyết định người dùng: Prettier chỉ áp từ M1; giữ script `format` thủ công và header `tsconfig.json` (`e6f2d47`).
+
 ### Fixed
 - `connectDb` không còn rò MongoClient khi driver tự reconnect (`0b84bc9`).
 <!-- Haihs: entry M0 kèm commit hash - end -->
