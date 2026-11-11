@@ -3,6 +3,7 @@
 import { clientIp } from './clientIp';
 import { readTrustProxy } from './env';
 import { readJson } from './handler';
+import { normalizePhone, PHONE_RE } from './phone'; // Haihs: dùng chung hàm chuẩn hóa và PHONE_RE với handler đăng nhập/đăng ký - start - end
 import { createRateLimiter, type RateLimiterOptions } from './rateLimit';
 
 const M = 60_000;
@@ -22,7 +23,7 @@ const ip = (req: Request) => `ip:${rawIp(req)}`.slice(0, 64);
 // Phone is attacker-controlled: it only becomes part of a key when it matches the VN format (after trim and
 // stripping space . -); otherwise the key is IP-only, so keys stay <= 64 chars and cannot be used to bloat memory.
 // TODO(api): Task 7 — handler phải trả 400 VALIDATION cho sdt không khớp regex TRƯỚC bcrypt/đăng ký (phone bucket bỏ qua sdt sai định dạng)
-const PHONE_RE = /^0\d{9,10}$/;
+// const PHONE_RE = /^0\d{9,10}$/; // Haihs: đóng code cũ, PHONE_RE chuyển sang lib/phone.ts để dùng chung - start - end
 // The body is read from a clone (cached per request), so the route handler can still read the original.
 const phones = new WeakMap<Request, Promise<string>>();
 function phoneOf(req: Request): Promise<string> {
@@ -30,9 +31,13 @@ function phoneOf(req: Request): Promise<string> {
   if (!p) {
     p = readJson(req.clone())
       .then((b) => {
-        const raw = (b as { phoneNumber?: unknown } | null)?.phoneNumber;
-        if (typeof raw !== 'string' || raw.length > 32) return '';
-        const phone = raw.trim().replace(/[\s.-]/g, '');
+        // Haihs: dùng normalizePhone dùng chung với handler đăng nhập/đăng ký - start
+        // đóng code cũ
+        // const raw = (b as { phoneNumber?: unknown } | null)?.phoneNumber;
+        // if (typeof raw !== 'string' || raw.length > 32) return '';
+        // const phone = raw.trim().replace(/[\s.-]/g, '');
+        const phone = normalizePhone((b as { phoneNumber?: unknown } | null)?.phoneNumber);
+        // Haihs: dùng normalizePhone dùng chung với handler đăng nhập/đăng ký - end
         return PHONE_RE.test(phone) ? phone : '';
       })
       .catch(() => '');
