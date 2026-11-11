@@ -2,7 +2,8 @@
 // Route wrappers withAuth / withPermission / withApiKey and the shared authenticateRequest (port of server/middlewares/authMiddleware.js).
 import jwt from 'jsonwebtoken';
 import mongoose from 'mongoose';
-import { UserModel, type IUser, type IUserMethods } from '../models/User';
+import { UserModel, type IUser } from '../models/User';
+import type { IUserMethods } from '../models/User';
 import { fail } from './apiResponse';
 import { connectDb } from './db';
 import { HttpError, type Handler } from './handler';
