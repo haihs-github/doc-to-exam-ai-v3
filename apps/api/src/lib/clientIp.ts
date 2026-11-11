@@ -12,6 +12,6 @@ export function clientIp(req: Request, trustProxy: number): string {
     .filter(Boolean);
   if (!parts.length) return UNKNOWN;
   // Our trusted proxies append the address they saw, so count from the right: left entries are client-supplied.
-  // Header shorter than trustProxy means a misconfiguration; the leftmost entry is the best remaining guess.
-  return (parts[Math.max(0, parts.length - trustProxy)] ?? UNKNOWN).slice(0, 64);
+  // Header shorter than trustProxy means a misconfiguration or a bypassed proxy: do not guess, trust nothing.
+  return (parts[parts.length - trustProxy] ?? UNKNOWN).slice(0, 64);
 }

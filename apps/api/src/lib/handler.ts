@@ -50,9 +50,9 @@ export async function readJson(req: Request, maxBytes = 1_048_576): Promise<unkn
 }
 // Haihs: readJson có trần byte (Content-Length + độ dài thực đọc) - end
 
-// type Handler = (req: Request, ctx?: any) => Promise<Response>; // đóng code cũ // Haihs: export Handler cho withRateLimit - start - end
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Next passes a route-specific ctx
-export type Handler = (req: Request, ctx?: any) => Promise<Response>; // Haihs: export Handler cho withRateLimit - start - end
+// type Handler = (req: Request, ctx?: any) => Promise<Response>; // đóng code cũ // Haihs: export Handler cho withRateLimit - start - end
+export type Handler = (req: Request, ctx?: any) => Promise<Response>; // eslint-disable-line @typescript-eslint/no-explicit-any -- Next passes a route-specific ctx // Haihs: export Handler cho withRateLimit - start - end
 
 export function withErrors(h: Handler): Handler {
   return async (req, ctx) => {
