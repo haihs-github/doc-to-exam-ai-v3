@@ -180,10 +180,11 @@ const MUTED = 'text-gray-600 dark:text-gray-300';
                 Tự host trên máy chủ của bạn
               </h3>
               <p [class]="muted">
-                Cần Node.js 22 trở lên và một MongoDB (đặt biến MONGODB_URI, xem
-                apps/api/.env.example). Khi triển khai thật, chạy một instance duy nhất sau reverse
-                proxy cùng origin; mỗi giáo viên dùng Gemini API Key riêng. Xem README để biết chi
-                tiết.
+                Cần Node.js 22 trở lên. Khi phát triển, MongoDB là tùy chọn: không đặt MONGODB_URI
+                thì API tự dùng MongoDB in-memory (dữ liệu mất khi dừng). Khi triển khai thật cần
+                MongoDB, đặt qua biến MONGODB_URI (xem apps/api/.env.example), chạy một instance
+                duy nhất sau reverse proxy cùng origin; mỗi giáo viên dùng Gemini API Key riêng.
+                Xem README để biết chi tiết.
               </p>
               <div class="relative rounded-lg bg-gray-950 p-4 text-gray-200">
                 <button
