@@ -6,6 +6,8 @@ import { authInterceptor } from './core/auth.interceptor';
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideRouter } from '@angular/router'; // Haihs: thêm router cho các route auth của M1 (plan Task 10/13) - start - end
 import { routes } from './app.routes';
+import { inject, provideEnvironmentInitializer } from '@angular/core';
+import { SessionNavigation } from './core/session-navigation';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -20,5 +22,10 @@ export const appConfig: ApplicationConfig = {
     // provideRouter([]), // Haihs: thêm router cho các route auth của M1 (plan Task 10/13) - start - end
     provideRouter(routes),
     // Haihs: nối bảng route thật (login/register/change-password/session-error...) thay cho bảng rỗng - end
+    // Haihs: khởi tạo SessionNavigation để mất phiên/buộc đổi mật khẩu giữa chừng tự điều hướng - start
+    provideEnvironmentInitializer(() => {
+      inject(SessionNavigation);
+    }),
+    // Haihs: khởi tạo SessionNavigation để mất phiên/buộc đổi mật khẩu giữa chừng tự điều hướng - end
   ]
 };

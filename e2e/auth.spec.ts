@@ -151,6 +151,35 @@ test('logout-all on one device sends the other device to the login page', async 
   }
 });
 
+test('revoked session is sent to login by its next API call (no page reload)', async ({
+  page,
+  browser,
+  baseURL,
+}) => {
+  const phone = newPhone();
+  await register(page, 'teacher', phone);
+  await expect(home(page)).toBeVisible();
+
+  const other = await newDevice(browser, baseURL);
+  try {
+    await login(other.page, 'teacher', phone);
+    await expect(home(other.page)).toBeVisible();
+
+    await page.getByRole('banner').getByRole('link', { name: 'Đổi mật khẩu' }).click();
+    await page.getByRole('button', { name: 'Đăng xuất mọi thiết bị' }).click();
+    await dialog(page).getByRole('button', { name: 'Đăng xuất' }).click();
+    await expect(page).toHaveURL(/\/teacher\/login$/);
+
+    // The other device still shows the logged-in home; saving an API key is its next API call and gets a 401.
+    await other.page.getByRole('banner').getByRole('button', { name: 'Cài đặt API Key' }).click();
+    await field(other.page, 'geminiApiKey').fill('AIzaSyE2E-revoked-0000');
+    await other.page.getByRole('dialog').getByRole('button', { name: 'Lưu key' }).click();
+    await expect(other.page).toHaveURL(/\/teacher\/login$/);
+  } finally {
+    await other.context.close();
+  }
+});
+
 test('student cannot reach teacher-only pages', async ({ page }) => {
   await register(page, 'student', newPhone());
   await expect(home(page)).toBeVisible();
