@@ -32,7 +32,9 @@ export const decideRoute = (input: {
     };
   }
   if (user.mustChangePassword)
-    return path === CHANGE_PASSWORD_PATH ? { kind: 'allow' } : { kind: 'redirect', to: CHANGE_PASSWORD_PATH };
+    return path === CHANGE_PASSWORD_PATH
+      ? { kind: 'allow' }
+      : { kind: 'redirect', to: CHANGE_PASSWORD_PATH };
   if (roles && !roles.includes(user.role)) return { kind: 'redirect', to: '/' };
   return { kind: 'allow' };
 };
