@@ -1,0 +1,63 @@
+// Created by Haihs on 11/11/2026
+// Route table of the web app (source: client/src/App.jsx route list, M1 subset).
+import { Injector, inject, runInInjectionContext } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { CanActivateFn, GuardResult, Router, Routes } from '@angular/router';
+import { filter, map, take } from 'rxjs';
+import { AuthService } from './core/auth.service';
+import { authGuard } from './core/auth.guard';
+import { ChangePassword } from './pages/change-password';
+import { Login } from './pages/login';
+import { About } from './pages/about';
+import { HomePlaceholder } from './pages/placeholders';
+import { Register } from './pages/register';
+import { SessionError } from './pages/session-error';
+
+/** Runs `decide` once the startup /me load is over (same wait as authGuard: no flash of the wrong page). */
+const afterLoad = (decide: () => GuardResult) => {
+  const auth = inject(AuthService);
+  return auth.isLoading()
+    ? toObservable(auth.isLoading).pipe(
+        filter((l) => !l),
+        take(1),
+        map(decide),
+      )
+    : decide();
+};
+
+/**
+ * `/`: guest -> /about; otherwise authGuard() (loadError -> /session-error, mustChangePassword -> /change-password)
+ * and the page itself is HomePlaceholder. Loop-free by design: the role homes (/sittings, /teacher/templates)
+ * do not exist yet, so they fall through `**` to `/`, which for a logged-in user renders a page instead of redirecting.
+ */
+const rootGuard: CanActivateFn = (route, state) => {
+  const auth = inject(AuthService);
+  const router = inject(Router);
+  const injector = inject(Injector); // the decision may run after the load, outside the injection context
+  return afterLoad(
+    () =>
+      !auth.user() && !auth.loadError()
+        ? router.parseUrl('/about')
+        : (runInInjectionContext(injector, () => authGuard()(route, state)) as GuardResult), // isLoading is false here: synchronous
+  );
+};
+
+/** /session-error only makes sense with a pending loadError; otherwise go home (which decides by session). */
+const sessionErrorGuard: CanActivateFn = () => {
+  const auth = inject(AuthService);
+  const router = inject(Router);
+  return afterLoad(() => (!auth.user() && auth.loadError() ? true : router.parseUrl('/')));
+};
+
+export const routes: Routes = [
+  { path: '', pathMatch: 'full', canActivate: [rootGuard], component: HomePlaceholder },
+  { path: 'about', component: About },
+  { path: 'login', component: Login, data: { audience: 'student' } },
+  { path: 'register', component: Register, data: { audience: 'student' } },
+  { path: 'teacher/login', component: Login, data: { audience: 'teacher' } },
+  { path: 'teacher/register', component: Register, data: { audience: 'teacher' } },
+  // the only page a mustChangePassword user can reach
+  { path: 'change-password', canActivate: [authGuard()], component: ChangePassword },
+  { path: 'session-error', canActivate: [sessionErrorGuard], component: SessionError },
+  { path: '**', redirectTo: '' },
+];
