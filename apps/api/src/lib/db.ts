@@ -15,7 +15,7 @@ const g = globalThis as unknown as Record<string, Promise<typeof mongoose> | und
 //       throw new Error('Cannot connect to MongoDB (check MONGODB_URI and that the server is reachable)');
 //     });
 //   return g[KEY]!;
-// } // Haihs: đóng code cũ - end
+// } // Haihs: đóng code cũ, sửa cache chết sau disconnect và ném đồng bộ khi env sai - end
 export async function connectDb(options: ConnectOptions = {}): Promise<typeof mongoose> { // Haihs: async để lỗi env thành rejected promise; kết nối lại khi readyState 0/3 - start
   const rs = mongoose.connection.readyState;
   if (g[KEY] && (rs === 0 || rs === 3)) g[KEY] = undefined; // disconnected/disconnecting: cache is dead
