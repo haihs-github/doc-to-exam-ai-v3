@@ -65,4 +65,9 @@
 ### Changed
 - `apps/api`: `withErrors` generic, bổ sung test `parsePage`/`call` (nợ M0) (`5aa23c6`).
 - Prettier áp lên 3 file M1 (`apps/api/src/models/User.ts`, `auth-rules.ts` và spec) (`e250cbe`).
+
+### Fixed
+- `apps/web`: mất phiên hoặc bị buộc đổi mật khẩu giữa chừng tự điều hướng (`SessionNavigation`) (`acae001`); lỗi server `geminiApiKey` hiện dưới ô ở trang đăng ký giáo viên (`64eefd6`).
+- Test ghim cờ `count`/`refund5xx` từng bucket rate limit (`257c3b1`); marker CHANGELOG/.env.example/User.ts (`24a0f42`); ghi chú đóng TODO (`20a8aa9`); E2E API key không lộ (`36305d2`).
+- `mongodb-memory-server` thành devDependency (`3e1621f`); CI cache binary trước `npm ci` (`0a507c5`).
 <!-- Haihs: mục M1 tách khỏi vùng M0 ở trên (không lồng cặp marker) - end -->
