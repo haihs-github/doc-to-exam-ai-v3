@@ -1,1 +1,11 @@
 .superpowers/
+# Haihs: bổ sung ignore cho monorepo - start
+node_modules
+.next
+dist
+.angular
+coverage
+.env*
+!.env.example
+playwright-report
+# Haihs: bổ sung ignore cho monorepo - end
