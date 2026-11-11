@@ -101,6 +101,7 @@ describe('withRateLimit', () => {
     await vi.advanceTimersByTimeAsync(500);
     await first; // refund of the OLD window entry must not give the new window's slot back
     expect((await withRateLimit([l], statusHandler(200))(req())).status).toBe(429);
+    expect(l.hits.get('k')?.n).toBe(1); // the new window's own counter was not decremented
   });
   it('refund5xx gives the hit back, 4xx still counts', async () => {
     const l = mk({ max: 1, refund5xx: true });

@@ -248,6 +248,19 @@ describe('duplicate phone', () => {
     expect((await post(studentRegister, reg())).status).toBe(500);
     vi.restoreAllMocks();
   });
+  it('cause chain depth limit: E11000 at depth 5 -> 409, at depth 6 -> 500', async () => {
+    const chain = (depth: number) => {
+      let e: unknown = { code: 11000 };
+      for (let i = 0; i < depth; i++) e = { cause: e };
+      return e;
+    };
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(UserModel.prototype, 'save').mockRejectedValueOnce(chain(5));
+    expect((await post(studentRegister, reg())).status).toBe(409);
+    vi.spyOn(UserModel.prototype, 'save').mockRejectedValueOnce(chain(6));
+    expect((await post(studentRegister, reg())).status).toBe(500);
+    vi.restoreAllMocks();
+  });
   it('geminiApiKey > 512 chars or enc:v1: -> 400 field geminiApiKey before any hashing', async () => {
     for (const k of ['a'.repeat(513), 'enc:v1:abc']) {
       const r = await post(teacherRegister, tReg({ geminiApiKey: k }));

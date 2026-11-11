@@ -71,6 +71,11 @@ describe('hash / compare', () => {
     ]);
     expect(bcryptTempCost({})).toBe(8);
   });
+  it("cost parsing: '0x05' (Number() = 5, in range) still falls back to the defaults", () => {
+    expect(Number('0x05')).toBe(5);
+    expect(bcryptCost({ BCRYPT_COST: '0x05' })).toBe(10);
+    expect(bcryptTempCost({ BCRYPT_TEMP_COST: '0x05' })).toBe(8);
+  });
   it('hash rejects >72 bytes / non-string; compare never throws for them', async () => {
     await expect(hashPassword('a'.repeat(73))).rejects.toMatchObject({ code: 'VALIDATION' });
     await expect(hashTempPassword(5 as unknown as string)).rejects.toMatchObject({

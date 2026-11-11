@@ -1,6 +1,8 @@
 // Created by Haihs on 11/11/2026
 // Tests for readJson, HttpError and withErrors (safe error handling).
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { Error as MongooseError, Types } from 'mongoose';
+import { UserModel } from '../src/models/User';
 import { HttpError, readJson, withErrors } from '../src/lib/handler';
 import { call } from './helpers';
 
@@ -112,3 +114,80 @@ describe('withErrors', () => {
     expect(spy).toHaveBeenCalled();
   });
 });
+
+// Haihs: withErrors: ném Response, rethrow digest Next, ánh xạ lỗi Mongoose, ctx generic (nợ M0) - start
+describe('withErrors control flow and Mongoose errors', () => {
+  const quiet = () => vi.spyOn(console, 'error').mockImplementation(() => {});
+  const run = (e: unknown) => withErrors(async () => { throw e; })(new Request('http://x/'));
+
+  it('a thrown Response is returned as-is', async () => {
+    const res = new Response('teapot', { status: 418 });
+    expect(await run(res)).toBe(res);
+  });
+  it('an error with a Next digest (redirect/notFound) is re-thrown, not a 500', async () => {
+    const spy = quiet();
+    const e = Object.assign(new Error('NEXT_REDIRECT'), { digest: 'NEXT_REDIRECT;replace;/x;307;' });
+    await expect(run(e)).rejects.toBe(e);
+    expect(spy).not.toHaveBeenCalled();
+  });
+  it('Mongoose CastError -> 400 VALIDATION fixed message, no value echoed', async () => {
+    quiet();
+    let err: unknown;
+    try { await UserModel.findOne({ _id: 'SECRET-VALUE' }); } catch (e) { err = e; }
+    expect(err).toBeInstanceOf(MongooseError.CastError);
+    const res = await run(err);
+    const text = await res.text();
+    expect(res.status).toBe(400);
+    expect(JSON.parse(text)).toMatchObject({ success: false, code: 'VALIDATION', message: 'Dữ liệu không hợp lệ.' });
+    expect(text).not.toMatch(/SECRET-VALUE/);
+  });
+  it('Mongoose ValidationError -> 400 VALIDATION fixed message, no field values echoed', async () => {
+    quiet();
+    const err = new UserModel({ phoneNumber: 'SECRET-PHONE' }).validateSync();
+    expect(err).toBeInstanceOf(MongooseError.ValidationError);
+    const res = await run(err);
+    const text = await res.text();
+    expect(res.status).toBe(400);
+    expect(JSON.parse(text)).toMatchObject({ code: 'VALIDATION', message: 'Dữ liệu không hợp lệ.' });
+    expect(text).not.toMatch(/SECRET-PHONE|required/);
+  });
+  it('HttpError thrown by a setter and wrapped by Mongoose is unwrapped (code/message/field)', async () => {
+    quiet();
+    const wrapped = new UserModel({ geminiApiKey: 'enc:v1:abc' }).validateSync();
+    expect(wrapped).toBeInstanceOf(MongooseError.ValidationError);
+    const direct = new HttpError('VALIDATION', 'Khóa không hợp lệ', { field: 'geminiApiKey' });
+    const res = await run(wrapped);
+    const body = await res.json();
+    expect(res.status).toBe(400);
+    expect(body).toMatchObject({ code: 'VALIDATION', field: 'geminiApiKey' });
+    expect(body.message).not.toBe('Dữ liệu không hợp lệ.'); // the setter's own message, not the generic one
+    expect(direct.code).toBe(body.code);
+  });
+  it('a CastError whose reason is an HttpError is unwrapped', async () => {
+    const inner = new HttpError('CONFLICT', 'trùng', { field: 'x' });
+    const cast = new MongooseError.CastError('String', 'v', 'x', inner);
+    expect(await (await run(cast)).json()).toMatchObject({ code: 'CONFLICT', message: 'trùng', field: 'x' });
+  });
+  it('other errors (even with an unrelated name) stay 500 INTERNAL', async () => {
+    quiet();
+    const res = await run(Object.assign(new Error('boom'), { name: 'SomethingElse' }));
+    expect(res.status).toBe(500);
+  });
+  it('typed route ctx: withErrors<C> passes ctx through and type-checks params', async () => {
+    const h = withErrors(async (_req: Request, ctx: { params: Promise<{ id: string }> }) =>
+      Response.json({ id: (await ctx.params).id }),
+    );
+    const res = await h(new Request('http://x/'), { params: Promise.resolve({ id: new Types.ObjectId().toString().slice(0, 3) }) });
+    expect((await res.json()).id).toHaveLength(3);
+  });
+});
+// Haihs: withErrors: ném Response, rethrow digest Next, ánh xạ lỗi Mongoose, ctx generic (nợ M0) - end
+
+// Haihs: test call() trả text khi body không phải JSON (nợ M0) - start
+describe('call() helper', () => {
+  it('returns the raw text in body when the response is not JSON, undefined when empty', async () => {
+    expect(await call(async () => new Response('plain text', { status: 502 }))).toEqual({ status: 502, body: 'plain text' });
+    expect(await call(async () => new Response(null, { status: 204 }))).toEqual({ status: 204, body: undefined });
+  });
+});
+// Haihs: test call() trả text khi body không phải JSON (nợ M0) - end

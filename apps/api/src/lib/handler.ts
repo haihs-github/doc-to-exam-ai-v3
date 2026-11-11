@@ -54,10 +54,17 @@ export async function readJson(req: Request, maxBytes = 1_048_576): Promise<unkn
 // type Handler = (req: Request, ctx?: any) => Promise<Response>; // đóng code cũ // Haihs: export Handler cho withRateLimit - start - end
 export type Handler = (req: Request, ctx?: any) => Promise<Response>; // eslint-disable-line @typescript-eslint/no-explicit-any -- Next passes a route-specific ctx // Haihs: export Handler cho withRateLimit - start - end
 
-export function withErrors(h: Handler): Handler {
+// Haihs: withErrors generic theo ctx của route (params có kiểu), nợ M0 - start
+// đóng code cũ
+// export function withErrors(h: Handler): Handler {
+//   return async (req, ctx) => {
+//     try {
+//       return await h(req, ctx);
+export function withErrors<C = unknown>(h: (req: Request, ctx: C) => Promise<Response>): (req: Request, ctx?: C) => Promise<Response> {
   return async (req, ctx) => {
     try {
-      return await h(req, ctx);
+      return await h(req, ctx as C);
+// Haihs: withErrors generic theo ctx của route (params có kiểu), nợ M0 - end
     } catch (err) {
       // Haihs: SERVER_BUSY kèm Retry-After cho mọi route - start
       // đóng code cũ
@@ -68,8 +75,33 @@ export function withErrors(h: Handler): Handler {
         return res;
       }
       // Haihs: SERVER_BUSY kèm Retry-After cho mọi route - end
+      // Haihs: ném Response trả nguyên, rethrow lỗi điều hướng Next (digest), lỗi Mongoose -> 400 (nợ M0) - start
+      if (err instanceof Response) return err;
+      if (typeof (err as { digest?: unknown } | null)?.digest === 'string') throw err; // redirect()/notFound()
+      const name = (err as { name?: unknown } | null)?.name;
+      if (name === 'ValidationError' || name === 'CastError') {
+        // A setter-thrown HttpError arrives wrapped by Mongoose: surface its own code/message/field.
+        const inner = findHttpError(err);
+        if (inner) return fail(inner.code, inner.message, inner.extra);
+        console.error(`Lỗi ${req.method} ${new URL(req.url).pathname}:`, err);
+        return fail('VALIDATION', 'Dữ liệu không hợp lệ.'); // fixed text: Mongoose messages echo field values
+      }
+      // Haihs: ném Response trả nguyên, rethrow lỗi điều hướng Next (digest), lỗi Mongoose -> 400 (nợ M0) - end
       console.error(`Lỗi ${req.method} ${new URL(req.url).pathname}:`, err);
       return fail('INTERNAL', 'Lỗi máy chủ');
     }
   };
 }
+
+// Haihs: tìm HttpError bị Mongoose bọc (reason/cause/errors), giới hạn độ sâu (nợ M0) - start
+function findHttpError(e: unknown, depth = 0): HttpError | undefined {
+  if (e instanceof HttpError) return e;
+  if (depth >= 5 || !e || typeof e !== 'object') return undefined;
+  const x = e as { reason?: unknown; cause?: unknown; errors?: Record<string, unknown> };
+  for (const c of [x.reason, x.cause, ...Object.values(x.errors ?? {})]) {
+    const f = findHttpError(c, depth + 1);
+    if (f) return f;
+  }
+  return undefined;
+}
+// Haihs: tìm HttpError bị Mongoose bọc (reason/cause/errors), giới hạn độ sâu (nợ M0) - end
