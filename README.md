@@ -52,3 +52,51 @@ CI (`.github/workflows/ci.yml`): các job lint, test-api, test-web, build, e2e, 
 - D9: chỉ hỗ trợ một instance (state như rate limit/kết nối nằm trong bộ nhớ tiến trình); chưa hỗ trợ scale ngang.
 - D13: web và API phải cùng origin. Dev dùng proxy `/api` của Angular tới `localhost:3000`; production đặt reverse proxy để `/api` và SPA chung một origin.
 <!-- Haihs: tài liệu M0 (test, E2E, triển khai) - end -->
+
+<!-- Haihs: tài liệu M1 (tài khoản, auth, biến môi trường, DB dev, E2E) - start -->
+## Tài khoản và xác thực (M1)
+
+Route API (JSON, envelope `{ success, data | code, message }`):
+
+- `POST /api/auth/teacher/register`, `POST /api/auth/teacher/login`
+- `POST /api/auth/student/register`, `POST /api/auth/student/login`
+- `GET /api/auth/me`, `PUT /api/auth/api-key` (Gemini API Key của giáo viên, mã hóa AES-GCM), `POST /api/auth/logout-all`, `POST /api/auth/change-password`
+
+Trang web: `/about`, `/login`, `/register`, `/teacher/login`, `/teacher/register`, `/change-password`. Trang `/` hiện là placeholder cho người đã đăng nhập (đến M2/M3).
+
+### Tạo tài khoản giáo viên đầu tiên
+
+Đặt `TEACHER_SECRET_KEY` (>= 8 ký tự) cho API, mở `/teacher/register`, nhập họ tên, số điện thoại (bắt đầu bằng 0, 10-11 số), mật khẩu và **mã bí mật giáo viên** đúng bằng giá trị đó. Trong dev nếu để trống, secret được sinh ngẫu nhiên mỗi lần khởi động (đặt giá trị cố định để đăng ký được).
+
+### Biến môi trường (apps/api, xem `apps/api/.env.example`)
+
+| Biến | Ý nghĩa |
+| --- | --- |
+| `JWT_SECRET` | Khóa ký JWT (>= 16 ký tự ở production) |
+| `JWT_EXPIRES_IN` | Hạn token, mặc định `7d` (số thuần = giây) |
+| `API_KEY_ENCRYPTION_SECRET` | Khóa mã hóa Gemini API Key (>= 16 ký tự ở production) |
+| `TEACHER_SECRET_KEY` | Mã bí mật để đăng ký giáo viên (>= 8 ký tự ở production) |
+| `BCRYPT_COST`, `BCRYPT_TEMP_COST` | Chi phí bcrypt (mặc định 10 và 8) |
+| `TRUST_PROXY` | Số reverse proxy tin cậy phía trước (X-Forwarded-For); mặc định 1 ở production, 0 nơi khác. Phải khớp hạ tầng, vì rate limit đăng nhập tính theo IP |
+| `RATE_LIMIT_<TÊN>_MAX` | Ghi đè số lần tối đa của từng bộ giới hạn (ví dụ `RATE_LIMIT_LOGIN_MAX`); chỉ bỏ qua hoàn toàn khi `NODE_ENV=test` |
+| `MONGODB_URI`, `ALLOW_IN_MEMORY_DB` | Xem mục DB dev bên dưới |
+
+Production (`NODE_ENV=production` hoặc giá trị lạ) kiểm tra cấu hình khi khởi động (`instrumentation.ts`): thiếu hoặc quá ngắn `JWT_SECRET`, `API_KEY_ENCRYPTION_SECRET`, `TEACHER_SECRET_KEY`, `MONGODB_URI` thì tiến trình ghi tên biến (không ghi giá trị) và thoát `process.exit(1)` (fail-fast).
+
+### DB khi phát triển
+
+Không đặt `MONGODB_URI` ở development/test: API tự khởi động MongoDB in-memory (mongodb-memory-server), dữ liệu mất khi dừng; lần chạy đầu tải binary `mongod` về `~/.cache/mongodb-binaries`. `ALLOW_IN_MEMORY_DB=false` để tắt. Luôn tắt ở production, nơi bắt buộc có `MONGODB_URI`.
+
+### Rate limit và một instance
+
+Rate limit lưu trong RAM tiến trình, nên chỉ đúng khi chạy một instance duy nhất (D9); scale ngang cần kho dùng chung.
+
+### Chạy E2E (smoke + auth)
+
+```bash
+scripts/limited.sh npx playwright install chromium
+scripts/limited.sh npx playwright test
+```
+
+Playwright tự khởi động API (DB in-memory, rate limit nới lên 100000, `TEACHER_SECRET_KEY` lấy từ `E2E_TEACHER_SECRET_KEY`, mặc định `e2e-teacher-secret`) và web. Timeout khởi động API là 240 giây vì lần đầu phải tải binary MongoDB. Server đang chạy sẵn (ngoài CI) được tái dùng và khi đó cấu hình env của Playwright không áp dụng.
+<!-- Haihs: tài liệu M1 (tài khoản, auth, biến môi trường, DB dev, E2E) - end -->
