@@ -17,6 +17,7 @@ afterEach(async () => {
   vi.restoreAllMocks();
   delete (globalThis as Record<string, unknown>).__docToExamMongoose; // resets the cache between tests only
   delete process.env.MONGODB_URI;
+  vi.unstubAllEnvs();
 });
 
 describe('connectDb', () => {
@@ -52,6 +53,16 @@ describe('connectDb', () => {
     expect(mongoose.connection.readyState).toBe(1);
   });
 
+  it('a transient disconnect without close does not trigger a second connect (no MongoClient leak)', async () => {
+    process.env.MONGODB_URI = db.uri;
+    await connectDb();
+    const spy = vi.spyOn(mongoose, 'connect');
+    mongoose.connection.readyState = 0; // driver auto-reconnect: state flips to disconnected, no 'close' event
+    await expect(connectDb()).resolves.toBe(mongoose);
+    expect(spy).not.toHaveBeenCalled();
+    mongoose.connection.readyState = 1;
+  });
+
   it('concurrent calls share one connect and one instance', async () => {
     process.env.MONGODB_URI = db.uri;
     const spy = vi.spyOn(mongoose, 'connect');
@@ -66,6 +77,5 @@ describe('connectDb', () => {
     let p: Promise<unknown> | undefined;
     expect(() => { p = connectDb(); }).not.toThrow();
     await expect(p).rejects.toThrow(/JWT_SECRET/);
-    vi.unstubAllEnvs();
   });
 });
