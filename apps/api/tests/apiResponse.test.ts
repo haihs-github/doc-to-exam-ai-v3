@@ -38,6 +38,24 @@ describe('parsePage', () => {
   it('computes skip', () => {
     expect(p('page=3&limit=10')).toEqual({ page: 3, limit: 10, skip: 20 });
   });
+  // Haihs: test biên limit/page: 0, âm, NaN, 1e3, abc (nợ M0) - start
+  it.each([
+    ['limit=0', 20],
+    ['limit=-5', 20],
+    ['limit=NaN', 20],
+    ['limit=abc', 20],
+    ['limit=1e3', 1], // parseInt stops at "e": 1, not 1000
+  ])('%s -> limit %i', (q, limit) => {
+    expect(p(q).limit).toBe(limit);
+  });
+  it.each(['page=0', 'page=-1', 'page=abc', 'page=NaN', 'page='])('%s -> page 1, skip 0', (q) => {
+    expect(p(q)).toMatchObject({ page: 1, skip: 0 });
+  });
+  it('page=1e3 reads as 1 (parseInt) and limit=0 uses the custom default', () => {
+    expect(p('page=1e3').page).toBe(1);
+    expect(p('limit=0', { defaultLimit: 7 }).limit).toBe(7);
+  });
+  // Haihs: test biên limit/page: 0, âm, NaN, 1e3, abc (nợ M0) - end
 });
 
 describe('pageResult', () => {
