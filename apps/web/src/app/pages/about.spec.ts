@@ -61,6 +61,8 @@ describe('About', () => {
     expect(el.querySelector('pre')?.textContent).toContain('npm install');
     expect(el.querySelector('pre')?.textContent).toContain('npm run dev');
     expect(t).toContain('MONGODB_URI');
+    expect(t).toContain('MongoDB in-memory');
+    expect(t).toContain('MongoDB là tùy chọn');
     expect(t).toContain('Node.js 22');
   });
 
