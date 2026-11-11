@@ -146,6 +146,26 @@ describe('Register (student)', () => {
     expect(btn.textContent).toContain('Đang Tạo Tài Khoản...');
   });
 
+  it('server VALIDATION on geminiApiKey shows under that field (no popup)', async () => {
+    const s = await setup('/teacher/register');
+    s.register.mockReturnValue(
+      throwError(() => ({
+        success: false,
+        code: 'VALIDATION',
+        field: 'geminiApiKey',
+        message: 'API key không hợp lệ.',
+        status: 400,
+      })),
+    );
+    await s.fill(true);
+    await s.type('geminiApiKey', 'AIza-bad');
+    await s.submit();
+    expect(s.el.querySelector('[role="alert"]')?.textContent).toContain('API key không hợp lệ.');
+    expect(s.input('geminiApiKey').getAttribute('aria-invalid')).toBe('true');
+    expect(document.activeElement).toBe(s.input('geminiApiKey'));
+    expect(s.alertError).not.toHaveBeenCalled();
+  });
+
   it('server VALIDATION with a field marks and focuses it; other errors use the popup', async () => {
     const s = await setup();
     s.register.mockReturnValue(

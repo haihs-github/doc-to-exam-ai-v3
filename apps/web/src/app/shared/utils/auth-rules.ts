@@ -59,7 +59,13 @@ const nameError = (raw: string): string => {
 };
 
 export const LOGIN_ORDER = ['phoneNumber', 'password'] as const;
-export const REGISTER_ORDER = ['fullName', 'phoneNumber', 'password', 'secretKey'] as const;
+export const REGISTER_ORDER = [
+  'fullName',
+  'phoneNumber',
+  'password',
+  'secretKey',
+  'geminiApiKey',
+] as const;
 export const CHANGE_PASSWORD_ORDER = ['currentPassword', 'newPassword', 'confirmPassword'] as const;
 
 export type FormErrors = Record<string, string>;

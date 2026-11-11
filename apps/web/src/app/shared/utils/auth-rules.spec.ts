@@ -199,7 +199,13 @@ describe('refreshErrors + ORDER', () => {
   });
   it('thứ tự ô', () => {
     expect(LOGIN_ORDER).toEqual(['phoneNumber', 'password']);
-    expect(REGISTER_ORDER).toEqual(['fullName', 'phoneNumber', 'password', 'secretKey']);
+    expect(REGISTER_ORDER).toEqual([
+      'fullName',
+      'phoneNumber',
+      'password',
+      'secretKey',
+      'geminiApiKey',
+    ]);
     expect(CHANGE_PASSWORD_ORDER).toEqual(['currentPassword', 'newPassword', 'confirmPassword']);
   });
 });
