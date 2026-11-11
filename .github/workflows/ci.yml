@@ -81,15 +81,18 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      # Haihs: cache binary mongodb-memory-server (DB in-memory cho E2E) để khỏi tải lại mỗi lần chạy (đặt trước npm ci vì postinstall tải binary) - start
+      # Haihs: đặt bước cache trước npm ci (postinstall của mongodb-memory-server tải binary trong npm ci) - start
+      # đóng code cũ
+      # - run: npm ci
+      # - run: npx playwright install --with-deps chromium
       - uses: actions/cache@v4
         with:
           path: ~/.cache/mongodb-binaries
           key: mongodb-binaries-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
           restore-keys: mongodb-binaries-${{ runner.os }}-
-      # Haihs: cache binary mongodb-memory-server (DB in-memory cho E2E) để khỏi tải lại mỗi lần chạy (đặt trước npm ci vì postinstall tải binary) - end
       - run: npm ci
       - run: npx playwright install --with-deps chromium
+      # Haihs: đặt bước cache trước npm ci (postinstall của mongodb-memory-server tải binary trong npm ci) - end
       # Haihs: E2E_TEACHER_SECRET_KEY cho API webServer (playwright.config.ts truyền thành TEACHER_SECRET_KEY) - start
       # đóng code cũ
       # - run: npx playwright test

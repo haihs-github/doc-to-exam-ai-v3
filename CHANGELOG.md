@@ -43,7 +43,7 @@
 <!-- Haihs: entry M0 kèm commit hash - end -->
 
 <!-- Haihs: mục M1 tách khỏi vùng M0 ở trên (không lồng cặp marker) - start -->
-## [Unreleased] - M1 (tài khoản, xác thực)
+### M1 (chưa phát hành): tài khoản, xác thực
 
 ### Added
 - M1 plan (14 task) và đánh dấu Accepted (`803759a`, `beeef6e`); spec §8 quyết định bổ sung M1: parity auth, DB in-memory dev, localStorage, merge sau cùng (`1a14520`).
