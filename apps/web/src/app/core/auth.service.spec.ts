@@ -203,6 +203,22 @@ describe('AuthService', () => {
     expect(s.isAuthenticated()).toBe(false);
   });
 
+  it('sessionEnded fires only when a user existed at the 401', () => {
+    const s = setup(); // anonymous (e.g. a wrong password on /login answered 401)
+    window.dispatchEvent(new CustomEvent(UNAUTHENTICATED_EVENT));
+    expect(s.sessionEnded()).toBeNull();
+  });
+
+  it('sessionEnded carries the last role and is a new object per revoked session', () => {
+    const s = setup('tk');
+    ctl.expectOne('/api/auth/me').flush(ok(student));
+    window.dispatchEvent(new CustomEvent(UNAUTHENTICATED_EVENT));
+    const first = s.sessionEnded();
+    expect(first).toEqual({ role: 'student' });
+    window.dispatchEvent(new CustomEvent(UNAUTHENTICATED_EVENT)); // already anonymous: nothing new
+    expect(s.sessionEnded()).toBe(first);
+  });
+
   it('never puts the token in loadError (even if the server message echoes it)', () => {
     const s = setup('SECRET-TOKEN');
     ctl

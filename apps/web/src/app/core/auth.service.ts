@@ -10,6 +10,7 @@ import type {
   ChangePasswordBody,
   LoginBody,
   RegisterBody,
+  UserRole,
 } from '@doc-to-exam/contract';
 import { ApiClient, ApiFailure } from './api-client';
 import { errorMessage } from './api-errors';
@@ -29,6 +30,9 @@ export class AuthService {
   private readonly _loadError = signal('');
   private loading?: Subscription; // unsubscribing = the stale-response gate (latest load / logout / login wins)
 
+  private readonly _sessionEnded = signal<{ role: UserRole } | null>(null);
+  /** A new object each time the server revoked a live session (401 with a user); SessionNavigation reacts. */
+  readonly sessionEnded = this._sessionEnded.asReadonly();
   readonly user = this._user.asReadonly();
   readonly isLoading = this._isLoading.asReadonly();
   readonly loadError = this._loadError.asReadonly();
@@ -37,7 +41,12 @@ export class AuthService {
   readonly isStudent = computed(() => this._user()?.role === 'student');
 
   constructor() {
-    const onUnauth = () => this.logout();
+    const onUnauth = () => {
+      const prev = this._user();
+      this.logout();
+      // only a session that existed ends "in the middle": a 401 for a wrong password on /login must not navigate
+      if (prev) this._sessionEnded.set({ role: prev.role });
+    };
     const onMust = () => this._user.update((u) => (u ? { ...u, mustChangePassword: true } : u));
     window.addEventListener(UNAUTHENTICATED_EVENT, onUnauth);
     window.addEventListener(MUST_CHANGE_PASSWORD_EVENT, onMust);
