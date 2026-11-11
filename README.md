@@ -43,7 +43,7 @@ scripts/limited.sh npx playwright install chromium   # lần đầu
 scripts/limited.sh npx playwright test               # smoke E2E, tự khởi động API (3000) + web (4200), không cần Mongo
 ```
 
-CI (`.github/workflows/ci.yml`): các job lint, test-api, test-web, build, e2e-smoke, audit.
+CI (`.github/workflows/ci.yml`): các job lint, test-api, test-web, build, e2e, audit.
 
 ## Triển khai
 

@@ -12,3 +12,6 @@ playwright-report
 # Haihs: bỏ qua output của Playwright - start
 test-results
 # Haihs: bỏ qua output của Playwright - end
+# Haihs: bỏ qua file next dev sinh ra - start
+apps/api/AGENTS.md
+# Haihs: bỏ qua file next dev sinh ra - end
