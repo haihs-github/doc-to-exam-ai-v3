@@ -22,5 +22,17 @@ export async function call(
     }),
   );
   const text = await res.text();
-  return { status: res.status, body: text ? JSON.parse(text) : undefined };
+  // Haihs: body không phải JSON thì trả text thay vì ném SyntaxError (nợ M0) - start
+  // đóng code cũ
+  // return { status: res.status, body: text ? JSON.parse(text) : undefined };
+  let body: unknown = text || undefined;
+  if (text) {
+    try {
+      body = JSON.parse(text);
+    } catch {
+      /* keep the raw text */
+    }
+  }
+  return { status: res.status, body };
+  // Haihs: body không phải JSON thì trả text thay vì ném SyntaxError (nợ M0) - end
 }
