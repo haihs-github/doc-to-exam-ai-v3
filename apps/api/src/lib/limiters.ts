@@ -23,6 +23,7 @@ const ip = (req: Request) => `ip:${rawIp(req)}`.slice(0, 64);
 // Phone is attacker-controlled: it only becomes part of a key when it matches the VN format (after trim and
 // stripping space . -); otherwise the key is IP-only, so keys stay <= 64 chars and cannot be used to bloat memory.
 // TODO(api): Task 7 — handler phải trả 400 VALIDATION cho sdt không khớp regex TRƯỚC bcrypt/đăng ký (phone bucket bỏ qua sdt sai định dạng)
+// Haihs: Task 7 đã xử lý — parsePhone (authValidation.ts) trả 400 trước bcrypt/đăng ký; chuẩn hóa dùng lib/phone.ts - start - end
 // const PHONE_RE = /^0\d{9,10}$/; // Haihs: đóng code cũ, PHONE_RE chuyển sang lib/phone.ts để dùng chung - start - end
 // The body is read from a clone (cached per request), so the route handler can still read the original.
 const phones = new WeakMap<Request, Promise<string>>();

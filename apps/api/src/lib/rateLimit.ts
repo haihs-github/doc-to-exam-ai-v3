@@ -1,8 +1,10 @@
 // Created by Haihs on 11/11/2026
 // In-RAM fixed-window rate limiter and withRateLimit wrapper (replaces express-rate-limit of the source app).
+import { HTTP_STATUS } from '@doc-to-exam/contract'; // Haihs: ánh xạ HttpError -> status khi settle - start - end
 import { fail } from './apiResponse';
 import { rateLimitMax } from './env';
-import type { Handler } from './handler';
+import { HttpError, type Handler } from './handler'; // Haihs: cần HttpError (runtime) để settle theo status - start - end
+// import type { Handler } from './handler'; // Haihs: đóng code cũ, đổi sang import có HttpError - start - end
 
 type Ctx = any; // eslint-disable-line @typescript-eslint/no-explicit-any -- route-specific Next ctx, same as Handler
 
@@ -116,7 +118,11 @@ export function withRateLimit(limiters: RateLimiter[], h: Handler): Handler {
     try {
       res = await h(req, ctx);
     } catch (err) {
-      settle(500);
+      // Haihs: HttpError ném ra được tính theo status HTTP thật (401 vào bucket failures, 503 được hoàn) - start
+      // đóng code cũ
+      // settle(500);
+      settle(err instanceof HttpError ? HTTP_STATUS[err.code] : 500);
+      // Haihs: HttpError ném ra được tính theo status HTTP thật (401 vào bucket failures, 503 được hoàn) - end
       throw err;
     }
     settle(res.status);
