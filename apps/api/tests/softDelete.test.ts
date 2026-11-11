@@ -67,6 +67,10 @@ describe('softDelete plugin', () => {
     expect(dead?.n).toBe('dead');
   });
 
+  it('estimatedDocumentCount ignores filters (counts deleted docs)', async () => {
+    expect(await Thing.estimatedDocumentCount()).toBe(2);
+  });
+
   it('softDelete()/restore() toggle deletedAt', async () => {
     const live = (await Thing.findOne({ n: 'live' }))!;
     await live.softDelete();

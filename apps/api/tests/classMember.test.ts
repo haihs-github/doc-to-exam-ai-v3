@@ -49,11 +49,13 @@ describe('ClassMember model', () => {
   });
 
   it('rejects invalid memberRole, status, source', async () => {
-    await expect(mk({ memberRole: 'Student' })).rejects.toThrow();
-    await expect(mk({ memberRole: 'a-b' })).rejects.toThrow();
+    await expect(mk({ memberRole: 'Student' })).rejects.toThrow(/memberRole/);
+    await expect(mk({ memberRole: 'a-b' })).rejects.toThrow(/memberRole/);
     await expect(mk({ memberRole: 'teaching_assistant' })).resolves.toBeTruthy();
-    await expect(mk({ status: 'rejected' })).rejects.toThrow();
-    await expect(mk({ source: 'x' })).rejects.toThrow();
+    await expect(mk({ status: 'rejected' })).rejects.toThrow(
+      /`rejected` is not a valid enum value/,
+    );
+    await expect(mk({ source: 'x' })).rejects.toThrow(/`x` is not a valid enum value/);
   });
 
   it('builds the declared indexes', async () => {
