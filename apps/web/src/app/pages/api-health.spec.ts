@@ -16,11 +16,11 @@ describe('ApiHealth', () => {
     return { fixture, el: fixture.nativeElement as HTMLElement };
   };
 
-  it('should create and render the title', async () => {
+  it('should create and render only the status line (no own <main>/<h1>: it is embedded in About)', async () => {
     const { fixture, el } = setup(() => new Subject());
     await fixture.whenStable();
     expect(fixture.componentInstance).toBeTruthy();
-    expect(el.querySelector('h1')?.textContent).toContain('Doc to Exam');
+    expect(el.querySelector('main, h1')).toBeNull();
   });
 
   it('shows loading before the API answers', async () => {
@@ -28,7 +28,6 @@ describe('ApiHealth', () => {
     const { fixture, el } = setup(() => s$);
     await fixture.whenStable();
     expect(el.querySelector('[role="status"]')?.textContent).toContain('Đang kiểm tra');
-    expect(el.querySelector('h1')?.textContent).toBe('Doc to Exam AI');
   });
 
   it('shows OK when status is OK', async () => {
@@ -37,7 +36,6 @@ describe('ApiHealth', () => {
     s$.next({ status: 'OK', timestamp: 't', service: 's' });
     await fixture.whenStable();
     expect(el.querySelector('[role="status"]')?.textContent).toContain('OK');
-    expect(el.querySelector('h1')?.textContent).toBe('Doc to Exam AI');
   });
 
   it('shows not-ready when status is not OK', async () => {
