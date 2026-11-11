@@ -1,12 +1,8 @@
-{
-  "printWidth": 100,
-  "singleQuote": true,
-  "overrides": [
-    {
-      "files": "*.html",
-      "options": {
-        "parser": "angular"
-      }
-    }
-  ]
-}
+# Created by Haihs on 11/11/2026
+# Prettier config (YAML) for apps/web; same values as the former JSON file.
+printWidth: 100
+singleQuote: true
+overrides:
+  - files: '*.html'
+    options:
+      parser: angular
