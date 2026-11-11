@@ -211,6 +211,15 @@ describe('POST /api/auth/logout-all', () => {
     expect(raw?.tokenVersion).toBe(1);
   });
 
+  it('STUDENT_API limiter (inside auth) answers 429', async () => {
+    const t = await mkTeacher();
+    vi.stubEnv('NODE_ENV', 'development');
+    vi.stubEnv('RATE_LIMIT_STUDENT_API_MAX', '1');
+    expect((await logout(t.token)).status).toBe(200);
+    await UserModel.updateOne({ _id: t.user.id }, { tokenVersion: 0 }); // make the token valid again
+    expect((await logout(t.token)).status).toBe(429);
+  });
+
   it('works for a user that must change password', async () => {
     const s = await mkStudent();
     await UserModel.updateOne({ _id: s.user.id }, { mustChangePassword: true });
@@ -298,6 +307,25 @@ describe('POST /api/auth/change-password', () => {
     expect(r.status).toBe(401);
     expect(r.body.code).toBe('UNAUTHENTICATED');
     const raw = await UserModel.collection.findOne({ phoneNumber: '0912345678' });
+    expect(raw?.tokenVersion).toBe(1);
+  });
+
+  it('logout-all landing between auth and the handler re-read -> 401, password NOT changed', async () => {
+    const t = await mkTeacher();
+    const real = UserModel.findById.bind(UserModel);
+    let n = 0;
+    vi.spyOn(UserModel, 'findById').mockImplementation(((...a: unknown[]) => {
+      n++;
+      if (n === 1) return (real as (...x: unknown[]) => unknown)(...a); // auth's read (tv matches the JWT)
+      return UserModel.updateOne({ _id: t.user.id }, { $inc: { tokenVersion: 1 } }).then(() =>
+        (real as (...x: unknown[]) => unknown)(...a),
+      );
+    }) as never);
+    const before = await UserModel.collection.findOne({ phoneNumber: '0912345678' });
+    const r = await change(t.token, { currentPassword: PW, newPassword: NEW });
+    expect(r.status).toBe(401);
+    const raw = await UserModel.collection.findOne({ phoneNumber: '0912345678' });
+    expect(raw?.password).toBe(before?.password);
     expect(raw?.tokenVersion).toBe(1);
   });
 

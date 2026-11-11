@@ -47,9 +47,12 @@ export const POST = withErrors(
         throw bad('currentPassword', 'Mật khẩu hiện tại không chính xác.'); // 400, not 401: the client must not drop the session
 
       const hash = await hashPassword(newPassword as string);
-      // Conditional on the tokenVersion we read: a concurrent change/logout-all matches nothing, so it is never applied twice.
+      // Conditional on the tokenVersion AUTH verified against the JWT (not the re-read above, which a logout-all may
+      // have bumped meanwhile). shortcut: tokenVersion: n does not match a document missing the field (fresh DB never has
+      // that); upgrade to $in [n, null] when migrated data exists.
+      // A concurrent change/logout-all matches nothing, so it is never applied twice.
       const updated = await UserModel.findOneAndUpdate(
-        { _id: user._id, tokenVersion: user.tokenVersion ?? 0 },
+        { _id: user._id, tokenVersion: ctx.user.tokenVersion ?? 0 },
         { $set: { password: hash, mustChangePassword: false }, $inc: { tokenVersion: 1 } },
         { returnDocument: 'after' },
       );
