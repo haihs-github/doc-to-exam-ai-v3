@@ -31,6 +31,13 @@ describe('QrCode', () => {
     expect(svg(f).getAttribute('aria-label')).toBe('Link học sinh');
   });
 
+  it('renders an accessible fallback instead of throwing for oversize input', async () => {
+    const f = await make('x'.repeat(4000));
+    const el = f.nativeElement as HTMLElement;
+    expect(el.querySelector('svg')).toBeNull();
+    expect(el.querySelector('[role="img"]')!.textContent).toContain('Không tạo được mã QR');
+  });
+
   it('re-renders when the value changes; empty value renders nothing', async () => {
     const f = await make('aaa');
     const d1 = svg(f).querySelector('path')!.getAttribute('d');

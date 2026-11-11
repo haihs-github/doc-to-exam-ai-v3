@@ -53,9 +53,13 @@ const ITEM =
       >
         @for (it of items(); track it.label) {
           @if (it.to) {
-            <a role="menuitem" [routerLink]="it.to" [class]="cls(it)" (click)="close()">{{
-              it.label
-            }}</a>
+            <a
+              role="menuitem"
+              [routerLink]="it.to"
+              [class]="cls(it)"
+              (click)="close(); focusTrigger()"
+              >{{ it.label }}</a
+            >
           } @else {
             <button
               type="button"
@@ -102,12 +106,17 @@ export class ActionMenu {
     afterNextRender(() => this.enabled()[0]?.focus(), { injector: this.injector });
   }
 
+  protected focusTrigger(): void {
+    this.host.querySelector<HTMLElement>('button[aria-haspopup]')!.focus();
+  }
+
   protected close(): void {
     this.pos.set(null);
   }
 
   protected run(it: ActionMenuItem): void {
     this.close();
+    this.focusTrigger();
     it.onClick?.();
   }
 
@@ -115,7 +124,7 @@ export class ActionMenu {
     if (!this.pos()) return;
     if (e.key === 'Escape') {
       this.close();
-      this.host.querySelector<HTMLElement>('button[aria-haspopup]')!.focus();
+      this.focusTrigger();
     } else if (e.key === 'Tab') {
       this.close();
     } else if (['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(e.key)) {
