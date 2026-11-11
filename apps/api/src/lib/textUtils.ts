@@ -22,3 +22,6 @@ export const toSearchKey = (raw: unknown): string =>
     .toLowerCase()
     .trim()
     .replace(/\s+/g, ' ');
+// Haihs: escapeRegExp cho tìm kiếm lớp theo tên/mã (Task 3) - start
+export const escapeRegExp = (str: unknown): string => String(str ?? '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+// Haihs: escapeRegExp cho tìm kiếm lớp theo tên/mã (Task 3) - end
