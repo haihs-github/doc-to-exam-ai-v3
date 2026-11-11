@@ -7,7 +7,7 @@ export class HttpError extends Error {
   // Haihs: message bắt buộc (bỏ mặc định = code) - start
   // đóng code cũ
   // constructor(public code: ErrorCode, message?: string, public extra?: { field?: string; data?: unknown }) {
-  //   super(message ?? code);
+  //     super(message ?? code);
   constructor(public code: ErrorCode, message: string, public extra?: { field?: string; data?: unknown }) {
     super(message);
   // Haihs: message bắt buộc (bỏ mặc định = code) - end
@@ -37,13 +37,13 @@ export async function readJson(req: Request, maxBytes = 1_048_576): Promise<unkn
     if (done) break;
     size += value.byteLength;
     if (size > maxBytes) {
-      await reader.cancel();
+      await reader.cancel().catch(() => {}); // a cancel failure must not mask the 413
       throw tooLarge();
     }
     chunks.push(value);
   }
   try {
-    return JSON.parse(Buffer.concat(chunks).toString('utf8'));
+    return JSON.parse(new TextDecoder().decode(Buffer.concat(chunks))); // TextDecoder drops a BOM, like req.json()
   } catch {
     throw new HttpError('VALIDATION', 'Dữ liệu không hợp lệ.');
   }
