@@ -18,7 +18,8 @@ export const validatePhone = (s: string): boolean => PHONE_RE.test(normalizePhon
 export const phoneError = (raw: string): string => {
   const v = normalizePhone(raw);
   if (!v) return 'Vui lòng nhập số điện thoại.';
-  if (v.startsWith('+')) return 'Không dùng định dạng +84. Hãy nhập số bắt đầu bằng 0, ví dụ 0912345678.';
+  if (v.startsWith('+'))
+    return 'Không dùng định dạng +84. Hãy nhập số bắt đầu bằng 0, ví dụ 0912345678.';
   if (!/^[0-9]+$/.test(v)) return 'Số điện thoại chỉ gồm chữ số.';
   if (!v.startsWith('0')) return 'Số điện thoại phải bắt đầu bằng 0.';
   return PHONE_RE.test(v) ? '' : 'Số điện thoại phải gồm 10-11 chữ số.';
@@ -40,7 +41,12 @@ export const validatePasswordInput = (s: string): { ok: boolean; message?: strin
 
 /** NFC, trimmed, inner whitespace collapsed (what the form sends and validates). */
 export const normalizeFullName = (s: string): string =>
-  String(s ?? '').normalize('NFC').trim().split(/\s+/).filter(Boolean).join(' ');
+  String(s ?? '')
+    .normalize('NFC')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .join(' ');
 
 /** Full name: trimmed/collapsed spaces, 2-255 chars, starts with a letter, no digits/special chars. */
 export const validateFullName = (s: string): boolean => FULL_NAME_RE.test(normalizeFullName(s));
@@ -76,7 +82,8 @@ export const validateRegisterForm = (
   if (n) e['fullName'] = n;
   if (p) e['phoneNumber'] = p;
   if (!pw.ok) e['password'] = pw.message ?? '';
-  if (opts.isTeacher && !String(v.secretKey ?? '').trim()) e['secretKey'] = 'Vui lòng nhập mã bí mật giáo viên.';
+  if (opts.isTeacher && !String(v.secretKey ?? '').trim())
+    e['secretKey'] = 'Vui lòng nhập mã bí mật giáo viên.';
   return e;
 };
 
@@ -89,14 +96,24 @@ export const validateChangePasswordForm = (v: {
   const check = validatePasswordInput(v.newPassword);
   if (!v.currentPassword) e['currentPassword'] = 'Vui lòng nhập mật khẩu hiện tại.';
   if (!check.ok) e['newPassword'] = check.message ?? '';
-  else if (v.newPassword === v.currentPassword) e['newPassword'] = 'Mật khẩu mới phải khác mật khẩu hiện tại.';
+  else if (v.newPassword === v.currentPassword)
+    e['newPassword'] = 'Mật khẩu mới phải khác mật khẩu hiện tại.';
   if (!v.confirmPassword) e['confirmPassword'] = 'Vui lòng nhập lại mật khẩu mới.';
-  else if (v.newPassword !== v.confirmPassword) e['confirmPassword'] = 'Mật khẩu nhập lại không khớp.';
+  else if (v.newPassword !== v.confirmPassword)
+    e['confirmPassword'] = 'Mật khẩu nhập lại không khớp.';
   return e;
 };
 
 /** Live re-validation: keep only the errors already shown that are still wrong (never adds new ones). */
-export const refreshErrors = <V>(prev: FormErrors, validate: (v: V) => FormErrors, values: V): FormErrors => {
+export const refreshErrors = <V>(
+  prev: FormErrors,
+  validate: (v: V) => FormErrors,
+  values: V,
+): FormErrors => {
   const fresh = validate(values);
-  return Object.fromEntries(Object.keys(prev).filter((k) => fresh[k]).map((k) => [k, fresh[k]]));
+  return Object.fromEntries(
+    Object.keys(prev)
+      .filter((k) => fresh[k])
+      .map((k) => [k, fresh[k]]),
+  );
 };

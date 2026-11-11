@@ -22,7 +22,8 @@ export interface IUser {
 }
 
 // interface IUserMethods { // Haihs: đóng code cũ, export để UserDoc có method - start - end
-export interface IUserMethods { // Haihs: export để UserDoc (auth.ts) có method - start - end
+export interface IUserMethods {
+  // Haihs: export để UserDoc (auth.ts) có method - start - end
   /** Throws HttpError VALIDATION for an `enc:v1:` input (would be stored unencrypted); '' clears. Does not save. */
   setGeminiApiKey(plain: string): void;
   toAuthUser(): AuthUser;

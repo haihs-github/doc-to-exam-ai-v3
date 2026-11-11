@@ -99,7 +99,8 @@ describe('normalizePhone', () => {
 
 describe('normalizePhone non-strings', () => {
   it.each([[undefined], [null], [912345678], [{}]])('%j -> empty', (v) =>
-    expect(normalizePhone(v as unknown as string)).toBe(''));
+    expect(normalizePhone(v as unknown as string)).toBe(''),
+  );
 });
 
 describe('phoneError (thông báo tiếng Việt từ client/authRules.js:validatePhone)', () => {
@@ -125,45 +126,75 @@ describe('validateLoginForm', () => {
 });
 
 describe('validateRegisterForm', () => {
-  const ok = { fullName: 'Hoàng Thị Tuyến', phoneNumber: '0912345678', password: '12345678', secretKey: '' };
+  const ok = {
+    fullName: 'Hoàng Thị Tuyến',
+    phoneNumber: '0912345678',
+    password: '12345678',
+    secretKey: '',
+  };
   it('hợp lệ: không lỗi (học sinh không cần secretKey)', () => {
     expect(validateRegisterForm(ok, { isTeacher: false })).toEqual({});
   });
   it('báo lỗi từng ô', () => {
-    const e = validateRegisterForm({ fullName: '', phoneNumber: '1', password: '1', secretKey: '' }, { isTeacher: true });
+    const e = validateRegisterForm(
+      { fullName: '', phoneNumber: '1', password: '1', secretKey: '' },
+      { isTeacher: true },
+    );
     expect(e['fullName']).toBe('Vui lòng nhập họ và tên.');
     expect(e['phoneNumber']).toBe('Số điện thoại phải bắt đầu bằng 0.');
     expect(e['password']).toContain('ít nhất 8 ký tự');
     expect(e['secretKey']).toBe('Vui lòng nhập mã bí mật giáo viên.');
   });
   it('tên chứa số bị từ chối; secretKey chỉ bắt buộc với giáo viên', () => {
-    expect(validateRegisterForm({ ...ok, fullName: 'Mai 2' })['fullName']).toContain('không hợp lệ');
-    expect(validateRegisterForm({ ...ok, secretKey: '  ' }, { isTeacher: true })['secretKey']).toBeDefined();
+    expect(validateRegisterForm({ ...ok, fullName: 'Mai 2' })['fullName']).toContain(
+      'không hợp lệ',
+    );
+    expect(
+      validateRegisterForm({ ...ok, secretKey: '  ' }, { isTeacher: true })['secretKey'],
+    ).toBeDefined();
     expect(validateRegisterForm({ ...ok, secretKey: '  ' })['secretKey']).toBeUndefined();
   });
 });
 
 describe('validateChangePasswordForm', () => {
   it('đủ ba ô, mới khác cũ, nhập lại khớp', () => {
-    expect(validateChangePasswordForm({ currentPassword: '', newPassword: '1', confirmPassword: '' })).toEqual({
+    expect(
+      validateChangePasswordForm({ currentPassword: '', newPassword: '1', confirmPassword: '' }),
+    ).toEqual({
       currentPassword: 'Vui lòng nhập mật khẩu hiện tại.',
       newPassword: 'Mật khẩu phải có ít nhất 8 ký tự.',
       confirmPassword: 'Vui lòng nhập lại mật khẩu mới.',
     });
     expect(
-      validateChangePasswordForm({ currentPassword: '12345678', newPassword: '12345678', confirmPassword: '12345678' })['newPassword'],
+      validateChangePasswordForm({
+        currentPassword: '12345678',
+        newPassword: '12345678',
+        confirmPassword: '12345678',
+      })['newPassword'],
     ).toBe('Mật khẩu mới phải khác mật khẩu hiện tại.');
     expect(
-      validateChangePasswordForm({ currentPassword: 'abcdefgh', newPassword: '12345678', confirmPassword: '1234567x' })['confirmPassword'],
+      validateChangePasswordForm({
+        currentPassword: 'abcdefgh',
+        newPassword: '12345678',
+        confirmPassword: '1234567x',
+      })['confirmPassword'],
     ).toBe('Mật khẩu nhập lại không khớp.');
-    expect(validateChangePasswordForm({ currentPassword: 'abcdefgh', newPassword: '12345678', confirmPassword: '12345678' })).toEqual({});
+    expect(
+      validateChangePasswordForm({
+        currentPassword: 'abcdefgh',
+        newPassword: '12345678',
+        confirmPassword: '12345678',
+      }),
+    ).toEqual({});
   });
 });
 
 describe('refreshErrors + ORDER', () => {
   it('chỉ giữ lỗi đang hiển thị mà vẫn còn sai; không thêm lỗi mới', () => {
     const prev = { phoneNumber: 'x', password: 'y' };
-    expect(refreshErrors(prev, validateLoginForm, { phoneNumber: '0912345678', password: '' })).toEqual({ password: 'Vui lòng nhập mật khẩu.' });
+    expect(
+      refreshErrors(prev, validateLoginForm, { phoneNumber: '0912345678', password: '' }),
+    ).toEqual({ password: 'Vui lòng nhập mật khẩu.' });
     expect(refreshErrors({}, validateLoginForm, { phoneNumber: '', password: '' })).toEqual({});
   });
   it('thứ tự ô', () => {
