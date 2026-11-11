@@ -59,7 +59,15 @@ export function withErrors(h: Handler): Handler {
     try {
       return await h(req, ctx);
     } catch (err) {
-      if (err instanceof HttpError) return fail(err.code, err.message, err.extra);
+      // Haihs: SERVER_BUSY kèm Retry-After cho mọi route - start
+      // đóng code cũ
+      // if (err instanceof HttpError) return fail(err.code, err.message, err.extra);
+      if (err instanceof HttpError) {
+        const res = fail(err.code, err.message, err.extra);
+        if (err.code === 'SERVER_BUSY') res.headers.set('Retry-After', '5');
+        return res;
+      }
+      // Haihs: SERVER_BUSY kèm Retry-After cho mọi route - end
       console.error(`Lỗi ${req.method} ${new URL(req.url).pathname}:`, err);
       return fail('INTERNAL', 'Lỗi máy chủ');
     }

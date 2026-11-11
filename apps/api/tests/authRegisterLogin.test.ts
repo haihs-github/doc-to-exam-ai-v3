@@ -235,6 +235,28 @@ describe('duplicate phone', () => {
     expect(rs.map((r) => r.status).sort()).toEqual([201, 409]);
     expect(await UserModel.countDocuments()).toBe(1);
   });
+  // Haihs: test cause lồng nhau, độ dài geminiApiKey (fix round 1) - start
+  it('E11000 nested in cause -> 409; self-referencing cause terminates -> 500', async () => {
+    vi.spyOn(UserModel.prototype, 'save').mockRejectedValueOnce({
+      cause: { cause: { code: 11000 } },
+    });
+    expect((await post(studentRegister, reg())).status).toBe(409);
+    const loop: { cause?: unknown } = {};
+    loop.cause = loop;
+    vi.spyOn(UserModel.prototype, 'save').mockRejectedValueOnce(loop);
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    expect((await post(studentRegister, reg())).status).toBe(500);
+    vi.restoreAllMocks();
+  });
+  it('geminiApiKey > 512 chars or enc:v1: -> 400 field geminiApiKey before any hashing', async () => {
+    for (const k of ['a'.repeat(513), 'enc:v1:abc']) {
+      const r = await post(teacherRegister, tReg({ geminiApiKey: k }));
+      expect(r).toMatchObject({ status: 400, body: { code: 'VALIDATION', field: 'geminiApiKey' } });
+    }
+    expect(passwordHash.hashPassword).not.toHaveBeenCalled();
+    expect(await UserModel.countDocuments()).toBe(0);
+  });
+  // Haihs: test cause lồng nhau, độ dài geminiApiKey (fix round 1) - end
   it('failure after hashing (DB error) -> 500 without detail and no user', async () => {
     vi.spyOn(UserModel.prototype, 'save').mockRejectedValueOnce(
       new Error('mongodb://secret-host exploded'),

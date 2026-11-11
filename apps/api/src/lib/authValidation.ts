@@ -11,6 +11,7 @@ import { toProperName } from './textUtils';
 const FULL_NAME_MAX = 255; // same as the User model
 // First char a letter/mark, then letters, marks, space . ' - (blocks digits and CSV-injection chars); source utils/textUtils.js:29
 const FULL_NAME_RE = new RegExp(`^[\\p{L}\\p{M}][\\p{L}\\p{M} .'-]{1,${FULL_NAME_MAX - 1}}$`, 'u');
+const MAX_GEMINI_KEY = 512; // Haihs: giới hạn độ dài geminiApiKey ≤ 512 - start - end
 export const MAX_LOGIN_PASSWORD = 1024; // longer than this is never a real password: skip bcrypt
 
 const bad = (message: string, field?: string) =>
@@ -65,8 +66,14 @@ export function validateRegister(body: unknown, audience: 'teacher' | 'student')
         'SECRET_KEY_INVALID',
         'Mã bí mật (Secret Key) không chính xác. Bạn không có quyền đăng ký tài khoản giáo viên.',
       );
-    if (typeof b.geminiApiKey === 'string' && b.geminiApiKey.trim())
-      out.geminiApiKey = b.geminiApiKey.trim();
+    // Haihs: giới hạn độ dài geminiApiKey ≤ 512 - start
+    // đóng code cũ
+    // if (typeof b.geminiApiKey === 'string' && b.geminiApiKey.trim())
+    //   out.geminiApiKey = b.geminiApiKey.trim();
+    const key = typeof b.geminiApiKey === 'string' ? b.geminiApiKey.trim() : '';
+    if (key.length > MAX_GEMINI_KEY) throw bad('API key không hợp lệ.', 'geminiApiKey');
+    if (key) out.geminiApiKey = key;
+    // Haihs: giới hạn độ dài geminiApiKey ≤ 512 - end
   }
   return out;
 }

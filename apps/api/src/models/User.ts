@@ -65,6 +65,7 @@ const UserSchema = new Schema<IUser, UserModelType, IUserMethods>(
       unique: true,
       trim: true,
       // Defensive only. TODO(api): Task 7 — chuẩn hóa sdt bằng đúng hàm chuẩn hóa của limiter TRƯỚC khi lưu/tra
+      // Haihs: Task 7 đã xử lý — parsePhone (authValidation.ts) trả 400 trước bcrypt/đăng ký; chuẩn hóa dùng lib/phone.ts - start - end
       match: [/^0\d{9,10}$/, 'Số điện thoại không hợp lệ'],
     },
     fullName: {
