@@ -1,3 +1,5 @@
+// Created by Haihs on 11/11/2026
+// TypeScript config for unit tests.
 /* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
 /* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */
 {

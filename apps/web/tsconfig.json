@@ -1,11 +1,13 @@
+// Created by Haihs on 11/11/2026
+// Base TypeScript/Angular compiler options and contract path alias.
 /* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
 /* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */
 {
   "compileOnSave": false,
   "compilerOptions": {
     "noImplicitOverride": true,
-    // "noPropertyAccessFromIndexSignature": true, // Haihs: đóng code cũ, packages/contract (nguồn .ts) dùng o.code trên Record và bị biên dịch theo cờ này - start - end
-    "strict": true, // Haihs: bật strict theo yêu cầu Task 7 - start - end
+    "noPropertyAccessFromIndexSignature": true,
+    "strict": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,

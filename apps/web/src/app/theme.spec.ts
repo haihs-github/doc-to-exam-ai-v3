@@ -3,7 +3,10 @@
 import { HTTP_STATUS } from '@doc-to-exam/contract';
 import { applyTheme } from './theme';
 
-const stubMatchMedia = (dark: boolean) => vi.stubGlobal('matchMedia', () => ({ matches: dark }));
+const stubMatchMedia = (dark: boolean) =>
+  vi.stubGlobal('matchMedia', (q: string) => ({
+    matches: dark && q === '(prefers-color-scheme: dark)',
+  }));
 const isDark = () => document.documentElement.classList.contains('dark');
 
 describe('applyTheme', () => {
@@ -12,7 +15,10 @@ describe('applyTheme', () => {
     document.documentElement.classList.remove('dark');
     stubMatchMedia(false);
   });
-  afterEach(() => vi.unstubAllGlobals());
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
 
   it('dark adds the dark class and persists the mode', () => {
     applyTheme('dark');
@@ -24,12 +30,14 @@ describe('applyTheme', () => {
     document.documentElement.classList.add('dark');
     applyTheme('light');
     expect(isDark()).toBe(false);
+    expect(localStorage.getItem('theme')).toBe('light');
   });
 
   it('system follows matchMedia', () => {
     stubMatchMedia(true);
     applyTheme('system');
     expect(isDark()).toBe(true);
+    expect(localStorage.getItem('theme')).toBe('system');
     stubMatchMedia(false);
     applyTheme('system');
     expect(isDark()).toBe(false);
@@ -41,7 +49,6 @@ describe('applyTheme', () => {
     });
     expect(() => applyTheme('dark')).not.toThrow();
     expect(isDark()).toBe(true);
-    vi.restoreAllMocks();
   });
 });
 
