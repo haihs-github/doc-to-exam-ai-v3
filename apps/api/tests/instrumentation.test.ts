@@ -21,10 +21,12 @@ vi.mock('../src/lib/env', async (orig) => {
     }),
   };
 });
-import { register } from '../instrumentation';
+import { register, startup } from '../instrumentation';
 
+let exit: ReturnType<typeof vi.spyOn>;
 beforeEach(() => {
   calls.length = 0;
+  exit = vi.spyOn(startup, 'exit').mockImplementation((() => undefined) as never);
   vi.stubEnv('NEXT_RUNTIME', 'nodejs');
   vi.stubEnv('NEXT_PHASE', '');
 });
@@ -34,6 +36,7 @@ describe('instrumentation.register', () => {
   it('runs loadEnv, connectDb, ensureIndexes, seedRbac once each, in order, then warms the dummy hash', async () => {
     await register();
     expect(calls).toEqual(['loadEnv', 'connectDb', 'ensureIndexes', 'seedRbac', 'compareDummy']);
+    expect(exit).not.toHaveBeenCalled();
   });
 
   it('is idempotent when called twice (hot reload)', async () => {
@@ -41,31 +44,51 @@ describe('instrumentation.register', () => {
     await expect(register()).resolves.toBeUndefined();
   });
 
-  it('production without JWT_SECRET rejects naming JWT_SECRET and leaking no value', async () => {
+  it('production without JWT_SECRET: exits 1 once, logs the variable name only, no secret values', async () => {
     vi.stubEnv('NODE_ENV', 'production');
     vi.stubEnv('JWT_SECRET', '');
     vi.stubEnv('API_KEY_ENCRYPTION_SECRET', 'super-secret-encryption-value');
     vi.stubEnv('TEACHER_SECRET_KEY', 'teacher-secret-value');
     vi.stubEnv('MONGODB_URI', 'mongodb://user:hunter2@host/db');
-    const err = await register().then(
-      () => null,
-      (e: Error) => e,
-    );
-    expect(err?.message).toContain('JWT_SECRET');
+    const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    await register();
+    expect(exit).toHaveBeenCalledTimes(1);
+    expect(exit).toHaveBeenCalledWith(1);
+    expect(errSpy).toHaveBeenCalledTimes(1);
+    const logged = String(errSpy.mock.calls[0]?.join(' '));
+    expect(logged).toContain('JWT_SECRET');
     for (const v of ['super-secret-encryption-value', 'teacher-secret-value', 'hunter2'])
-      expect(err?.message).not.toContain(v);
+      expect(logged).not.toContain(v);
     expect(calls).toEqual(['loadEnv']); // nothing after the failed validation
+  });
+
+  it('development + failure rethrows and does not exit', async () => {
+    vi.stubEnv('NODE_ENV', 'development');
+    const { connectDb } = await import('../src/lib/db');
+    vi.mocked(connectDb).mockRejectedValueOnce(new Error('boom'));
+    await expect(register()).rejects.toThrow('boom');
+    expect(exit).not.toHaveBeenCalled();
+  });
+
+  it('test env + failure rethrows and does not exit', async () => {
+    vi.stubEnv('NODE_ENV', 'test');
+    const { seedRbac } = await import('../src/lib/rbac');
+    vi.mocked(seedRbac).mockRejectedValueOnce(new Error('boom2'));
+    await expect(register()).rejects.toThrow('boom2');
+    expect(exit).not.toHaveBeenCalled();
   });
 
   it('is a no-op when NEXT_RUNTIME is not nodejs', async () => {
     vi.stubEnv('NEXT_RUNTIME', 'edge');
     await register();
     expect(calls).toEqual([]);
+    expect(exit).not.toHaveBeenCalled();
   });
 
   it('is a no-op during the production build phase', async () => {
     vi.stubEnv('NEXT_PHASE', 'phase-production-build');
     await register();
     expect(calls).toEqual([]);
+    expect(exit).not.toHaveBeenCalled();
   });
 });
