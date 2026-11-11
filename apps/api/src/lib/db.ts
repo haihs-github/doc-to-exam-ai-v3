@@ -2,6 +2,7 @@
 // Mongo connection singleton cached on globalThis (hot-reload safe).
 import mongoose, { type ConnectOptions } from 'mongoose';
 import { loadEnv } from './env';
+import { connectWithFallback } from './memoryMongo';
 
 const KEY = '__docToExamMongoose';
 const g = globalThis as unknown as Record<string, Promise<typeof mongoose> | undefined>;
@@ -20,8 +21,9 @@ export async function connectDb(options: ConnectOptions = {}): Promise<typeof mo
   // Cache is cleared only on an explicit close or a failed connect: a transient readyState 0 is
   // the driver auto-reconnecting the SAME client, and a second connect would leak a MongoClient.
   if (!g[KEY]) {
-    const p: Promise<typeof mongoose> = mongoose
-      .connect(loadEnv().mongodbUri, { serverSelectionTimeoutMS: 8000, ...options })
+    // const p: Promise<typeof mongoose> = mongoose // Haihs: đóng code cũ, fallback MongoDB in-memory cho dev/E2E (D16), loadEnv() vẫn chạy đồng bộ nên lỗi env nêu tên biến - start - end
+    //   .connect(loadEnv().mongodbUri, { serverSelectionTimeoutMS: 8000, ...options }) // Haihs: đóng code cũ, fallback MongoDB in-memory cho dev/E2E (D16), loadEnv() vẫn chạy đồng bộ nên lỗi env nêu tên biến - start - end
+    const p: Promise<typeof mongoose> = connectWithFallback(loadEnv(), { serverSelectionTimeoutMS: 8000, ...options }) // Haihs: fallback MongoDB in-memory cho dev/E2E (D16), loadEnv() vẫn chạy đồng bộ nên lỗi env nêu tên biến - start - end
       .then((m) => {
         m.connection.once('close', () => {
           if (g[KEY] === p) g[KEY] = undefined;
