@@ -140,8 +140,19 @@ type Values = { fullName: string; phoneNumber: string; password: string; secretK
                   spellcheck="false"
                   placeholder="AIzaSy..."
                   [value]="geminiApiKey()"
+                  [attr.aria-invalid]="errors()['geminiApiKey'] ? 'true' : null"
+                  [attr.aria-describedby]="errors()['geminiApiKey'] ? 'geminiApiKey-err' : null"
                   (input)="geminiApiKey.set(val($event))"
                 />
+                @if (errors()['geminiApiKey']) {
+                  <p
+                    id="geminiApiKey-err"
+                    role="alert"
+                    class="mt-1 text-sm font-medium text-red-700 dark:text-red-300"
+                  >
+                    {{ errors()['geminiApiKey'] }}
+                  </p>
+                }
                 <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
                   Key sẽ được lưu trực tiếp vào tài khoản của bạn trong cơ sở dữ liệu.
                 </p>
