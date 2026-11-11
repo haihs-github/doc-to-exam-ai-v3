@@ -44,5 +44,11 @@ export const HTTP_STATUS: Record<ErrorCode, number> = {
 export function isApiError(x: unknown): x is ApiError {
   if (typeof x !== 'object' || x === null) return false;
   const o = x as Record<string, unknown>;
-  return o.success === false && typeof o.code === 'string' && typeof o.message === 'string';
+  // Haihs: truy cập bracket để qua TS4111 dưới Angular strict - start
+  // đóng code cũ
+  // return o.success === false && typeof o.code === 'string' && typeof o.message === 'string';
+  return (
+    o['success'] === false && typeof o['code'] === 'string' && typeof o['message'] === 'string'
+  );
+  // Haihs: truy cập bracket để qua TS4111 dưới Angular strict - end
 }
