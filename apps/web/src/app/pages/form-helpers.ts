@@ -20,10 +20,20 @@ export const focusField = (root: HTMLElement, name: string): void => {
   el?.focus({ preventScroll: true });
 };
 
+const AUTH_PATHS = [
+  '/login',
+  '/register',
+  '/teacher/login',
+  '/teacher/register',
+  '/session-error',
+  '/change-password',
+];
+
 /** `from` set by authGuard (a path string). Only same-origin absolute paths are honoured. */
 export const navigationFrom = (router: Router): string | undefined => {
   const from = (router.currentNavigation()?.extras.state as { from?: unknown } | undefined)?.from;
-  return typeof from === 'string' && from.startsWith('/') && !from.startsWith('//')
-    ? from
-    : undefined;
+  if (typeof from !== 'string' || !from.startsWith('/') || from[1] === '/' || from[1] === '\\')
+    return undefined;
+  const path = from.split(/[?#]/)[0].replace(/\/+$/, '');
+  return AUTH_PATHS.includes(path) ? undefined : from; // returning to an auth page would loop
 };

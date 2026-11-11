@@ -32,8 +32,6 @@ describe('App', () => {
   //   // expect(compiled.querySelector('h1')?.textContent).toContain('Hello, web'); // Haihs: đóng code cũ, placeholder CLI đã bị thay - start - end
   //   expect(compiled.querySelector('h1')?.textContent).toContain('Doc to Exam'); // Haihs: khớp tiêu đề mới - start - end
   // });
-  // Haihs: vỏ ứng dụng không còn hiển thị health, test health chuyển sang pages/api-health.spec.ts (Task 13a) - end
-  // Haihs: test vỏ ứng dụng: mỗi thành phần chung đúng một lần - start
   it('renders the shell pieces exactly once', async () => {
     TestBed.overrideProvider(ApiClient, { useValue: { get: () => new Subject() } });
     const fixture = TestBed.createComponent(App);
@@ -51,7 +49,7 @@ describe('App', () => {
     await fixture.whenStable();
     expect(get).not.toHaveBeenCalled();
   });
-  // Haihs: test vỏ ứng dụng: mỗi thành phần chung đúng một lần - end
+  // Haihs: vỏ ứng dụng không còn hiển thị health, test health chuyển sang pages/api-health.spec.ts (Task 13a) - end
 
   // Haihs: test trạng thái API health (loading / OK / lỗi) - start
   // đóng code cũ: các test này chuyển sang pages/api-health.spec.ts (vỏ ứng dụng không còn hiển thị health)

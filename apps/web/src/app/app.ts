@@ -31,8 +31,6 @@ import { Navbar } from './shared/ui/navbar';
   //     <p role="status">{{ text() }}</p>
   //   </main>
   // `,
-  // Haihs: hiển thị tiêu đề + trạng thái API health - end
-  // Haihs: vỏ ứng dụng: thanh tiến trình, navbar, outlet, hộp thoại dùng chung (mỗi thứ đúng một lần) - start
   template: `
     <app-api-progress />
     <app-navbar />
@@ -42,7 +40,7 @@ import { Navbar } from './shared/ui/navbar';
     <app-alert-host />
     <app-confirm-host />
   `,
-  // Haihs: vỏ ứng dụng: thanh tiến trình, navbar, outlet, hộp thoại dùng chung (mỗi thứ đúng một lần) - end
+  // Haihs: hiển thị tiêu đề + trạng thái API health - end
 })
 export class App {
   // protected readonly title = signal('web'); // Haihs: đóng code cũ, title không được dùng - start - end

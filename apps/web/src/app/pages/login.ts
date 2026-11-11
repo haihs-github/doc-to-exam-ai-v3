@@ -65,7 +65,7 @@ const LINK =
                 autocomplete="tel"
                 placeholder="0987654321"
                 [value]="phone()"
-                (input)="setPhone($any($event.target).value)"
+                (input)="setPhone(val($event))"
               />
             </app-form-field>
             <app-form-field label="Mật Khẩu" [required]="true" [error]="errors()['password'] ?? ''">
@@ -136,6 +136,8 @@ export class Login {
       if (u) void this.router.navigateByUrl(postLoginPath(u, this.from), { replaceUrl: true });
     });
   }
+
+  protected val = (e: Event): string => (e.target as HTMLInputElement).value;
 
   protected setPhone(v: string): void {
     this.phone.set(v);

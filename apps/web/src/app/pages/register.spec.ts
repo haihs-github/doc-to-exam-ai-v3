@@ -13,6 +13,8 @@ import { Register } from './register';
 @Component({ template: 'dummy' })
 class Dummy {}
 
+const HP = 'contact_site_url_x'; // DOM name must not be a browser autofill token; the payload field is still `website`
+
 const mk = (over: Partial<AuthUser> = {}): AuthUser => ({
   id: '1',
   phoneNumber: '0912345678',
@@ -70,16 +72,20 @@ describe('Register (student)', () => {
     expect(el.querySelector('input[name="secretKey"]')).toBeNull();
   });
 
-  it('honeypot: hidden from users and screen readers, not tabbable, never autofilled', async () => {
-    const { el, input } = await setup();
-    const hp = input('website');
-    expect(hp.getAttribute('tabindex')).toBe('-1');
-    expect(hp.getAttribute('autocomplete')).toBe('off');
-    expect(hp.value).toBe('');
-    expect(hp.closest('[aria-hidden="true"]')).toBeTruthy();
-    expect(hp.closest('[aria-hidden="true"]')!.className).toContain('-left-[9999px]');
-    expect(el.querySelectorAll('input[name="website"]').length).toBe(1);
-  });
+  it.each(['/register', '/teacher/register'])(
+    'honeypot on %s: hidden, inert, not tabbable, never autofilled',
+    async (url) => {
+      const { el, input } = await setup(url);
+      const hp = input(HP);
+      expect(hp.getAttribute('tabindex')).toBe('-1');
+      expect(hp.getAttribute('autocomplete')).toBe('off');
+      expect(hp.value).toBe('');
+      expect(hp.closest('[aria-hidden="true"]')).toBeTruthy();
+      expect(hp.closest('[aria-hidden="true"]')!.className).toContain('-left-[9999px]');
+      expect(hp.closest('[aria-hidden="true"]')!.hasAttribute('inert')).toBe(true);
+      expect(el.querySelectorAll(`input[name="${HP}"]`).length).toBe(1);
+    },
+  );
 
   it('input attributes: autocomplete new-password, tel/numeric phone', async () => {
     const { input } = await setup();
@@ -122,7 +128,7 @@ describe('Register (student)', () => {
     const s = await setup();
     s.register.mockReturnValue(of({ token: 't', user: mk() }));
     await s.fill();
-    await s.type('website', 'http://spam');
+    await s.type(HP, 'http://spam');
     await s.submit();
     expect(s.register.mock.calls[0][1].website).toBe('http://spam');
   });
@@ -195,7 +201,6 @@ describe('Register (teacher)', () => {
     expect(input('secretKey')).toBeTruthy();
     expect(input('secretKey').type).toBe('password');
     expect(input('geminiApiKey')).toBeTruthy();
-    expect(input('website')).toBeNull();
     expect(el.querySelector('a[href="/teacher/login"]')).toBeTruthy();
   });
 
@@ -222,8 +227,18 @@ describe('Register (teacher)', () => {
       fullName: 'Hoàng Thị Tuyến',
       password: 'secret-pw1',
       secretKey: 'key-123',
+      website: '',
     });
     expect(s.router.url).toBe('/');
+  });
+
+  it('a filled honeypot is sent as `website` for teachers too', async () => {
+    const s = await setup('/teacher/register');
+    s.register.mockReturnValue(of({ token: 't', user: mk({ role: 'teacher' }) }));
+    await s.fill(true);
+    await s.type(HP, 'http://spam');
+    await s.submit();
+    expect(s.register.mock.calls[0][1].website).toBe('http://spam');
   });
 
   it('sends geminiApiKey (trimmed) when filled', async () => {

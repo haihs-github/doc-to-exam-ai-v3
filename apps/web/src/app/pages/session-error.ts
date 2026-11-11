@@ -5,6 +5,7 @@ import {
   Component,
   effect,
   inject,
+  linkedSignal,
   signal,
   untracked,
 } from '@angular/core';
@@ -19,7 +20,7 @@ import { navigationFrom } from './form-helpers';
     <div class="min-h-[60vh] flex items-center justify-center p-4">
       <div class="text-center space-y-3 max-w-sm">
         <p role="alert" class="text-gray-700 dark:text-gray-200 font-semibold text-base">
-          {{ auth.loadError() }}
+          {{ shown() }}
         </p>
         <div class="flex flex-wrap justify-center gap-2">
           <button type="button" class="btn-primary" (click)="retry()" [disabled]="auth.isLoading()">
@@ -36,6 +37,11 @@ export class SessionError {
   private readonly router = inject(Router);
   private readonly from = navigationFrom(this.router);
   private readonly retrying = signal(false);
+  /** reload() clears loadError; keep the last message so the alert never empties while retrying. */
+  protected readonly shown = linkedSignal<string, string>({
+    source: this.auth.loadError,
+    computation: (now, prev) => now || prev?.value || '',
+  });
 
   constructor() {
     // Moves on only after the user pressed "Thử lại" and the reload settled, so nothing redirects by itself.

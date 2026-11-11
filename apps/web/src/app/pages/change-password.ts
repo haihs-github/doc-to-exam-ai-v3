@@ -31,7 +31,9 @@ type Values = { currentPassword: string; newPassword: string; confirmPassword: s
         novalidate
         class="bg-white shadow-raised dark:shadow-raised-dark rounded-xl border border-gray-200 p-6 sm:p-8 space-y-5 dark:bg-gray-800 dark:border-gray-700"
       >
-        <h1 class="text-xl font-extrabold text-gray-900 dark:text-gray-100">Đổi mật khẩu</h1>
+        <h1 tabindex="-1" class="text-xl font-extrabold text-gray-900 dark:text-gray-100">
+          Đổi mật khẩu
+        </h1>
         @if (forced) {
           <p class="text-base text-gray-600 dark:text-gray-400">
             Bạn cần đổi mật khẩu để tiếp tục.
@@ -131,7 +133,13 @@ export class ChangePassword {
         next: (r) => {
           if (this.forced)
             void this.router.navigateByUrl(homePathForRole(r.user.role), { replaceUrl: true });
-          else void this.alert.success('Đã đổi mật khẩu. Các thiết bị khác phải đăng nhập lại.');
+          else {
+            // Staying on the page: wipe the secrets so Enter cannot resend the old current password.
+            this.v.set({ currentPassword: '', newPassword: '', confirmPassword: '' });
+            this.errors.set({});
+            this.host.nativeElement.querySelector<HTMLElement>('h1')?.focus();
+            void this.alert.success('Đã đổi mật khẩu. Các thiết bị khác phải đăng nhập lại.');
+          }
         },
         error: (err: unknown) => {
           const f = fieldFailure(err, CHANGE_PASSWORD_ORDER);

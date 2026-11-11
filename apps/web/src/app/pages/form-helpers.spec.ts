@@ -58,10 +58,20 @@ describe('navigationFrom', () => {
   it('reads a string path from the navigation state', async () => {
     expect(await setup({ from: '/teacher/templates' })).toBe('/teacher/templates');
   });
-  it.each([['https://evil.example'], ['//evil.example'], [42], [undefined]])(
-    'ignores %j',
-    async (f) => {
-      expect(await setup({ from: f })).toBeUndefined();
-    },
-  );
+  it.each([
+    ['https://evil.example'],
+    ['//evil.example'],
+    ['/\\evil.example'],
+    ['/login'],
+    ['/login?x=1'],
+    ['/register'],
+    ['/teacher/login'],
+    ['/teacher/register#a'],
+    ['/session-error'],
+    ['/change-password'],
+    [42],
+    [undefined],
+  ])('ignores %j', async (f) => {
+    expect(await setup({ from: f })).toBeUndefined();
+  });
 });
