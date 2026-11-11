@@ -16,7 +16,8 @@ export const errorMessage = (e: unknown): string => {
   if (!isApiError(e)) return FALLBACK;
   const status = (e as { status?: number }).status;
   if (status === 0) return 'Không kết nối được máy chủ. Vui lòng kiểm tra mạng và thử lại.'; // apiErrors.js:24
-  if (status === 429 || e.code === 'RATE_LIMITED') return withWait('Bạn thao tác quá nhiều lần.', e); // :26 (data.code RATE_LIMITED)
+  if (status === 429 || e.code === 'RATE_LIMITED')
+    return withWait('Bạn thao tác quá nhiều lần.', e); // :26 (data.code RATE_LIMITED)
   if (status === 503) return withWait('Hệ thống đang bận.', e); // :27 (SERVER_BUSY has no contract code; status only)
   return e.message || FALLBACK; // :28
 };

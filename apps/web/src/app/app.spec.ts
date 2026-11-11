@@ -9,8 +9,7 @@ describe('App', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [App],
-    })
-      .compileComponents();
+    }).compileComponents();
   });
 
   it('should create the app', () => {
@@ -73,9 +72,12 @@ describe('App', () => {
 
     it('shows a Vietnamese message on error without throwing', async () => {
       const { fixture, el } = setup(() =>
-        throwError(() => ({ success: false, code: 'INTERNAL', message: 'x', status: 0 })));
+        throwError(() => ({ success: false, code: 'INTERNAL', message: 'x', status: 0 })),
+      );
       await fixture.whenStable();
-      expect(el.querySelector('[role="status"]')?.textContent).toContain('Không kết nối được máy chủ');
+      expect(el.querySelector('[role="status"]')?.textContent).toContain(
+        'Không kết nối được máy chủ',
+      );
     });
   });
   // Haihs: test trạng thái API health (loading / OK / lỗi) - end

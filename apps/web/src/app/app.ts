@@ -29,7 +29,12 @@ export class App {
   protected readonly state = signal<'loading' | 'ok' | 'error'>('loading');
   private readonly error = signal('');
   protected readonly text = computed(() =>
-    this.state() === 'loading' ? 'Đang kiểm tra API...' : this.state() === 'ok' ? 'API: OK' : this.error());
+    this.state() === 'loading'
+      ? 'Đang kiểm tra API...'
+      : this.state() === 'ok'
+        ? 'API: OK'
+        : this.error(),
+  );
 
   constructor() {
     inject(ApiClient)
@@ -38,9 +43,15 @@ export class App {
       .subscribe({
         next: (d) => {
           if (d.status === 'OK') this.state.set('ok');
-          else { this.error.set('API: không sẵn sàng'); this.state.set('error'); }
+          else {
+            this.error.set('API: không sẵn sàng');
+            this.state.set('error');
+          }
         },
-        error: (e) => { this.error.set(errorMessage(e)); this.state.set('error'); },
+        error: (e) => {
+          this.error.set(errorMessage(e));
+          this.state.set('error');
+        },
       });
   }
   // Haihs: gọi /api/health, giữ trạng thái bằng signal - end

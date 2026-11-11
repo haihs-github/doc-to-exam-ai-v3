@@ -34,12 +34,18 @@ describe('loadEnv', () => {
   it('production too-short secret throws by name only', () => {
     const src = { ...prod, JWT_SECRET: 'q7Zk9' };
     expect(() => loadEnv(src)).toThrow(/JWT_SECRET/);
-    expect(() => loadEnv(src)).toThrow(expect.objectContaining({ message: expect.not.stringContaining('q7Zk9') }));
+    expect(() => loadEnv(src)).toThrow(
+      expect.objectContaining({ message: expect.not.stringContaining('q7Zk9') }),
+    );
   });
 
   it('production complete input returns the values', () => {
     const env = loadEnv(prod);
-    expect(env).toMatchObject({ nodeEnv: 'production', jwtSecret: prod.JWT_SECRET, mongodbUri: prod.MONGODB_URI });
+    expect(env).toMatchObject({
+      nodeEnv: 'production',
+      jwtSecret: prod.JWT_SECRET,
+      mongodbUri: prod.MONGODB_URI,
+    });
   });
 
   it('development with empty input does not throw and returns defaults', () => {
@@ -58,8 +64,12 @@ describe('loadEnv', () => {
   it('length boundaries in production', () => {
     expect(() => loadEnv({ ...prod, JWT_SECRET: 'x'.repeat(16) })).not.toThrow();
     expect(() => loadEnv({ ...prod, JWT_SECRET: 'x'.repeat(15) })).toThrow(/JWT_SECRET/);
-    expect(() => loadEnv({ ...prod, API_KEY_ENCRYPTION_SECRET: 'x'.repeat(15) })).toThrow(/API_KEY_ENCRYPTION_SECRET/);
-    expect(() => loadEnv({ ...prod, TEACHER_SECRET_KEY: 'x'.repeat(7) })).toThrow(/TEACHER_SECRET_KEY/);
+    expect(() => loadEnv({ ...prod, API_KEY_ENCRYPTION_SECRET: 'x'.repeat(15) })).toThrow(
+      /API_KEY_ENCRYPTION_SECRET/,
+    );
+    expect(() => loadEnv({ ...prod, TEACHER_SECRET_KEY: 'x'.repeat(7) })).toThrow(
+      /TEACHER_SECRET_KEY/,
+    );
     expect(() => loadEnv({ ...prod, TEACHER_SECRET_KEY: 'x'.repeat(8) })).not.toThrow();
   });
 
@@ -67,7 +77,9 @@ describe('loadEnv', () => {
     expect(loadEnv({ NODE_ENV: 'test' }).nodeEnv).toBe('test');
     expect(loadEnv({ NODE_ENV: 'development' }).nodeEnv).toBe('development');
     expect(loadEnv({ NODE_ENV: '' }).nodeEnv).toBe('development');
-    expect(() => loadEnv({ NODE_ENV: 'staging' })).toThrow(/JWT_SECRET.*API_KEY_ENCRYPTION_SECRET/s);
+    expect(() => loadEnv({ NODE_ENV: 'staging' })).toThrow(
+      /JWT_SECRET.*API_KEY_ENCRYPTION_SECRET/s,
+    );
     expect(() => loadEnv({ NODE_ENV: 'Production ' })).toThrow(/JWT_SECRET/);
     expect(loadEnv({ ...prod, NODE_ENV: 'staging', ALLOW_IN_MEMORY_DB: 'true' })).toMatchObject({
       nodeEnv: 'production',

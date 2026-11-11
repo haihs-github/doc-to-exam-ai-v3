@@ -7,7 +7,9 @@ export default defineConfig({
   resolve: {
     // contract is source-only, so point straight at its TS entry
     alias: {
-      '@doc-to-exam/contract': fileURLToPath(new URL('../../packages/contract/src/index.ts', import.meta.url)),
+      '@doc-to-exam/contract': fileURLToPath(
+        new URL('../../packages/contract/src/index.ts', import.meta.url),
+      ),
     },
   },
   test: {
