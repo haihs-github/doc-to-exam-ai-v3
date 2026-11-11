@@ -1,14 +1,27 @@
 {
   "name": "doc-to-exam-ts",
   "private": true,
+  "type": "module",
   "version": "0.0.0",
-  "workspaces": ["apps/*", "packages/*"],
-  "engines": { "node": ">=22" },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "lint": "eslint .",
     "test:api": "npm test -w apps/api",
     "test:web": "npm test -w apps/web",
     "build": "npm run build -w apps/api && npm run build -w apps/web",
     "dev": "npm run dev -w apps/api & npm run dev -w apps/web & wait"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.14.0",
+    "prettier": "^3.9.10",
+    "typescript": "5.9",
+    "typescript-eslint": "^8.72.2"
   }
 }
