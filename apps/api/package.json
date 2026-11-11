@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@doc-to-exam/contract": "*",
+    "mongodb-memory-server": "^11.0.0",
     "mongoose": "^9.0.0",
     "next": "~16.4.0",
     "react": "^19.0.0",
@@ -18,7 +19,6 @@
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
-    "@types/react": "19.3.0",
-    "mongodb-memory-server": "^11.0.0"
+    "@types/react": "19.3.0"
   }
 }
