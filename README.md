@@ -20,5 +20,6 @@ Lệnh test/build/install nặng chạy qua `scripts/limited.sh <lệnh>` (2 CPU
 
 ## Ngoại lệ quy ước header
 
-`package.json`, `package-lock.json` và các file JSON khác không mang header `Created by Haihs` vì JSON không hỗ trợ comment (người dùng đã duyệt 11/11/2026).
+<!-- đóng code cũ: `package.json`, `package-lock.json` và các file JSON khác không mang header `Created by Haihs` vì JSON không hỗ trợ comment (người dùng đã duyệt 11/11/2026). -->
+`package.json`, `package-lock.json` và các file JSON thuần (không comment được) miễn header `Created by Haihs` (người dùng đã duyệt 11/11/2026); `tsconfig*.json` (JSONC) có header. <!-- Haihs: tsconfig*.json nay có header - start - end -->
 `apps/web/src/index.html` giữ `<!doctype html>` ở dòng 1, header đặt ngay sau (tránh quirks mode; người dùng đã duyệt 11/11/2026). <!-- Haihs: ghi nhận ngoại lệ index.html - start - end -->
