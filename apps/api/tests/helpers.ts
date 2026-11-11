@@ -7,8 +7,6 @@ export async function startTestDb(): Promise<{ uri: string; stop(): Promise<void
   return { uri: server.getUri(), stop: async () => void (await server.stop()) };
 }
 
-// Prettier would move the end-of-line eslint-disable/Haihs marker off the signature line.
-// prettier-ignore
 export async function call(
   handler: (req: Request) => Promise<Response>,
   init: { method?: string; url?: string; body?: unknown; headers?: Record<string, string> } = {},

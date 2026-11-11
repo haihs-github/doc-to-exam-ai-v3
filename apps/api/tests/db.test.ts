@@ -21,8 +21,7 @@ afterEach(async () => {
 });
 
 // the property is read-only in the typings but has a setter that emits the state events
-const setReadyState = (n: number) =>
-  ((mongoose.connection as { readyState: number }).readyState = n);
+const setReadyState = (n: number) => ((mongoose.connection as { readyState: number }).readyState = n);
 
 describe('connectDb', () => {
   it('returns the same instance twice and does not grow connections', async () => {
@@ -79,9 +78,7 @@ describe('connectDb', () => {
     vi.stubEnv('NODE_ENV', 'production');
     vi.stubEnv('JWT_SECRET', '');
     let p: Promise<unknown> | undefined;
-    expect(() => {
-      p = connectDb();
-    }).not.toThrow();
+    expect(() => { p = connectDb(); }).not.toThrow();
     await expect(p).rejects.toThrow(/JWT_SECRET/);
   });
 });

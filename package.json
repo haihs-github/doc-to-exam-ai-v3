@@ -12,8 +12,7 @@
   },
   "scripts": {
     "lint": "eslint .",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
+    "format": "prettier --write",
     "test:api": "npm test -w apps/api",
     "test:contract": "npm test -w packages/contract",
     "test:web": "npm test -w apps/web",

@@ -24,10 +24,6 @@ export const runtime = 'nodejs';
 // Haihs: health trả envelope ok() theo contract (D10) - start
 // đóng code cũ: GET withErrors trả Response.json thô, comment nguyên văn ngay phía trên
 export const GET = withErrors(async (): Promise<Response> => {
-  return ok({
-    status: 'OK',
-    timestamp: new Date().toISOString(),
-    service: 'Doc to Exam AI Backend',
-  });
+  return ok({ status: 'OK', timestamp: new Date().toISOString(), service: 'Doc to Exam AI Backend' });
 });
 // Haihs: health trả envelope ok() theo contract (D10) - end
