@@ -386,6 +386,18 @@ describe('SERVER_BUSY and rate limit', () => {
       vi.stubEnv('NODE_ENV', 'test');
     }
   });
+  it('successful student logins do not consume LOGIN_ACCOUNT/LOGIN_IP_FAIL (20 correct logins, max 10, no 429)', async () => {
+    await post(studentRegister, reg());
+    vi.stubEnv('NODE_ENV', 'development');
+    try {
+      for (let i = 0; i < 20; i++) {
+        const r = await post(studentLogin, { phoneNumber: '0912345678', password: 'matkhau-1234' });
+        expect(r.status).toBe(200);
+      }
+    } finally {
+      vi.stubEnv('NODE_ENV', 'test');
+    }
+  });
   it('student login failures are counted per account (LOGIN_ACCOUNT, 10 then 429)', async () => {
     vi.stubEnv('NODE_ENV', 'development');
     try {
