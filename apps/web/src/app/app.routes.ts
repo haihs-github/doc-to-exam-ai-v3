@@ -12,6 +12,7 @@ import { About } from './pages/about';
 import { HomePlaceholder } from './pages/placeholders';
 import { Register } from './pages/register';
 import { SessionError } from './pages/session-error';
+import { TeacherClasses } from './pages/teacher-classes';
 
 /** Runs `decide` once the startup /me load is over (same wait as authGuard: no flash of the wrong page). */
 const afterLoad = (decide: () => GuardResult) => {
@@ -59,5 +60,6 @@ export const routes: Routes = [
   // the only page a mustChangePassword user can reach
   { path: 'change-password', canActivate: [authGuard()], component: ChangePassword },
   { path: 'session-error', canActivate: [sessionErrorGuard], component: SessionError },
+  { path: 'teacher/classes', canActivate: [authGuard(['teacher'], 'teacher')], component: TeacherClasses }, // Haihs: M2 Task 11 - trang danh sách lớp của giáo viên - start - end
   { path: '**', redirectTo: '' },
 ];
