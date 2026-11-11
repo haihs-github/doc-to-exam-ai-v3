@@ -38,6 +38,47 @@ describe('readJson size cap', () => {
   });
 });
 
+describe('readJson cap edge cases', () => {
+  const enc = (s: string) => new TextEncoder().encode(s);
+  it('exactly maxBytes passes, maxBytes+1 -> 413', async () => {
+    const body = (n: number) => '"' + 'x'.repeat(n - 2) + '"';
+    expect(await readJson(post(body(20)), 20)).toBe('x'.repeat(18));
+    await expect(readJson(post(body(21)), 20)).rejects.toMatchObject({ code: 'PAYLOAD_TOO_LARGE' });
+  });
+  it('counts bytes, not characters (multi-byte UTF-8)', async () => {
+    const s = '"' + 'é'.repeat(9) + '"'; // 11 chars, 20 bytes
+    expect(s.length).toBeLessThanOrEqual(20);
+    await expect(readJson(post(s), 19)).rejects.toMatchObject({ code: 'PAYLOAD_TOO_LARGE' });
+    expect(await readJson(post(s), 20)).toBe('é'.repeat(9));
+  });
+  it('lying small Content-Length with a big body -> 413', async () => {
+    const req = new Request('http://x/', { method: 'POST', body: '"' + 'x'.repeat(50) + '"', headers: { 'content-length': '1' } });
+    await expect(readJson(req, 20)).rejects.toMatchObject({ code: 'PAYLOAD_TOO_LARGE' });
+  });
+  it('chunked stream over the cap -> 413 and the stream is cancelled', async () => {
+    const cancel = vi.fn();
+    const stream = new ReadableStream<Uint8Array>({
+      pull(c) { c.enqueue(enc('xxxxxxxxxx')); },
+      cancel,
+    });
+    const req = new Request('http://x/', { method: 'POST', body: stream, duplex: 'half' } as RequestInit);
+    await expect(readJson(req, 25)).rejects.toMatchObject({ code: 'PAYLOAD_TOO_LARGE' });
+    expect(cancel).toHaveBeenCalled();
+  });
+  it('a failing cancel does not turn 413 into another error', async () => {
+    const stream = new ReadableStream<Uint8Array>({
+      pull(c) { c.enqueue(enc('xxxxxxxxxx')); },
+      cancel() { throw new Error('boom'); },
+    });
+    const req = new Request('http://x/', { method: 'POST', body: stream, duplex: 'half' } as RequestInit);
+    await expect(readJson(req, 15)).rejects.toMatchObject({ code: 'PAYLOAD_TOO_LARGE' });
+  });
+  it('UTF-8 BOM is stripped like req.json()', async () => {
+    const req = new Request('http://x/', { method: 'POST', body: new Uint8Array([0xef, 0xbb, 0xbf, ...enc('{"a":1}')]) });
+    expect(await readJson(req)).toEqual({ a: 1 });
+  });
+});
+
 describe('HttpError message', () => {
   it('Vietnamese message passes through withErrors', async () => {
     const h = withErrors(async () => { throw new HttpError('NOT_FOUND', 'Không tìm thấy'); });
