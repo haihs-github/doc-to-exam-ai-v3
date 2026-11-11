@@ -152,6 +152,52 @@ describe('withAuth', () => {
     });
   });
 
+  it('infrastructure errors from verifyToken (secret missing) are 500, not 401', async () => {
+    const u = await mk();
+    const t = tokenOf(u);
+    vi.stubEnv('JWT_SECRET', '');
+    vi.stubEnv('NODE_ENV', 'production');
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    const r = await call(inner, { headers: bearer(t) });
+    vi.stubEnv('NODE_ENV', 'test');
+    vi.stubEnv('JWT_SECRET', SECRET);
+    expect(r.status).toBe(500);
+    expect(r.body.code).toBe('INTERNAL');
+  });
+
+  it('token without tv is rejected at the auth layer', async () => {
+    const u = await mk();
+    const r = await call(inner, { headers: bearer(jwt.sign({ id: u.id }, SECRET)) });
+    expect(r.status).toBe(401);
+  });
+
+  it.each([
+    ['Bearer a, Bearer b', 'Bearer a, Bearer b'],
+    ['tab separator', 'Bearer\tabc'],
+    ['20KB token', `Bearer ${'a'.repeat(20_000)}`],
+  ])('odd header %s -> 401', async (_n, authorization) => {
+    const r = await call(inner, { headers: { authorization } });
+    expect(r.status).toBe(401);
+  });
+
+  it('whole 401 bodies are identical across causes (missing, other secret, expired, alg none, deleted user)', async () => {
+    const u = await mk();
+    const gone = await mk();
+    const goneToken = tokenOf(gone);
+    await UserModel.deleteOne({ _id: gone._id });
+    const hs = [
+      {},
+      bearer(jwt.sign({ id: u.id, tv: 0 }, 'other-secret-other-secret')),
+      bearer(jwt.sign({ id: u.id, tv: 0 }, SECRET, { expiresIn: -10 })),
+      bearer(`${b64({ alg: 'none', typ: 'JWT' })}.${b64({ id: u.id, tv: 0 })}.`),
+      bearer(goneToken),
+    ];
+    const bodies = await Promise.all(
+      hs.map(async (headers) => JSON.stringify((await call(inner, { headers })).body)),
+    );
+    expect(new Set(bodies).size).toBe(1);
+  });
+
   it('a DB failure is a 500 INTERNAL, not a 401', async () => {
     const u = await mk();
     const t = tokenOf(u);
@@ -164,55 +210,49 @@ describe('withAuth', () => {
     expect(r.body.code).toBe('INTERNAL');
   });
 
-  describe('mustChangePassword allowlist (method + exact pathname)', () => {
-    const allowed: [string, string][] = [
-      ['GET', '/api/auth/me'],
-      ['POST', '/api/auth/change-password'],
-      ['POST', '/api/auth/logout-all'],
-      ['GET', '/api/auth/me/'],
-      ['GET', '/api/auth/me?x=1'],
-    ];
-    const denied: [string, string][] = [
-      ['GET', '/api/classes'],
-      ['POST', '/api/auth/me'],
-      ['GET', '/api/auth/me/extra'],
-      ['GET', '/api/auth/mexxx'],
-      ['GET', '/api/classes?next=/api/auth/me'],
-      ['GET', '/api/auth/change-password'],
-      ['POST', '/api/auth/logout-all/x'],
-    ];
-    it.each(allowed)('%s %s passes', async (method, path) => {
+  describe('mustChangePassword (route identity, default deny)', () => {
+    const allowedRoute = withErrors(
+      withAuth(async () => ok('me'), { allowWhenMustChangePassword: true }),
+    );
+    it('403 MUST_CHANGE_PASSWORD on a route without the opt-in', async () => {
       const u = await mk({ mustChangePassword: true });
-      const r = await call(inner, {
-        method,
-        url: `http://localhost${path}`,
-        headers: bearer(tokenOf(u)),
-      });
-      expect(r.status).toBe(200);
-    });
-    it.each(denied)('%s %s -> 403 MUST_CHANGE_PASSWORD', async (method, path) => {
-      const u = await mk({ mustChangePassword: true });
-      const r = await call(inner, {
-        method,
-        url: `http://localhost${path}`,
-        headers: bearer(tokenOf(u)),
-      });
+      const r = await call(inner, { headers: bearer(tokenOf(u)) });
       expect(r.status).toBe(403);
       expect(r.body.code).toBe('MUST_CHANGE_PASSWORD');
       expect(seen).toHaveLength(0);
     });
-    it('a normal user is not gated', async () => {
-      const u = await mk();
-      const r = await call(inner, {
-        url: 'http://localhost/api/classes',
+    it('passes on a route that opts in (any URL: the route identity decides)', async () => {
+      const u = await mk({ mustChangePassword: true });
+      const r = await call(allowedRoute, {
+        url: 'http://localhost/api/classes?next=/api/auth/me',
         headers: bearer(tokenOf(u)),
       });
       expect(r.status).toBe(200);
+    });
+    it('withPermission forwards the opt-in; without it a gated user gets 403 before the permission check', async () => {
+      const u = await mk({ mustChangePassword: true });
+      const yes = withErrors(
+        withPermission('account:changePassword', async () => ok('x'), {
+          allowWhenMustChangePassword: true,
+        }),
+      );
+      const no = withErrors(withPermission('account:changePassword', async () => ok('x')));
+      expect((await call(yes, { headers: bearer(tokenOf(u)) })).status).toBe(200);
+      expect((await call(no, { headers: bearer(tokenOf(u)) })).body.code).toBe(
+        'MUST_CHANGE_PASSWORD',
+      );
+    });
+    it('a normal user is not gated', async () => {
+      const u = await mk();
+      expect((await call(inner, { headers: bearer(tokenOf(u)) })).status).toBe(200);
     });
   });
 });
 
 describe('withPermission', () => {
+  it('throws at wrap time for a permission not in the catalogue', () => {
+    expect(() => withPermission('class:creat', async () => ok('x'))).toThrow(/Unknown permission/);
+  });
   const h = withErrors(withPermission('class:create', async () => ok('yes')));
   it('401 without a token', async () => {
     expect((await call(h)).status).toBe(401);
