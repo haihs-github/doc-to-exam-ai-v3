@@ -10,6 +10,12 @@ export type ErrorCode =
   | 'PAYLOAD_TOO_LARGE'
   | 'MUST_CHANGE_PASSWORD'
   | 'REQUIRE_API_KEY'
+  // Haihs: thêm mã lỗi auth M1 - start
+  | 'INVALID_CREDENTIALS'
+  | 'PHONE_TAKEN'
+  | 'SECRET_KEY_INVALID'
+  | 'SERVER_BUSY'
+  // Haihs: thêm mã lỗi auth M1 - end
   | 'INTERNAL';
 
 export interface ApiError {
@@ -37,6 +43,12 @@ export const HTTP_STATUS: Record<ErrorCode, number> = {
   PAYLOAD_TOO_LARGE: 413, // middlewares/rateLimit.js:161
   MUST_CHANGE_PASSWORD: 403, // middlewares/authMiddleware.js:59
   REQUIRE_API_KEY: 400, // middlewares/authMiddleware.js:166 (source sends requireApiKey:true, no code)
+  // Haihs: status mã lỗi auth M1 - start
+  INVALID_CREDENTIALS: 401, // controllers/authController.js:197
+  PHONE_TAKEN: 409, // controllers/authController.js:252
+  SECRET_KEY_INVALID: 403, // controllers/authController.js:247
+  SERVER_BUSY: 503, // controllers/authController.js:204
+  // Haihs: status mã lỗi auth M1 - end
   INTERNAL: 500, // middlewares/authMiddleware.js:69 (source wire code is 'INTERNAL_ERROR')
 };
 
