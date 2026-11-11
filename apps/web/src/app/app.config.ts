@@ -6,6 +6,6 @@ import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideHttpClient(),
+    provideHttpClient(), // Haihs: ApiClient cần HttpClient - start - end
   ]
 };
