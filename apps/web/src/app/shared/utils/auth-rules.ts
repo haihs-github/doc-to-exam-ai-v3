@@ -1,16 +1,25 @@
 // Created by Haihs on 11/11/2026
 // Pure client-side input rules for phone / password / full name (port of client authRules.js; server decides).
 
+import { normalizePhone, PHONE_RE } from '@doc-to-exam/contract';
+
 export const MIN_PASSWORD_LENGTH = 8;
 export const MAX_PASSWORD_BYTES = 72; // bcrypt limit
 export const FULL_NAME_MAX = 255;
 
-const PHONE_RE = /^0\d{9,10}$/;
+// Haihs: PHONE_RE dùng chung từ contract - start
+// đóng code cũ
+// const PHONE_RE = /^0\d{9,10}$/;
+// Haihs: PHONE_RE dùng chung từ contract - end
 const FULL_NAME_RE = new RegExp(`^[\\p{L}\\p{M}][\\p{L}\\p{M} .'-]{1,${FULL_NAME_MAX - 1}}$`, 'u');
 
-/** Same normalisation as the API: '' for non-strings / raw input over 32 chars; else trim and strip whitespace, dots, dashes. */
-export const normalizePhone = (raw: unknown): string =>
-  typeof raw !== 'string' || raw.length > 32 ? '' : raw.trim().replace(/[\s.-]/g, ''); // same as apps/api/src/lib/phone.ts
+// Haihs: normalizePhone dùng chung từ contract, giữ re-export cho nơi import cũ - start
+// đóng code cũ
+// /** Same normalisation as the API: '' for non-strings / raw input over 32 chars; else trim and strip whitespace, dots, dashes. */
+// export const normalizePhone = (raw: unknown): string =>
+//   typeof raw !== 'string' || raw.length > 32 ? '' : raw.trim().replace(/[\s.-]/g, ''); // same as apps/api/src/lib/phone.ts
+export { normalizePhone };
+// Haihs: normalizePhone dùng chung từ contract, giữ re-export cho nơi import cũ - end
 
 export const validatePhone = (s: string): boolean => PHONE_RE.test(normalizePhone(s));
 
