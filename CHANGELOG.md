@@ -26,7 +26,26 @@
 <!-- Haihs: M0 changelog: thay tên commit bằng hash thật, đổi tên job e2e - end -->
 - `packages/contract`: `npm test`, script gốc `test:contract` và bước CI (`bdd259e`); script `format`/`format:check` và bước CI `format:check` (`201bda9`).
 - README: hướng dẫn chạy dev, test qua `scripts/limited.sh`, giới hạn một instance (D9), same-origin (D13).
-<!-- Haihs: entry M1 (tài khoản, auth) kèm commit hash - start -->
+
+### Changed
+- Bỏ `.nvmrc`, dùng `engines.node >=22` (`06193b5`, `052a4a7`); README sửa theo.
+- CI: quyền `contents: read`, timeout, concurrency, đổi tên job e2e, cấu hình Playwright, ignore `apps/api/AGENTS.md` (`8b97c41`).
+- `apps/web`: `npm test` chạy `ng test --watch=false`, giới hạn 2 worker Vitest qua `vitest.config.mts` (`bdd259e`).
+- `apps/api`: secret dev/test sinh ngẫu nhiên theo process; `NODE_ENV` khác `development`/`test` theo luật production (`65b9b13`).
+- Prettier áp dụng toàn repo, `.prettierignore`, `apps/web/.prettierrc` chuyển YAML, header cho `tsconfig.json` (`e30bb15`, `201bda9`).
+- `apiResponse` dùng `satisfies`, README (D6), `npm run dev` dọn tiến trình khi Ctrl-C (`2455d51`).
+
+### Reverted
+- Hoàn tác format Prettier toàn repo (`201bda9`) và bước CI `format:check` theo quyết định người dùng: Prettier chỉ áp từ M1; giữ script `format` thủ công và header `tsconfig.json` (`e6f2d47`).
+
+### Fixed
+- `connectDb` không còn rò MongoClient khi driver tự reconnect (`0b84bc9`).
+<!-- Haihs: entry M0 kèm commit hash - end -->
+
+<!-- Haihs: mục M1 tách khỏi vùng M0 ở trên (không lồng cặp marker) - start -->
+## [Unreleased] - M1 (tài khoản, xác thực)
+
+### Added
 - M1 plan (14 task) và đánh dấu Accepted (`803759a`, `beeef6e`); spec §8 quyết định bổ sung M1: parity auth, DB in-memory dev, localStorage, merge sau cùng (`1a14520`).
 - `packages/contract`: kiểu auth (`AuthUser`, `RegisterBody`, `LoginBody`...), mã lỗi auth, `HttpError` bắt buộc message, `readJson` có trần byte (`67c2a64`, `595efe1`).
 - `apps/api`: rate limit RAM tự viết, `clientIp`, header bảo mật, bộ giới hạn theo route (`4881f06`, `c6b8149`).
@@ -42,24 +61,8 @@
 - E2E auth `e2e/auth.spec.ts` (`6cb0930`), smoke chuyển sang `/about` (`aedad7b`), env E2E cho API và timeout 240s (`9a60dfe`), CI cache binary MongoDB (`904aa96`).
 - README M1 (`c4a6299`), `.env.example` (`68b597b`), About mô tả DB dev (`70d0b0d`); handoff `docs/handoff/2026-11-12-m1.md`.
 - Merge m1/api và m1/web (`e8decd3`, `f261009`).
-<!-- Haihs: entry M1 (tài khoản, auth) kèm commit hash - end -->
 
 ### Changed
-- Bỏ `.nvmrc`, dùng `engines.node >=22` (`06193b5`, `052a4a7`); README sửa theo.
-- CI: quyền `contents: read`, timeout, concurrency, đổi tên job e2e, cấu hình Playwright, ignore `apps/api/AGENTS.md` (`8b97c41`).
-- `apps/web`: `npm test` chạy `ng test --watch=false`, giới hạn 2 worker Vitest qua `vitest.config.mts` (`bdd259e`).
-- `apps/api`: secret dev/test sinh ngẫu nhiên theo process; `NODE_ENV` khác `development`/`test` theo luật production (`65b9b13`).
-- Prettier áp dụng toàn repo, `.prettierignore`, `apps/web/.prettierrc` chuyển YAML, header cho `tsconfig.json` (`e30bb15`, `201bda9`).
-- `apiResponse` dùng `satisfies`, README (D6), `npm run dev` dọn tiến trình khi Ctrl-C (`2455d51`).
-
-<!-- Haihs: mục Changed của M1 - start -->
 - `apps/api`: `withErrors` generic, bổ sung test `parsePage`/`call` (nợ M0) (`5aa23c6`).
 - Prettier áp lên 3 file M1 (`apps/api/src/models/User.ts`, `auth-rules.ts` và spec) (`e250cbe`).
-<!-- Haihs: mục Changed của M1 - end -->
-
-### Reverted
-- Hoàn tác format Prettier toàn repo (`201bda9`) và bước CI `format:check` theo quyết định người dùng: Prettier chỉ áp từ M1; giữ script `format` thủ công và header `tsconfig.json` (`e6f2d47`).
-
-### Fixed
-- `connectDb` không còn rò MongoClient khi driver tự reconnect (`0b84bc9`).
-<!-- Haihs: entry M0 kèm commit hash - end -->
+<!-- Haihs: mục M1 tách khỏi vùng M0 ở trên (không lồng cặp marker) - end -->
