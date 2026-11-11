@@ -31,8 +31,8 @@ export const decideRoute = (input: {
       state: { from: path },
     };
   }
-  if (user.mustChangePassword && path !== CHANGE_PASSWORD_PATH)
-    return { kind: 'redirect', to: CHANGE_PASSWORD_PATH };
+  if (user.mustChangePassword)
+    return path === CHANGE_PASSWORD_PATH ? { kind: 'allow' } : { kind: 'redirect', to: CHANGE_PASSWORD_PATH };
   if (roles && !roles.includes(user.role)) return { kind: 'redirect', to: '/' };
   return { kind: 'allow' };
 };
