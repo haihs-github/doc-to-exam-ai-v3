@@ -6,7 +6,7 @@
     "start": "ng serve",
     "dev": "ng serve",
     "build": "ng build",
-    "test": "ng test",
+    "test": "ng test --watch=false",
     "lint": "eslint ."
   },
   "private": true,
