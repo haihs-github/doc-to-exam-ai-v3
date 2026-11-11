@@ -9,14 +9,21 @@ const isProduction = () => {
   return !(raw === 'test' || !raw || raw === 'development');
 };
 
+// Messages we own and know carry no secret: env.ts:51,94 (variable names only) and db.ts:39 (fixed text, no URI).
+const SAFE_PREFIXES = ['Invalid environment:', 'Cannot connect to MongoDB'];
+const safeDetail = (err: unknown): string => {
+  if (!(err instanceof Error)) return 'unknown error';
+  return SAFE_PREFIXES.some((p) => err.message.startsWith(p)) ? err.message : err.name;
+};
+
 export async function register(): Promise<void> {
   try {
     await boot();
   } catch (err) {
+    if (!isProduction()) throw err; // dev/test: surface the error, never kill the dev server or runner
     // Next keeps serving 500s after a failed hook; in production exit so the orchestrator restarts/alerts.
-    // Messages from loadEnv/connectDb name variables only (no values, URI or stack), so printing them is safe.
-    if (!isProduction()) throw err;
-    console.error(`Startup failed: ${err instanceof Error ? err.message : 'unknown error'}`);
+    // Only messages known to be safe are printed; driver errors (host:port, key values, user names) log the class name only.
+    console.error(`Startup failed: ${safeDetail(err)}`);
     startup.exit(1);
   }
 }
