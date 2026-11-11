@@ -2,14 +2,15 @@
 // Route wrappers withAuth / withPermission / withApiKey and the shared authenticateRequest (port of server/middlewares/authMiddleware.js).
 import jwt from 'jsonwebtoken';
 import mongoose from 'mongoose';
-import { UserModel, type IUser } from '../models/User';
+import { UserModel, type IUser, type IUserMethods } from '../models/User';
 import { fail } from './apiResponse';
 import { connectDb } from './db';
 import { HttpError, type Handler } from './handler';
 import { InvalidTokenError, verifyToken } from './jwt';
 import { hasPermission, PERMISSIONS } from './rbac';
 
-export type UserDoc = mongoose.HydratedDocument<IUser>;
+// export type UserDoc = mongoose.HydratedDocument<IUser>; // Haihs: đóng code cũ, thêm IUserMethods để bỏ ép kiểu ở route me - start - end
+export type UserDoc = mongoose.HydratedDocument<IUser, IUserMethods>; // Haihs: thêm IUserMethods để bỏ ép kiểu ở route me - start - end
 /** Next route ctx is preserved (params), plus the authenticated user. */
 export interface AuthCtx {
   user: UserDoc;

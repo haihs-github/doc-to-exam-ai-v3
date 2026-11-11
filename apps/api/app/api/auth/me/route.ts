@@ -6,18 +6,14 @@ import { withAuth } from '../../../../src/lib/auth';
 import { withErrors } from '../../../../src/lib/handler';
 import { LIMITERS } from '../../../../src/lib/limiters';
 import { withRateLimit } from '../../../../src/lib/rateLimit';
-import type { UserModel } from '../../../../src/models/User';
 
 export const runtime = 'nodejs';
 // IP limiter OUTSIDE auth: a flood of valid tokens is stopped before it reaches the DB.
 export const GET = withErrors(
   withRateLimit(
     [LIMITERS.STUDENT_API],
-    withAuth(
-      async (_req, ctx) => ok<AuthUser>((ctx.user as InstanceType<typeof UserModel>).toAuthUser()),
-      {
-        allowWhenMustChangePassword: true,
-      },
-    ),
+    withAuth(async (_req, ctx) => ok<AuthUser>(ctx.user.toAuthUser()), {
+      allowWhenMustChangePassword: true,
+    }),
   ),
 );

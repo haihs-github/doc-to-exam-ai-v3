@@ -3,17 +3,19 @@
 import { ok } from '../../../../src/lib/apiResponse';
 import { withPermission } from '../../../../src/lib/auth';
 import { withErrors } from '../../../../src/lib/handler';
+import { LIMITERS } from '../../../../src/lib/limiters';
+import { withRateLimit } from '../../../../src/lib/rateLimit';
 import { UserModel } from '../../../../src/models/User';
 
 export const runtime = 'nodejs';
 export const POST = withErrors(
   withPermission(
     'account:logoutAll',
-    async (_req, ctx) => {
+    withRateLimit([LIMITERS.STUDENT_API], async (_req, ctx) => {
       // Atomic $inc: concurrent logouts/changes never lose an increment; this token dies too (no new one is issued).
       await UserModel.updateOne({ _id: ctx.userId }, { $inc: { tokenVersion: 1 } });
       return ok(null);
-    },
+    }),
     { allowWhenMustChangePassword: true },
   ),
 );
