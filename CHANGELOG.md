@@ -24,8 +24,17 @@
 - CI GitHub Actions: job lint, test-api, test-web, build, e2e, audit (`npm audit --audit-level=high`) (`f2c8d26`).
 - Merge các nhánh M0 và sửa lỗi sau merge: `a9be4c6`, `082cdb4`, `f601422` (merge); `5c0b306`, `4ceaf66`, `80088d3`, `3dc2836`, `6941bc2` (api); `3a2be71`, `2d2ece2`, `5eb22c8`, `0afaaf4`, `a084b43` (web/README).
 <!-- Haihs: M0 changelog: thay tên commit bằng hash thật, đổi tên job e2e - end -->
+- `packages/contract`: `npm test`, script gốc `test:contract` và bước CI (`bdd259e`); script `format`/`format:check` và bước CI `format:check` (`201bda9`).
 - README: hướng dẫn chạy dev, test qua `scripts/limited.sh`, giới hạn một instance (D9), same-origin (D13).
 
 ### Changed
 - Bỏ `.nvmrc`, dùng `engines.node >=22` (`06193b5`, `052a4a7`); README sửa theo.
+- CI: quyền `contents: read`, timeout, concurrency, đổi tên job e2e, cấu hình Playwright, ignore `apps/api/AGENTS.md` (`8b97c41`).
+- `apps/web`: `npm test` chạy `ng test --watch=false`, giới hạn 2 worker Vitest qua `vitest.config.mts` (`bdd259e`).
+- `apps/api`: secret dev/test sinh ngẫu nhiên theo process; `NODE_ENV` khác `development`/`test` theo luật production (`65b9b13`).
+- Prettier áp dụng toàn repo, `.prettierignore`, `apps/web/.prettierrc` chuyển YAML, header cho `tsconfig.json` (`e30bb15`, `201bda9`).
+- `apiResponse` dùng `satisfies`, README (D6), `npm run dev` dọn tiến trình khi Ctrl-C (`2455d51`).
+
+### Fixed
+- `connectDb` không còn rò MongoClient khi driver tự reconnect (`0b84bc9`).
 <!-- Haihs: entry M0 kèm commit hash - end -->
