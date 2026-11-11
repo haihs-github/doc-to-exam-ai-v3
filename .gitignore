@@ -9,3 +9,6 @@ coverage
 !.env.example
 playwright-report
 # Haihs: bổ sung ignore cho monorepo - end
+# Haihs: bỏ qua output của Playwright - start
+test-results
+# Haihs: bỏ qua output của Playwright - end
