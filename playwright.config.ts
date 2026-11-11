@@ -5,6 +5,9 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   testDir: 'e2e',
   workers: 1,
+  forbidOnly: !!process.env.CI,
+  retries: process.env.CI ? 1 : 0,
+  expect: { timeout: 10_000 },
   reporter: process.env.CI ? [['html', { open: 'never' }], ['list']] : 'list',
   use: { baseURL: 'http://localhost:4200' },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
