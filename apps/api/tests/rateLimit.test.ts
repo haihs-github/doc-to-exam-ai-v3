@@ -24,14 +24,16 @@ afterEach(() => {
 });
 
 describe('withRateLimit', () => {
-  it('over max -> 429 RATE_LIMITED, Vietnamese message, Retry-After seconds (ceil)', async () => {
-    const h = withRateLimit([mk()], statusHandler(200));
+  it('over max -> 429 RATE_LIMITED, Vietnamese message, Retry-After seconds (ceil), handler not called', async () => {
+    const spy = vi.fn(statusHandler(200));
+    const h = withRateLimit([mk({ windowMs: 2500 })], spy);
     expect((await h(req())).status).toBe(200);
     expect((await h(req())).status).toBe(200);
-    vi.advanceTimersByTime(250);
+    vi.advanceTimersByTime(400); // 2100ms left: ceil -> 3, floor would be 2
     const res = await h(req());
     expect(res.status).toBe(429);
-    expect(res.headers.get('Retry-After')).toBe('1');
+    expect(res.headers.get('Retry-After')).toBe('3');
+    expect(spy).toHaveBeenCalledTimes(2);
     const body = await res.json();
     expect(body).toMatchObject({ success: false, code: 'RATE_LIMITED' });
     expect(body.message).toContain('quá nhiều lần');
@@ -50,6 +52,54 @@ describe('withRateLimit', () => {
     for (let i = 0; i < 5; i++)
       expect((await withRateLimit([l], statusHandler(503))(req())).status).toBe(503);
     expect((await withRateLimit([l], statusHandler(400))(req())).status).toBe(400);
+    expect((await withRateLimit([l], statusHandler(200))(req())).status).toBe(429);
+  });
+  it('failures: 20 parallel requests reserve slots up front (max=3) -> exactly 3 reach the handler', async () => {
+    const spy = vi.fn(async () => {
+      await Promise.resolve();
+      await new Promise((r) => setTimeout(r, 10));
+      return new Response(null, { status: 401 });
+    });
+    const h = withRateLimit([mk({ max: 3, count: 'failures' })], spy);
+    const pending = Promise.all(Array.from({ length: 20 }, () => h(req())));
+    await vi.advanceTimersByTimeAsync(20);
+    const statuses = (await pending).map((r) => r.status);
+    expect(spy).toHaveBeenCalledTimes(3);
+    expect(statuses.filter((s) => s === 429)).toHaveLength(17);
+  });
+  it('failures: success, 5xx and a throwing handler give the slot back', async () => {
+    const l = mk({ max: 1, count: 'failures' });
+    await withRateLimit([l], statusHandler(200))(req());
+    await withRateLimit([l], statusHandler(503))(req());
+    await expect(
+      withRateLimit([l], async () => {
+        throw new Error('x');
+      })(req()),
+    ).rejects.toThrow();
+    expect((await withRateLimit([l], statusHandler(401))(req())).status).toBe(401);
+    expect((await withRateLimit([l], statusHandler(200))(req())).status).toBe(429);
+  });
+  it.each([
+    [399, false],
+    [400, true],
+    [499, true],
+    [500, false],
+  ])('failures: status %i consumes the slot = %s', async (status, consumed) => {
+    const l = mk({ max: 1, count: 'failures' });
+    expect((await withRateLimit([l], statusHandler(status))(req())).status).toBe(status);
+    expect((await withRateLimit([l], statusHandler(200))(req())).status).toBe(consumed ? 429 : 200);
+  });
+  it('a refund after the window rolled over does not touch the new window', async () => {
+    const l = mk({ max: 1, count: 'failures', windowMs: 1000 });
+    const slow = withRateLimit([l], async () => {
+      await new Promise((r) => setTimeout(r, 1500));
+      return new Response(null, { status: 200 });
+    });
+    const first = slow(req());
+    await vi.advanceTimersByTimeAsync(1100);
+    await withRateLimit([l], statusHandler(401))(req()); // new window, consumes its slot
+    await vi.advanceTimersByTimeAsync(500);
+    await first; // refund of the OLD window entry must not give the new window's slot back
     expect((await withRateLimit([l], statusHandler(200))(req())).status).toBe(429);
   });
   it('refund5xx gives the hit back, 4xx still counts', async () => {
@@ -96,6 +146,9 @@ describe('withRateLimit', () => {
   });
   it('tracked keys are capped and expired windows are swept by the timer', async () => {
     // fresh module so its sweep interval is created under fake timers
+    const g = globalThis as { __rateLimiters?: { timer?: ReturnType<typeof setInterval> } };
+    clearInterval(g.__rateLimiters?.timer);
+    delete g.__rateLimiters;
     vi.resetModules();
     const m = await import('../src/lib/rateLimit');
     const l = m.createRateLimiter({
@@ -147,7 +200,7 @@ describe('limiters buckets', () => {
       STUDENT_API: [3000, M],
     });
   });
-  it('REGISTER_PHONE keys by phone+IP from the body without consuming it; others by IP', async () => {
+  it('REGISTER_PHONE keys by valid phone+IP from the body without consuming it; others by ip: key', async () => {
     const mkReq = (phone: string, ip: string) =>
       req({
         method: 'POST',
@@ -155,17 +208,55 @@ describe('limiters buckets', () => {
         headers: { 'x-forwarded-for': ip, 'content-type': 'application/json' },
       });
     vi.stubEnv('TRUST_PROXY', '1');
-    const r = mkReq(' 090-1 ', '1.1.1.1');
-    const k1 = await LIMITERS.REGISTER_PHONE.key(r);
-    expect(k1).toBe('p:0901|1.1.1.1');
-    expect(await r.json()).toEqual({ phoneNumber: ' 090-1 ' });
-    expect(await LIMITERS.LOGIN_PHONE_GLOBAL.key(mkReq('0901', '2.2.2.2'))).toBe('p:0901');
-    expect(await LIMITERS.LOGIN.key(mkReq('0901', '2.2.2.2'))).toBe('2.2.2.2');
-    expect(
-      await LIMITERS.REGISTER_PHONE.key(
-        req({ method: 'POST', body: 'garbage', headers: { 'x-forwarded-for': '3.3.3.3' } }),
-      ),
-    ).toBe('3.3.3.3');
+    const r = mkReq(' 090-123.4567 ', '1.1.1.1');
+    expect(await LIMITERS.REGISTER_PHONE.key(r)).toBe('p:0901234567|1.1.1.1');
+    expect(await r.json()).toEqual({ phoneNumber: ' 090-123.4567 ' });
+    expect(await LIMITERS.LOGIN_PHONE_GLOBAL.key(mkReq('0901234567', '2.2.2.2'))).toBe(
+      'p:0901234567',
+    );
+    expect(await LIMITERS.LOGIN.key(mkReq('0901234567', '2.2.2.2'))).toBe('ip:2.2.2.2');
+    const garbage = req({
+      method: 'POST',
+      body: 'garbage',
+      headers: { 'x-forwarded-for': '3.3.3.3' },
+    });
+    expect(await LIMITERS.REGISTER_PHONE.key(garbage)).toBe('ip:3.3.3.3');
     expect(await LIMITERS.CHANGE_PASSWORD.key(req(), { userId: 'u1' })).toBe('u:u1');
+  });
+  it('malformed or huge phoneNumber never becomes part of a key (IP-only fallback, key <= 64 chars)', async () => {
+    vi.stubEnv('TRUST_PROXY', '1');
+    const mkReq = (phone: unknown) =>
+      req({
+        method: 'POST',
+        body: JSON.stringify({ phoneNumber: phone }),
+        headers: { 'x-forwarded-for': '4.4.4.4' },
+      });
+    for (const bad of ['9'.repeat(900_000), '12345', 'abc0901234567', '1901234567', 42, null]) {
+      for (const l of [
+        LIMITERS.REGISTER_PHONE,
+        LIMITERS.LOGIN_ACCOUNT,
+        LIMITERS.LOGIN_PHONE_GLOBAL,
+      ]) {
+        const k = (await l.key(mkReq(bad))) as string;
+        expect(k).toBe('ip:4.4.4.4');
+      }
+    }
+    // a hostile XFF entry is capped too
+    const long = req({ headers: { 'x-forwarded-for': 'y'.repeat(5000) } });
+    expect(((await LIMITERS.LOGIN.key(long)) as string).length).toBeLessThanOrEqual(64);
+  });
+  it('registry survives module duplication (globalThis) and resetRateLimiters clears all copies', async () => {
+    const g = globalThis as { __rateLimiters?: { timer?: ReturnType<typeof setInterval> } };
+    clearInterval(g.__rateLimiters?.timer);
+    delete g.__rateLimiters;
+    vi.resetModules();
+    const a = await import('../src/lib/rateLimit');
+    const l = a.createRateLimiter({ name: 'DUP', max: 5, windowMs: 1000, key: () => 'k' });
+    await a.withRateLimit([l], statusHandler(200))(req());
+    expect(a.trackedKeyCount(l)).toBe(1);
+    vi.resetModules();
+    const other = await import('../src/lib/rateLimit');
+    other.resetRateLimiters();
+    expect(a.trackedKeyCount(l)).toBe(0);
   });
 });

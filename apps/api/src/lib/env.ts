@@ -56,9 +56,20 @@ export function loadEnv(src: Record<string, string | undefined> = process.env): 
     teacherSecretKey: teacherSecretKey || DEV.teacherSecretKey,
     // in-memory DB loses data: never outside dev/test (source env.js:164-166, hardened for production)
     allowInMemoryDb: !isProd && get('ALLOW_IN_MEMORY_DB') !== 'false',
-    trustProxy: Number.isInteger(Number(get('TRUST_PROXY'))) && get('TRUST_PROXY') !== '' && Number(get('TRUST_PROXY')) >= 0 ? Number(get('TRUST_PROXY')) : isProd ? 1 : 0, // Haihs: trust proxy mặc định 1 ở production, 0 nơi khác - start - end
+    trustProxy: readTrustProxy(src), // Haihs: trust proxy mặc định 1 ở production, 0 nơi khác - start - end
   };
 }
+
+// Haihs: đọc TRUST_PROXY không cần loadEnv (không đòi secret production) - start
+// Non-negative integer; anything else falls back to 1 in production, 0 elsewhere.
+export function readTrustProxy(src: Record<string, string | undefined> = process.env): number {
+  const raw = (src.TRUST_PROXY ?? '').trim();
+  const v = Number(raw);
+  if (raw !== '' && Number.isInteger(v) && v >= 0) return v;
+  const e = src.NODE_ENV;
+  return e && e !== 'development' && e !== 'test' ? 1 : 0;
+}
+// Haihs: đọc TRUST_PROXY không cần loadEnv (không đòi secret production) - end
 
 // Haihs: ghi đè ngưỡng rate limit bằng RATE_LIMIT_<NAME>_MAX - start
 // Positive integer only; anything else is ignored (source rateLimit.js resolveMax).

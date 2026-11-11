@@ -20,13 +20,18 @@ export interface RateLimiterOptions {
 export interface RateLimiter extends Required<Omit<RateLimiterOptions, 'max'>> {
   readonly max: number; // effective value: RATE_LIMIT_<NAME>_MAX override applied at call time
   readonly hits: Map<string, { n: number; resetAt: number }>;
+  lastSweep: number;
 }
 
 // shortcut: per-process memory, so a multi-instance deploy multiplies the limits; per-limiter key cap evicts the oldest key when full (loses that key's count). Move to Redis if scaled out
 const MAX_KEYS = 10_000;
 const SWEEP_MS = 60_000;
-const registry = new Set<RateLimiter>();
-let timer: ReturnType<typeof setInterval> | undefined;
+// Next may instantiate this module once per route bundle: keep registry and timer on globalThis so there is one sweeper.
+const g = globalThis as {
+  __rateLimiters?: { registry: Set<RateLimiter>; timer?: ReturnType<typeof setInterval> };
+};
+const shared = (g.__rateLimiters ??= { registry: new Set() });
+const registry = shared.registry;
 
 function sweep(l: RateLimiter, now = Date.now()) {
   for (const [k, e] of l.hits) if (e.resetAt <= now) l.hits.delete(k);
@@ -41,10 +46,11 @@ export function createRateLimiter(o: RateLimiterOptions): RateLimiter {
       return rateLimitMax(o.name, o.max);
     },
     hits: new Map(),
+    lastSweep: 0,
   };
   registry.add(l);
-  timer ??= setInterval(() => registry.forEach((x) => sweep(x)), SWEEP_MS);
-  timer.unref();
+  shared.timer ??= setInterval(() => registry.forEach((x) => sweep(x)), SWEEP_MS);
+  shared.timer.unref();
   return l;
 }
 
@@ -58,7 +64,10 @@ function entry(l: RateLimiter, key: string, now: number) {
   let e = l.hits.get(key);
   if (!e || e.resetAt <= now) {
     if (!e && l.hits.size >= MAX_KEYS) {
-      sweep(l, now);
+      if (now - l.lastSweep >= 1000) {
+        l.lastSweep = now;
+        sweep(l, now); // throttled: an attacker flooding new keys must not make every request O(keys)
+      }
       if (l.hits.size >= MAX_KEYS) l.hits.delete(l.hits.keys().next().value as string);
     }
     e = { n: 0, resetAt: now + l.windowMs };
@@ -76,26 +85,31 @@ const limited = (retryMs: number) => {
 export function withRateLimit(limiters: RateLimiter[], h: Handler): Handler {
   return async (req, ctx) => {
     if (process.env.NODE_ENV === 'test') return h(req, ctx);
-    const active: { l: RateLimiter; key: string }[] = [];
+    // Every limiter reserves its slot BEFORE the handler runs (like express-rate-limit), so parallel requests cannot
+    // all pass the check before any is counted; the slot is handed back in settle() when the response does not count.
+    const held: { l: RateLimiter; key: string; e: { n: number; resetAt: number } }[] = [];
+    const release = () => held.forEach(({ e }) => e.n > 0 && e.n--);
     for (const l of limiters) {
       const key = await l.key(req, ctx);
       if (key === null) continue;
       const now = Date.now();
       const e = entry(l, key, now);
-      // 'all' reserves its slot up front; 'failures' only blocks once max failures are already recorded
-      if (l.count === 'all') e.n++;
-      if (l.count === 'all' ? e.n > l.max : e.n >= l.max) return limited(e.resetAt - now);
-      active.push({ l, key });
+      e.n++;
+      held.push({ l, key, e });
+      if (e.n > l.max) {
+        // this limiter blocked: the request never reaches the handler, so none of the earlier slots were spent
+        e.n--;
+        held.pop();
+        release();
+        return limited(e.resetAt - now);
+      }
     }
     const settle = (status: number) => {
-      const now = Date.now();
-      for (const { l, key } of active) {
-        if (l.count === 'failures') {
-          if (status >= 400 && status < 500) entry(l, key, now).n++;
-        } else if (l.refund5xx && status >= 500) {
-          const e = l.hits.get(key);
-          if (e && e.resetAt > now && e.n > 0) e.n--;
-        }
+      for (const { l, key, e } of held) {
+        if (l.hits.get(key) !== e) continue; // window rolled over meanwhile: never touch the new window
+        const counts =
+          l.count === 'failures' ? status >= 400 && status < 500 : !(l.refund5xx && status >= 500);
+        if (!counts && e.n > 0) e.n--;
       }
     };
     let res: Response;

@@ -16,8 +16,8 @@ describe('clientIp', () => {
   it('takes the Nth entry from the right for trustProxy=2', () => {
     expect(clientIp(req('6.6.6.6, 2.2.2.2, 10.0.0.1'), 2)).toBe('2.2.2.2');
   });
-  it('falls back to the leftmost entry when the header is shorter than trustProxy', () => {
-    expect(clientIp(req('2.2.2.2'), 3)).toBe('2.2.2.2');
+  it('returns unknown when the header has fewer entries than trustProxy', () => {
+    expect(clientIp(req('2.2.2.2'), 3)).toBe('unknown');
   });
   it.each([undefined, '', ' , ,'])('never throws on missing/malformed header %j', (h) => {
     expect(clientIp(req(h), 1)).toBe('unknown');
