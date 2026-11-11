@@ -10,7 +10,8 @@ export async function startTestDb(): Promise<{ uri: string; stop(): Promise<void
 export async function call(
   handler: (req: Request) => Promise<Response>,
   init: { method?: string; url?: string; body?: unknown; headers?: Record<string, string> } = {},
-): Promise<{ status: number; body: any }> { // eslint-disable-line @typescript-eslint/no-explicit-any -- test helper returns arbitrary JSON // Haihs: lint error có sẵn từ Task 4, eslint root chưa xanh - start - end
+// ): Promise<{ status: number; body: any }> { // Haihs: đóng code cũ, silence no-explicit-any có sẵn từ Task 4 - start - end
+): Promise<{ status: number; body: any }> { // eslint-disable-line @typescript-eslint/no-explicit-any -- arbitrary JSON // Haihs: silence no-explicit-any có sẵn từ Task 4 - start - end
   const headers: Record<string, string> = { ...init.headers };
   if (init.body !== undefined) headers['content-type'] ??= 'application/json';
   const res = await handler(
