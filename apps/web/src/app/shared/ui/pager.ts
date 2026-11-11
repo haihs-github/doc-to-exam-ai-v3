@@ -24,7 +24,7 @@ const ON =
   template: `
     <span>Tổng {{ total() }} {{ unit() }} · Trang {{ page() }}/{{ max(totalPages(), 1) }}</span>
     @if (totalPages() > 1) {
-      <div class="flex flex-wrap items-center gap-2">
+      <nav aria-label="Phân trang" class="flex flex-wrap items-center gap-2">
         <button
           type="button"
           [class]="btn + ' ' + idle"
@@ -40,9 +40,9 @@ const ON =
             <button
               type="button"
               [class]="btn + ' ' + (p === page() ? on : idle)"
-              [disabled]="disabled() || p === page()"
+              [disabled]="disabled()"
               [attr.aria-current]="p === page() ? 'page' : null"
-              (click)="pageChange.emit(p)"
+              (click)="p !== page() && pageChange.emit(p)"
             >
               {{ p }}
             </button>
@@ -56,7 +56,7 @@ const ON =
         >
           Sau
         </button>
-      </div>
+      </nav>
     }
   `,
   host: {

@@ -10,17 +10,27 @@ const QUIET = 4; // quiet-zone modules
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (qr(); as q) {
-      <svg
-        role="img"
-        [attr.aria-label]="label()"
-        [attr.width]="size()"
-        [attr.height]="size()"
-        [attr.viewBox]="'0 0 ' + (q.n + 2 * quiet) + ' ' + (q.n + 2 * quiet)"
-        shape-rendering="crispEdges"
-      >
-        <rect width="100%" height="100%" fill="#fff" />
-        <path [attr.d]="q.d" fill="#000" />
-      </svg>
+      @if (q.failed) {
+        <span
+          role="img"
+          [attr.aria-label]="label() + ': không tạo được mã QR'"
+          class="text-sm text-gray-600 dark:text-gray-300"
+        >
+          Không tạo được mã QR
+        </span>
+      } @else {
+        <svg
+          role="img"
+          [attr.aria-label]="label()"
+          [attr.width]="size()"
+          [attr.height]="size()"
+          [attr.viewBox]="'0 0 ' + (q.n + 2 * quiet) + ' ' + (q.n + 2 * quiet)"
+          shape-rendering="crispEdges"
+        >
+          <rect width="100%" height="100%" fill="#fff" />
+          <path [attr.d]="q.d" fill="#000" />
+        </svg>
+      }
     }
   `,
   host: { class: 'inline-block' },
@@ -33,11 +43,18 @@ export class QrCode {
   protected readonly qr = computed(() => {
     const v = this.value();
     if (!v) return null;
-    const { size: n, data } = create(v, { errorCorrectionLevel: 'M' }).modules;
+    let m;
+    try {
+      m = create(v, { errorCorrectionLevel: 'M' }).modules;
+    } catch {
+      // input too large for QR capacity
+      return { n: 0, d: '', failed: true };
+    }
+    const { size: n, data } = m;
     let d = '';
     for (let i = 0; i < data.length; i += 1) {
       if (data[i]) d += `M${(i % n) + QUIET} ${Math.floor(i / n) + QUIET}h1v1h-1z`;
     }
-    return { n, d };
+    return { n, d, failed: false };
   });
 }

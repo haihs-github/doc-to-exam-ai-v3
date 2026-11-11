@@ -4,6 +4,9 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  Injector,
+  afterNextRender,
+  effect,
   OnDestroy,
   computed,
   inject,
@@ -71,14 +74,18 @@ const TRIGGER =
       [attr.aria-expanded]="open()"
       [attr.aria-controls]="open() ? uid + '-list' : null"
       [attr.aria-activedescendant]="open() && active() >= 0 ? uid + '-opt-' + active() : null"
-      [attr.aria-label]="label() || null"
+      [attr.aria-labelledby]="label() ? uid + '-label ' + uid + '-value' : null"
       [attr.aria-invalid]="invalid() || null"
       [disabled]="disabled()"
       (click)="open() ? open.set(false) : openList()"
       (keydown)="onKeyDown($event)"
       [class]="trigger + (invalid() ? ' border-red-600' : ' border-gray-300 dark:border-gray-600')"
     >
+      @if (label()) {
+        <span [id]="uid + '-label'" class="sr-only">{{ label() }}</span>
+      }
       <span
+        [id]="uid + '-value'"
         [class]="selectedIndex() < 0 ? 'truncate text-gray-500 dark:text-gray-400' : 'truncate'"
         >{{ shown() }}</span
       >
@@ -140,8 +147,23 @@ export class Select implements OnDestroy {
     () => this.options()[this.selectedIndex()]?.label ?? this.placeholder(),
   );
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+  private readonly injector = inject(Injector);
   private typed = '';
   private timer: ReturnType<typeof setTimeout> | undefined;
+
+  constructor() {
+    effect(() => {
+      const i = this.active();
+      if (!this.open() || i < 0) return;
+      afterNextRender(
+        () =>
+          document.getElementById(`${this.uid}-opt-${i}`)?.scrollIntoView?.({ block: 'nearest' }),
+        {
+          injector: this.injector,
+        },
+      );
+    });
+  }
 
   ngOnDestroy(): void {
     clearTimeout(this.timer);

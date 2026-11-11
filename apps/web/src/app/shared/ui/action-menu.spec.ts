@@ -98,6 +98,14 @@ describe('ActionMenu', () => {
     expect(el.querySelector('[role="menu"]')).toBeNull();
   });
 
+  it('returns focus to the trigger after activating an item', async () => {
+    const { trigger, items, open, f } = await setup();
+    await open();
+    (items()[0] as HTMLButtonElement).click();
+    await f.whenStable();
+    expect(document.activeElement).toBe(trigger);
+  });
+
   it('renders `to` items as links', async () => {
     const { items, open } = await setup();
     await open();

@@ -48,12 +48,15 @@ describe('Pager', () => {
   });
 
   it('emits pageChange for Sau, a number, and marks the current page', async () => {
-    const { f, btn } = await setup();
+    const { f, el, btn } = await setup();
     btn('Sau').click();
     btn('5').click();
     expect(f.componentInstance.got).toEqual([2, 5]);
     expect(btn('1').getAttribute('aria-current')).toBe('page');
-    expect(btn('1').disabled).toBe(true);
+    expect(btn('1').disabled).toBe(false); // stays focusable
+    btn('1').click();
+    expect(f.componentInstance.got).toEqual([2, 5]); // no-op
+    expect(el.querySelector('nav')!.getAttribute('aria-label')).toBe('Phân trang');
   });
 
   it('disables Sau on the last page and renders a gap', async () => {

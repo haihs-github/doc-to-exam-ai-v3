@@ -63,7 +63,12 @@ describe('Select', () => {
     const { cb, el } = await setup();
     expect(cb.getAttribute('aria-haspopup')).toBe('listbox');
     expect(cb.getAttribute('aria-expanded')).toBe('false');
-    expect(cb.getAttribute('aria-label')).toBe('Năm học');
+    const name = cb
+      .getAttribute('aria-labelledby')!
+      .split(' ')
+      .map((id) => el.querySelector('#' + id)!.textContent!.trim())
+      .join(' ');
+    expect(name).toBe('Năm học Chọn');
     expect(cb.textContent).toContain('Chọn');
     expect(el.querySelector('[role="listbox"]')).toBeNull();
   });
@@ -79,6 +84,20 @@ describe('Select', () => {
     expect(opts()[2].getAttribute('aria-selected')).toBe('true');
     expect(opts()[1].getAttribute('aria-disabled')).toBe('true');
     expect(active()).toBe(opts()[2].id);
+  });
+
+  it('scrolls the active option into view while open', async () => {
+    const spy = vi.fn();
+    (Element.prototype as unknown as { scrollIntoView: unknown }).scrollIntoView = spy;
+    try {
+      const { f, key } = await setup();
+      await key('ArrowDown');
+      await key('ArrowDown');
+      await f.whenStable();
+      expect(spy).toHaveBeenCalledWith({ block: 'nearest' });
+    } finally {
+      delete (Element.prototype as unknown as { scrollIntoView?: unknown }).scrollIntoView;
+    }
   });
 
   it('arrow keys move the active option (skipping disabled); Enter picks, closes, updates the model', async () => {
