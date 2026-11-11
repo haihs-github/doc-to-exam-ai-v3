@@ -8,8 +8,9 @@ export const FULL_NAME_MAX = 255;
 const PHONE_RE = /^0\d{9,10}$/;
 const FULL_NAME_RE = new RegExp(`^[\\p{L}\\p{M}][\\p{L}\\p{M} .'-]{1,${FULL_NAME_MAX - 1}}$`, 'u');
 
-/** Same normalisation as the API: trim, then strip whitespace, dots and dashes. */
-export const normalizePhone = (raw: string): string => String(raw ?? '').trim().replace(/[\s.-]/g, '');
+/** Same normalisation as the API: '' for non-strings / raw input over 32 chars; else trim and strip whitespace, dots, dashes. */
+export const normalizePhone = (raw: unknown): string =>
+  typeof raw !== 'string' || raw.length > 32 ? '' : raw.trim().replace(/[\s.-]/g, ''); // same as apps/api/src/lib/phone.ts
 
 export const validatePhone = (s: string): boolean => PHONE_RE.test(normalizePhone(s));
 

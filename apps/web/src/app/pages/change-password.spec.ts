@@ -141,6 +141,20 @@ describe('ChangePassword', () => {
     );
   });
 
+  it('voluntary success clears all three fields, focuses the heading and cannot resubmit the old values', async () => {
+    const s = await setup(mk({ mustChangePassword: false }));
+    s.changePassword.mockReturnValue(of({ token: 't2', user: mk({ mustChangePassword: false }) }));
+    await s.fill();
+    await s.submit();
+    for (const n of ['currentPassword', 'newPassword', 'confirmPassword'])
+      expect(s.input(n).value, n).toBe('');
+    expect(s.el.querySelectorAll('[role="alert"]').length).toBe(0);
+    expect(document.activeElement).toBe(s.el.querySelector('h1'));
+    s.changePassword.mockClear();
+    await s.submit(); // e.g. Enter again
+    expect(s.changePassword).not.toHaveBeenCalled();
+  });
+
   it('blocks a double submit', async () => {
     const s = await setup();
     s.changePassword.mockReturnValue(new Subject());

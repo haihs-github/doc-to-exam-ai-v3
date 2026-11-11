@@ -71,7 +71,7 @@ type Values = { fullName: string; phoneNumber: string; password: string; secretK
                 placeholder="Ví dụ: Hoàng Thị Tuyến"
                 [attr.maxlength]="fullNameMax"
                 [value]="fullName()"
-                (input)="set('fullName', $any($event.target).value)"
+                (input)="set('fullName', val($event))"
               />
             </app-form-field>
             <app-form-field
@@ -87,7 +87,7 @@ type Values = { fullName: string; phoneNumber: string; password: string; secretK
                 autocomplete="tel"
                 placeholder="0987654321"
                 [value]="phone()"
-                (input)="set('phoneNumber', $any($event.target).value)"
+                (input)="set('phoneNumber', val($event))"
               />
             </app-form-field>
             <app-form-field label="Mật Khẩu" [required]="true" [error]="errors()['password'] ?? ''">
@@ -140,27 +140,27 @@ type Values = { fullName: string; phoneNumber: string; password: string; secretK
                   spellcheck="false"
                   placeholder="AIzaSy..."
                   [value]="geminiApiKey()"
-                  (input)="geminiApiKey.set($any($event.target).value)"
+                  (input)="geminiApiKey.set(val($event))"
                 />
                 <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
                   Key sẽ được lưu trực tiếp vào tài khoản của bạn trong cơ sở dữ liệu.
                 </p>
               </div>
-            } @else {
-              <!-- Honeypot: hidden from users and screen readers; the server rejects any value. -->
-              <div aria-hidden="true" class="absolute -left-[9999px] h-0 w-0 overflow-hidden">
-                <label for="website">Website</label>
-                <input
-                  id="website"
-                  name="website"
-                  type="text"
-                  tabindex="-1"
-                  autocomplete="off"
-                  [value]="website()"
-                  (input)="website.set($any($event.target).value)"
-                />
-              </div>
             }
+            <!-- Honeypot (both audiences): hidden from users and screen readers; the server rejects any value.
+                 The DOM name is not a browser autofill token; the payload field is still 'website'. -->
+            <div aria-hidden="true" inert class="absolute -left-[9999px] h-0 w-0 overflow-hidden">
+              <label for="contact_site_url_x">Website</label>
+              <input
+                id="contact_site_url_x"
+                name="contact_site_url_x"
+                type="text"
+                tabindex="-1"
+                autocomplete="off"
+                [value]="website()"
+                (input)="website.set(val($event))"
+              />
+            </div>
           </div>
           <div class="pt-2">
             <button type="submit" class="btn-primary w-full" [disabled]="busy()">
@@ -236,6 +236,8 @@ export class Register {
     };
   }
 
+  protected val = (e: Event): string => (e.target as HTMLInputElement).value;
+
   protected set(key: keyof Values, v: string): void {
     ({
       fullName: this.fullName,
@@ -267,7 +269,12 @@ export class Register {
     };
     const gemini = this.geminiApiKey().trim();
     const body: RegisterBody = this.isTeacher
-      ? { ...base, secretKey: this.secretKey().trim(), ...(gemini && { geminiApiKey: gemini }) }
+      ? {
+          ...base,
+          secretKey: this.secretKey().trim(),
+          ...(gemini && { geminiApiKey: gemini }),
+          website: this.website(),
+        }
       : { ...base, website: this.website() };
 
     this.busy.set(true);

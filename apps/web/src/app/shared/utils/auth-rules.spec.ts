@@ -91,7 +91,15 @@ describe('normalizePhone', () => {
     ['', ''],
     ['+84 912 345 678', '+84912345678'],
     ['abc', 'abc'],
+    ['0'.repeat(32), '0'.repeat(32)],
+    ['0'.repeat(33), ''],
+    [' '.repeat(33) + '0912345678', ''], // raw length cap like the API (apps/api/src/lib/phone.ts)
   ])('%j -> %j', (raw, out) => expect(normalizePhone(raw)).toBe(out));
+});
+
+describe('normalizePhone non-strings', () => {
+  it.each([[undefined], [null], [912345678], [{}]])('%j -> empty', (v) =>
+    expect(normalizePhone(v as unknown as string)).toBe(''));
 });
 
 describe('phoneError (thông báo tiếng Việt từ client/authRules.js:validatePhone)', () => {

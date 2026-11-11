@@ -83,6 +83,17 @@ describe('SessionError', () => {
     expect(s.router.url).toBe('/login');
   });
 
+  it('keeps the old message visible while retrying (alert never empties)', async () => {
+    const s = await setup();
+    s.btn('Thử lại').click();
+    s.loadError.set(''); // reload() clears loadError
+    s.isLoading.set(true);
+    await s.harness.fixture.whenStable();
+    expect(s.el.querySelector('[role="alert"]')?.textContent).toContain(
+      'Không kết nối được máy chủ.',
+    );
+  });
+
   it('retry button is disabled and relabelled while loading', async () => {
     const s = await setup();
     s.isLoading.set(true);
