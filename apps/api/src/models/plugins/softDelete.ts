@@ -11,6 +11,7 @@ export interface ISoftDeleteMethods {
 }
 
 // Filtered: find, findOne (findById/populate), findOneAndUpdate, updateOne, updateMany, count*, distinct, aggregate.
+// shortcut: estimatedDocumentCount uses collection metadata and counts deleted docs (verified by test); use countDocuments when exactness matters.
 // NOT filtered: deleteOne/deleteMany/findOneAndDelete/replaceOne, doc.save(), raw driver (Model.collection).
 const QUERY_OPS = [
   'find',
@@ -19,7 +20,6 @@ const QUERY_OPS = [
   'updateOne',
   'updateMany',
   'countDocuments',
-  'estimatedDocumentCount',
   'distinct',
 ] as const;
 

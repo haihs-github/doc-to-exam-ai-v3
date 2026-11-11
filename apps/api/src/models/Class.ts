@@ -110,6 +110,8 @@ ClassSchema.statics.restoreWithCode = function restoreWithCode(
   { code }: { code?: string } = {},
 ) {
   const newCode = typeof code === 'string' ? toUpperVi(code) : '';
+  if (typeof code === 'string' && (!newCode || newCode.length > 30))
+    throw new Error(newCode ? 'Mã lớp tối đa 30 ký tự.' : 'Mã lớp là bắt buộc.');
   // $literal: a code starting with `$` would otherwise be read as a field path
   const rename = newCode
     ? { code: { $literal: newCode }, codeKey: { $literal: codeKeyOf(newCode) } }
@@ -119,6 +121,14 @@ ClassSchema.statics.restoreWithCode = function restoreWithCode(
     [{ $set: { deletedAt: null, ...rename } }, { $set: { activeCodeKey: '$codeKey' } }],
     { updatePipeline: true },
   ).setOptions({ withDeleted: true });
+};
+
+// Inherited restore() would bring deletedAt back without activeCodeKey (code uniqueness lost): route through restoreWithCode.
+ClassSchema.methods.restore = function restoreClass(this: {
+  _id: Types.ObjectId;
+  constructor: unknown;
+}) {
+  return (this.constructor as ClassModelType).restoreWithCode(this._id);
 };
 
 ClassSchema.pre('validate', function deriveAndCheck() {

@@ -83,6 +83,24 @@ describe('Class model', () => {
     expect((await ClassModel.findById(a._id))?.activeCodeKey).toBe('a1');
   });
 
+  it('restore() keeps uniqueness: taken code -> E11000, free code -> activeCodeKey back', async () => {
+    const a = await mk({ code: 'A1' });
+    await a.softDelete();
+    const b = await mk({ code: 'A1' });
+    await expect(a.restore()).rejects.toMatchObject(e11000);
+    await b.softDelete();
+    await a.restore();
+    expect((await ClassModel.findById(a._id))?.activeCodeKey).toBe('a1');
+  });
+
+  it('restoreWithCode rejects an invalid provided code', async () => {
+    const a = await mk({ code: 'A1' });
+    await a.softDelete();
+    expect(() => ClassModel.restoreWithCode(a._id, { code: '   ' })).toThrow(/Mã lớp/); // throws synchronously
+    expect(() => ClassModel.restoreWithCode(a._id, { code: 'x'.repeat(31) })).toThrow(/30/);
+    expect(await ClassModel.findById(a._id)).toBeNull(); // still deleted
+  });
+
   it('two parallel restores into the same new code: exactly one wins', async () => {
     const a = await mk({ code: 'A1' });
     const b = await mk({ code: 'B1' });
@@ -107,7 +125,7 @@ describe('Class model', () => {
     await expect(mk({ startYear: 2024, endYear: 2024 })).rejects.toThrow(/1 đến 12/);
     await expect(mk({ startYear: 2024, endYear: 2037 })).rejects.toThrow(/1 đến 12/);
     await expect(mk({ code: 'S12', startYear: 2024, endYear: 2036 })).resolves.toBeTruthy();
-    await expect(mk({ status: 'nope' })).rejects.toThrow();
+    await expect(mk({ status: 'nope' })).rejects.toThrow(/active hoặc graduated/);
   });
 
   it('invite tokens are hidden from find() and toJSON/toObject; enabled defaults true', async () => {
