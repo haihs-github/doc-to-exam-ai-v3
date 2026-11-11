@@ -19,8 +19,8 @@ const inAllowedZone = (el: Element | null) => Boolean(el?.closest('[data-allow-b
   template: `
     @if (visible()) {
       <div
-        role="progressbar"
-        aria-label="Đang tải dữ liệu"
+        data-api-progress
+        aria-hidden="true"
         class="fixed inset-x-0 top-0 z-[100] h-0.5 overflow-hidden bg-primary-100 dark:bg-sky-900/40"
       >
         <div
@@ -44,8 +44,13 @@ export class ApiProgress {
 
     const root = document.documentElement;
     effect(() => {
-      if (this.activity.writing() > 0) root.dataset['apiBusy'] = 'write';
-      else delete root.dataset['apiBusy'];
+      if (this.activity.writing() > 0) {
+        root.dataset['apiBusy'] = 'write';
+        document.body.setAttribute('aria-busy', 'true'); // stable element: the page is busy while a write is pending
+      } else {
+        delete root.dataset['apiBusy'];
+        document.body.removeAttribute('aria-busy');
+      }
     });
 
     // Capture phase: swallow button clicks / form submits during a write (anti double-submit), except in [data-allow-busy].
@@ -67,6 +72,7 @@ export class ApiProgress {
       document.removeEventListener('click', onClick, true);
       document.removeEventListener('submit', onSubmit, true);
       delete root.dataset['apiBusy'];
+      document.body.removeAttribute('aria-busy');
     });
   }
 }

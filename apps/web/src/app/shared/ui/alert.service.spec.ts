@@ -126,4 +126,24 @@ describe('AlertService + AlertHost', () => {
     await flush();
     expect(dialogs().length).toBe(0);
   });
+
+  it('does not merge duplicates that differ in title, secondaryLabel or onSecondary', async () => {
+    const { el, svc, msg, flush } = await setup();
+    const fn1 = () => undefined;
+    const fn2 = () => undefined;
+    void svc.error('m', { title: 'A' });
+    void svc.error('m', { title: 'B' });
+    void svc.error('m', { title: 'B', secondaryLabel: 'x' });
+    void svc.error('m', { title: 'B', secondaryLabel: 'x', onSecondary: fn1 });
+    void svc.error('m', { title: 'B', secondaryLabel: 'x', onSecondary: fn2 });
+    void svc.error('m', { title: 'B', secondaryLabel: 'x', onSecondary: fn2 }); // identical: merged
+    let shown = 0;
+    for (;;) {
+      await flush();
+      if (!msg()) break;
+      shown++;
+      el.querySelector<HTMLButtonElement>('[data-autofocus]')!.click();
+    }
+    expect(shown).toBe(5);
+  });
 });

@@ -40,12 +40,26 @@ export class AlertService {
     item.resolvers.forEach((r) => r());
   }
 
+  /** Host teardown: settle every pending call (secondary actions are not run) so callers never hang. */
+  clear(): void {
+    const q = this.queue();
+    this.queue.set([]);
+    q.forEach((i) => i.resolvers.forEach((r) => r()));
+  }
+
   private show(variant: AlertVariant, message: string, opts: AlertOptions = {}): Promise<void> {
     return new Promise<void>((resolve) => {
       this.queue.update((q) => {
         const last = q[q.length - 1];
-        // Consecutive duplicates (same variant + message) share one popup.
-        if (last && last.variant === variant && last.message === message)
+        // Consecutive identical popups (variant, message, title, secondary action) share one.
+        if (
+          last &&
+          last.variant === variant &&
+          last.message === message &&
+          last.title === opts.title &&
+          last.secondaryLabel === opts.secondaryLabel &&
+          last.onSecondary === opts.onSecondary
+        )
           return [...q.slice(0, -1), { ...last, resolvers: [...last.resolvers, resolve] }];
         return [...q, { ...opts, id: this.nextId++, variant, message, resolvers: [resolve] }];
       });

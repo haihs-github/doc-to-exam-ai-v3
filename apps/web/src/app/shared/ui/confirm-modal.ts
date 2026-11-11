@@ -3,6 +3,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   Injectable,
   computed,
   inject,
@@ -41,15 +42,26 @@ export class ConfirmService {
     this.queue.set(rest);
     item.resolve(ok);
   }
+
+  /** Host teardown: pending confirms resolve false so callers never hang. */
+  cancelAll(): void {
+    const q = this.queue();
+    this.queue.set([]);
+    q.forEach((i) => i.resolve(false));
+  }
 }
 
+/** Mount exactly ONCE in the app shell. */
 @Component({
   selector: 'app-confirm-host',
   imports: [ModalFocus],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @for (c of shown(); track c.id) {
-      <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div
+        data-allow-busy
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      >
         <div
           appModalFocus
           (dismissed)="svc.answer(false)"
@@ -99,6 +111,11 @@ export class ConfirmService {
 })
 export class ConfirmHost {
   protected readonly svc = inject(ConfirmService);
+
+  constructor() {
+    inject(DestroyRef).onDestroy(() => this.svc.cancelAll());
+  }
+
   protected readonly shown = computed(() => {
     const c = this.svc.current();
     return c ? [c] : [];

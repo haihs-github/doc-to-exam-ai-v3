@@ -1,6 +1,6 @@
 // Created by Haihs on 11/11/2026
 // <app-password-field>: password input with a show/hide button (port of PasswordField.jsx + passwordVisibility.js).
-import { ChangeDetectionStrategy, Component, input, model, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, model, output, signal } from '@angular/core';
 
 @Component({
   selector: 'app-password-field',
@@ -10,7 +10,10 @@ import { ChangeDetectionStrategy, Component, input, model, signal } from '@angul
       class="input pr-12"
       [type]="visible() ? 'text' : 'password'"
       [value]="value()"
-      (input)="value.set($any($event.target).value)"
+      (input)="onInput($event)"
+      (blur)="blurred.emit()"
+      autocapitalize="off"
+      spellcheck="false"
       [attr.autocomplete]="autocomplete()"
       [attr.placeholder]="placeholder() || null"
       [attr.name]="name() || null"
@@ -19,7 +22,7 @@ import { ChangeDetectionStrategy, Component, input, model, signal } from '@angul
     <button
       type="button"
       (click)="visible.set(!visible())"
-      [attr.aria-label]="visible() ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'"
+      aria-label="Hiển thị mật khẩu"
       [attr.aria-pressed]="visible()"
       class="absolute right-0 top-1/2 flex h-12 w-12 -translate-y-1/2 cursor-pointer items-center justify-center rounded-lg text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
     >
@@ -47,5 +50,11 @@ export class PasswordField {
   readonly placeholder = input('');
   readonly name = input('');
   readonly disabled = input(false);
+  /** Fires when the input loses focus (validate on blur). */
+  readonly blurred = output<void>();
   protected readonly visible = signal(false);
+
+  protected onInput(e: Event): void {
+    this.value.set((e.target as HTMLInputElement).value);
+  }
 }
