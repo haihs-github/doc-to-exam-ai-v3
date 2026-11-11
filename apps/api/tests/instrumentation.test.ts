@@ -62,6 +62,37 @@ describe('instrumentation.register', () => {
     expect(calls).toEqual(['loadEnv']); // nothing after the failed validation
   });
 
+  it.each(['ensureIndexes', 'seedRbac'] as const)(
+    'production + raw driver error from %s: logs only Startup failed + error name, never the message',
+    async (which) => {
+      vi.stubEnv('NODE_ENV', 'production');
+      vi.stubEnv('JWT_SECRET', 'j'.repeat(20));
+      vi.stubEnv('API_KEY_ENCRYPTION_SECRET', 'k'.repeat(20));
+      vi.stubEnv('TEACHER_SECRET_KEY', 'teacher-key-1');
+      vi.stubEnv('MONGODB_URI', 'mongodb://admin:pw123@db.internal:27017/x');
+      const err = new Error(
+        'mongodb://admin:pw123@db.internal:27017/x E11000 dup key: { phoneNumber: "0912345678" }',
+      );
+      err.name = 'MongoServerError';
+      const mod =
+        which === 'ensureIndexes'
+          ? await import('../src/lib/ensureIndexes')
+          : await import('../src/lib/rbac');
+      vi.mocked(
+        (mod as Record<string, unknown>)[which] as () => Promise<void>,
+      ).mockRejectedValueOnce(err);
+      const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      await register();
+      expect(exit).toHaveBeenCalledTimes(1);
+      expect(exit).toHaveBeenCalledWith(1);
+      const logged = errSpy.mock.calls.flat().map(String).join(' ');
+      expect(logged).toContain('Startup failed');
+      expect(logged).toContain('MongoServerError');
+      for (const v of ['pw123', 'db.internal', '0912345678', 'mongodb://'])
+        expect(logged).not.toContain(v);
+    },
+  );
+
   it('development + failure rethrows and does not exit', async () => {
     vi.stubEnv('NODE_ENV', 'development');
     const { connectDb } = await import('../src/lib/db');
