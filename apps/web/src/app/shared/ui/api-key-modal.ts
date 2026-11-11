@@ -1,6 +1,13 @@
 // Created by Haihs on 11/11/2026
 // <app-api-key-modal>: Gemini API key dialog for teachers (port of ApiKeyModal.jsx + utils/apiKeyModal.js). Mount ONCE in the shell.
-import { ChangeDetectionStrategy, Component, ElementRef, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
 import { finalize } from 'rxjs';
 import { errorMessage } from '../../core/api-errors';
 import { AuthService } from '../../core/auth.service';
@@ -58,6 +65,7 @@ export const openApiKeyModal = (): void => {
               [hint]="hint()"
             >
               <app-password-field
+                inputId="geminiApiKey"
                 name="geminiApiKey"
                 autocomplete="off"
                 placeholder="AIzaSy..."
@@ -122,6 +130,13 @@ export class ApiKeyModal {
   protected readonly error = signal('');
   protected readonly busy = signal(false);
 
+  constructor() {
+    // Session ended (logout / 401): drop the open state and the typed key so a later login never resurrects them.
+    effect(() => {
+      if (!this.auth.isTeacher()) this.close();
+    });
+  }
+
   protected hint(): string {
     return this.auth.user()?.hasApiKey ? 'Nhập key mới nếu muốn thay key đã lưu.' : '';
   }
@@ -160,10 +175,12 @@ export class ApiKeyModal {
       .updateApiKey(k)
       .pipe(finalize(() => this.busy.set(false)))
       .subscribe({
-        next: () =>
+        next: () => {
+          this.key.set(''); // gone from the DOM before the popup is acknowledged
           void this.alert
             .success('Đã lưu API Key thành công vào tài khoản của bạn!')
-            .then(() => this.close()),
+            .then(() => this.close());
+        },
         error: (err: unknown) => void this.alert.error(errorMessage(err)),
       });
   }
@@ -181,7 +198,10 @@ export class ApiKeyModal {
       .updateApiKey('')
       .pipe(finalize(() => this.busy.set(false)))
       .subscribe({
-        next: () => this.key.set(''),
+        next: () => {
+          this.key.set('');
+          void this.alert.success('Đã xóa API Key khỏi tài khoản.').then(() => this.close());
+        },
         error: (err: unknown) => void this.alert.error(errorMessage(err)),
       });
   }

@@ -52,4 +52,20 @@ describe('About', () => {
     const el = await setup();
     expect(el.querySelector('footer')?.textContent).toContain('Cam kết về Gemini API Key');
   });
+
+  it('self-host block matches the real repo: npm install / npm run dev, no stale old-stack commands or repo name', async () => {
+    const el = await setup();
+    const t = el.textContent ?? '';
+    for (const bad of ['install-all', 'generate-secrets', 'server/.env', 'doc-to-exam-v2'])
+      expect(t).not.toContain(bad);
+    expect(el.querySelector('pre')?.textContent).toContain('npm install');
+    expect(el.querySelector('pre')?.textContent).toContain('npm run dev');
+    expect(t).toContain('MONGODB_URI');
+    expect(t).toContain('Node.js 22');
+  });
+
+  it('flags features still in development', async () => {
+    const el = await setup();
+    expect(el.textContent).toContain('Một số tính năng đang trong quá trình phát triển.');
+  });
 });

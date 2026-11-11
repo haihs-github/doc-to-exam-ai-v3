@@ -1,15 +1,12 @@
 // Created by Haihs on 11/11/2026
 // Public About page (/about); port of client/src/pages/About.jsx. Mounted inside the shell's <main>.
-// shortcut: no GitHub star-count fetch and no decorative mock-up panels (they carried real-looking student names); add if marketing wants them.
+// shortcut: no GitHub star-count fetch and no decorative mock-up panels (they carried real-looking student names), add them if marketing wants them.
+// TODO(web): điền URL repo (nút GitHub, lệnh clone) khi repo công khai
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ApiHealth } from './api-health';
 
-const REPO_URL = 'https://github.com/haihs-github/doc-to-exam-v2';
-const COMMANDS = `git clone ${REPO_URL}.git
-cd doc-to-exam-v2 && npm run install-all
-cp server/.env.example server/.env
-npm run generate-secrets
+const COMMANDS = `npm install
 npm run dev`;
 
 const STEPS = [
@@ -40,9 +37,6 @@ const EYEBROW = 'text-sm font-semibold uppercase tracking-wider text-primary-700
 const H2 =
   'mt-2 text-balance text-[clamp(1.6rem,4vw,2.25rem)] font-semibold leading-tight text-gray-900 dark:text-gray-100';
 const MUTED = 'text-gray-600 dark:text-gray-300';
-const PILL =
-  'inline-flex min-h-[48px] items-center gap-2 rounded-full border border-gray-200 bg-primary-50 px-4 text-base font-semibold text-gray-900 hover:border-primary-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:hover:border-sky-400';
-
 @Component({
   selector: 'app-about',
   imports: [RouterLink, ApiHealth],
@@ -65,9 +59,6 @@ const PILL =
           </p>
           <div class="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
             <a routerLink="/teacher/register" class="btn btn-primary">Dùng thử ngay</a>
-            <a [href]="repo" target="_blank" rel="noopener noreferrer" [class]="pill"
-              >Star trên GitHub</a
-            >
           </div>
           <p class="mt-4 text-base text-gray-500 dark:text-gray-400">
             Miễn phí. Bạn chỉ cần một tài khoản Gemini.
@@ -143,6 +134,9 @@ const PILL =
               }
             </ul>
           </div>
+          <p class="text-sm text-gray-500 dark:text-gray-400 min-[900px]:col-span-2">
+            Một số tính năng đang trong quá trình phát triển.
+          </p>
         </div>
       </section>
 
@@ -186,7 +180,10 @@ const PILL =
                 Tự host trên máy chủ của bạn
               </h3>
               <p [class]="muted">
-                Cần Node.js và một cơ sở dữ liệu MongoDB. Làm theo hướng dẫn trong README.
+                Cần Node.js 22 trở lên và một MongoDB (đặt biến MONGODB_URI, xem
+                apps/api/.env.example). Khi triển khai thật, chạy một instance duy nhất sau reverse
+                proxy cùng origin; mỗi giáo viên dùng Gemini API Key riêng. Xem README để biết chi
+                tiết.
               </p>
               <div class="relative rounded-lg bg-gray-950 p-4 text-gray-200">
                 <button
@@ -200,11 +197,6 @@ const PILL =
                 <pre
                   class="m-0 overflow-x-auto pt-8 font-mono text-sm leading-7"
                 ><code>{{ commands }}</code></pre>
-              </div>
-              <div>
-                <a [href]="repo" target="_blank" rel="noopener noreferrer" [class]="pill"
-                  >Xem mã nguồn trên GitHub</a
-                >
               </div>
             </div>
           </div>
@@ -268,13 +260,6 @@ const PILL =
                 class="hover:text-primary-700 hover:underline dark:hover:text-sky-300"
                 >Dành cho giáo viên</a
               >
-              <a
-                [href]="repo"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="hover:text-primary-700 hover:underline dark:hover:text-sky-300"
-                >GitHub</a
-              >
             </span>
           </div>
         </div>
@@ -287,8 +272,6 @@ export class About {
   protected readonly eyebrow = EYEBROW;
   protected readonly h2 = H2;
   protected readonly muted = MUTED;
-  protected readonly pill = PILL;
-  protected readonly repo = REPO_URL;
   protected readonly commands = COMMANDS;
   protected readonly steps = STEPS;
   protected readonly cheatTicks = [
