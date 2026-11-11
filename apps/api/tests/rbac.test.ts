@@ -1,8 +1,10 @@
 // Created by Haihs on 11/11/2026
 // Tests for the RBAC catalogue, seedRbac idempotency and hasPermission cache.
 import mongoose from 'mongoose';
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { PERMISSIONS, clearRbacCache, hasPermission, seedRbac } from '../src/lib/rbac';
+import { ensureIndexes } from '../src/lib/ensureIndexes';
+import { UserModel } from '../src/models/User';
 import { RoleModel } from '../src/models/Role';
 import { startTestDb } from './helpers';
 
@@ -63,5 +65,61 @@ describe('hasPermission', () => {
     await seedRbac();
     expect(await hasPermission('admin', 'class:list')).toBe(false);
     expect(await hasPermission('ghost' as never, 'class:list')).toBe(false);
+  });
+});
+
+afterEach(() => vi.useRealTimers());
+
+// literal expectations copied from server/services/rbac.js
+const STUDENT_LITERAL = [
+  'class:join',
+  'class:leave',
+  'enrollment:read',
+  'classmate:read',
+  'account:changePassword',
+  'account:logoutAll',
+  'sitting:take',
+  'sitting:listMine',
+  'result:readMine',
+];
+
+describe('catalogue literals', () => {
+  it('student has exactly the 9 source codes, no template:* / class:create; teacher has 46 unique', () => {
+    expect([...PERMISSIONS.student].sort()).toEqual([...STUDENT_LITERAL].sort());
+    expect(PERMISSIONS.student.some((p) => p.startsWith('template:') || p === 'class:create')).toBe(
+      false,
+    );
+    expect(PERMISSIONS.teacher).toHaveLength(46);
+    expect(new Set(PERMISSIONS.teacher).size).toBe(46);
+  });
+});
+
+describe('cache TTL and unknown roles', () => {
+  it('expires after 60s (fake timers)', async () => {
+    await seedRbac();
+    vi.useFakeTimers({ toFake: ['Date'] });
+    expect(await hasPermission('student', 'class:join')).toBe(true);
+    await RoleModel.updateOne({ name: 'student' }, { $pull: { permissions: 'class:join' } });
+    vi.setSystemTime(Date.now() + 59_000);
+    expect(await hasPermission('student', 'class:join')).toBe(true);
+    vi.setSystemTime(Date.now() + 2_000);
+    expect(await hasPermission('student', 'class:join')).toBe(false);
+  });
+
+  it('role outside the enum is false without a DB hit', async () => {
+    const spy = vi.spyOn(RoleModel, 'findOne');
+    expect(await hasPermission('ghost' as never, 'class:list')).toBe(false);
+    expect(spy).not.toHaveBeenCalled();
+    spy.mockRestore();
+  });
+});
+
+describe('ensureIndexes', () => {
+  it('creates unique indexes on phoneNumber and name', async () => {
+    await ensureIndexes();
+    const u = await UserModel.collection.indexes();
+    const r = await RoleModel.collection.indexes();
+    expect(u.some((i) => i.key.phoneNumber === 1 && i.unique)).toBe(true);
+    expect(r.some((i) => i.key.name === 1 && i.unique)).toBe(true);
   });
 });

@@ -86,6 +86,7 @@ export const clearRbacCache = (): void => cache.clear();
 
 /** Only ADDS missing defaults ($addToSet; hand-added permissions survive) and pulls obsolete ones. Idempotent. */
 export async function seedRbac(): Promise<void> {
+  await RoleModel.init(); // unique index must exist before concurrent upserts
   await RoleModel.bulkWrite(
     Object.entries(PERMISSIONS).map(([name, permissions]) => ({
       updateOne: {
@@ -101,6 +102,7 @@ export async function seedRbac(): Promise<void> {
 
 /** Role without a row (unknown, admin) has no permission. Cached 60s per role. */
 export async function hasPermission(role: UserRole, perm: string): Promise<boolean> {
+  if (!(role in PERMISSIONS) && role !== 'admin') return false; // keeps the cache bounded
   const hit = cache.get(role);
   if (hit && hit.expiresAt > Date.now()) return hit.permissions.has(perm);
   const doc = await RoleModel.findOne({ name: role }).lean();
