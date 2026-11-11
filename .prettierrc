@@ -1,6 +1,6 @@
-{
-  "singleQuote": true,
-  "semi": true,
-  "printWidth": 100,
-  "trailingComma": "all"
-}
+# Created by Haihs on 11/11/2026
+# Prettier config (YAML) for the monorepo.
+singleQuote: true
+semi: true
+printWidth: 100
+trailingComma: all
