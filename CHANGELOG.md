@@ -26,6 +26,23 @@
 <!-- Haihs: M0 changelog: thay tên commit bằng hash thật, đổi tên job e2e - end -->
 - `packages/contract`: `npm test`, script gốc `test:contract` và bước CI (`bdd259e`); script `format`/`format:check` và bước CI `format:check` (`201bda9`).
 - README: hướng dẫn chạy dev, test qua `scripts/limited.sh`, giới hạn một instance (D9), same-origin (D13).
+<!-- Haihs: entry M1 (tài khoản, auth) kèm commit hash - start -->
+- M1 plan (14 task) và đánh dấu Accepted (`803759a`, `beeef6e`); spec §8 quyết định bổ sung M1: parity auth, DB in-memory dev, localStorage, merge sau cùng (`1a14520`).
+- `packages/contract`: kiểu auth (`AuthUser`, `RegisterBody`, `LoginBody`...), mã lỗi auth, `HttpError` bắt buộc message, `readJson` có trần byte (`67c2a64`, `595efe1`).
+- `apps/api`: rate limit RAM tự viết, `clientIp`, header bảo mật, bộ giới hạn theo route (`4881f06`, `c6b8149`).
+- `apps/api`: fallback MongoDB in-memory cho dev/E2E (`f505274`, `14a7eab`).
+- `apps/api`: `secureField` AES-GCM và `passwordHash` bcrypt có cổng đồng thời (`b0903bb`, `5c478e7`).
+- `apps/api`: model `User`, `Role`, RBAC, `seedRbac` (`c980d34`, `673c0f1`).
+- `apps/api`: JWT thu hồi được, `withAuth`/`withPermission`/`withApiKey` (`f3feddc`, `d1144be`).
+- `apps/api`: đăng ký/đăng nhập giáo viên và học sinh (`bc77208`, `75df3c0`).
+- `apps/api`: `GET /api/auth/me`, `PUT /api/auth/api-key`, `POST /api/auth/logout-all`, `POST /api/auth/change-password`, `instrumentation.ts` fail-fast khi cấu hình production sai (`3b17dc1`, `6d8f6f6`, `55f37f2`, `1666202`, `4dee7eb`).
+- `apps/web`: router, tiện ích auth thuần, token store (`951091a`, `ac7a99d`); `AuthService`, interceptor, guard (`315f307`, `cc652d0`).
+- `apps/web`: UI kit tối thiểu cho auth (`320774d`, `21782d2`); trang Login/Register/ChangePassword/SessionError và app shell (`1e872c6`, `41e1ac2`).
+- `apps/web`: trang About, `ApiKeyModal`, gắn `app-api-health` (`d4b8cc1`, `07019e2`).
+- E2E auth `e2e/auth.spec.ts` (`6cb0930`), smoke chuyển sang `/about` (`aedad7b`), env E2E cho API và timeout 240s (`9a60dfe`), CI cache binary MongoDB (`904aa96`).
+- README M1 (`c4a6299`), `.env.example` (`68b597b`), About mô tả DB dev (`70d0b0d`); handoff `docs/handoff/2026-11-12-m1.md`.
+- Merge m1/api và m1/web (`e8decd3`, `f261009`).
+<!-- Haihs: entry M1 (tài khoản, auth) kèm commit hash - end -->
 
 ### Changed
 - Bỏ `.nvmrc`, dùng `engines.node >=22` (`06193b5`, `052a4a7`); README sửa theo.
@@ -34,6 +51,11 @@
 - `apps/api`: secret dev/test sinh ngẫu nhiên theo process; `NODE_ENV` khác `development`/`test` theo luật production (`65b9b13`).
 - Prettier áp dụng toàn repo, `.prettierignore`, `apps/web/.prettierrc` chuyển YAML, header cho `tsconfig.json` (`e30bb15`, `201bda9`).
 - `apiResponse` dùng `satisfies`, README (D6), `npm run dev` dọn tiến trình khi Ctrl-C (`2455d51`).
+
+<!-- Haihs: mục Changed của M1 - start -->
+- `apps/api`: `withErrors` generic, bổ sung test `parsePage`/`call` (nợ M0) (`5aa23c6`).
+- Prettier áp lên 3 file M1 (`apps/api/src/models/User.ts`, `auth-rules.ts` và spec) (`e250cbe`).
+<!-- Haihs: mục Changed của M1 - end -->
 
 ### Reverted
 - Hoàn tác format Prettier toàn repo (`201bda9`) và bước CI `format:check` theo quyết định người dùng: Prettier chỉ áp từ M1; giữ script `format` thủ công và header `tsconfig.json` (`e6f2d47`).
