@@ -31,6 +31,7 @@ export const isEncrypted = (value: string): boolean => value.startsWith(PREFIX);
  * Idempotent: a value already starting with `enc:v1:` is returned as-is, so callers must reject such INPUT
  * (use isEncrypted) BEFORE encrypting, or an attacker-supplied "enc:v1:..." would be stored unencrypted.
  * TODO(api): Task 8 — validate Gemini key (từ chối giá trị bắt đầu bằng 'enc:v1:'), bọc decryptField bằng try/catch → coi như chưa có key (REQUIRE_API_KEY), không 500
+ * Haihs: đã xử lý ở models/User.ts (setGeminiApiKey từ chối enc:v1:, decrypt có try/catch) - start - end
  */
 export function encryptField(plain: string, secret: string | undefined): string {
   if (!plain) return '';
