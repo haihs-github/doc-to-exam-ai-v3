@@ -1,7 +1,7 @@
 // Created by Haihs on 11/11/2026
 // Session state (port of client AuthContext.jsx): current user, startup /me load, login/register/password/api-key actions.
 import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
-import { Observable, Subscription, map, tap } from 'rxjs';
+import { Observable, Subscription, map, tap, timeout } from 'rxjs';
 import type {
   AuthResult,
   AuthUser,
@@ -11,10 +11,12 @@ import type {
   LoginBody,
   RegisterBody,
 } from '@doc-to-exam/contract';
-import { ApiClient } from './api-client';
+import { ApiClient, ApiFailure } from './api-client';
 import { errorMessage } from './api-errors';
 import { MUST_CHANGE_PASSWORD_EVENT, UNAUTHENTICATED_EVENT } from './auth.interceptor';
 import { TokenStore } from './token-store';
+
+const ME_TIMEOUT_MS = 120_000;
 
 export type Audience = 'teacher' | 'student';
 
@@ -56,19 +58,22 @@ export class AuthService {
     }
     this._isLoading.set(true);
     this._loadError.set('');
-    this.loading = this.api.get<AuthUser>('/api/auth/me').subscribe({
-      next: (u) => {
-        this._user.set(u);
-        this._isLoading.set(false);
-      },
-      error: (e: unknown) => {
-        if ((e as { status?: number }).status === 401) this.logout();
-        else {
-          this._loadError.set(errorMessage(e));
+    this.loading = this.api
+      .get<AuthUser>('/api/auth/me')
+      .pipe(timeout(ME_TIMEOUT_MS)) // source axios timeout 120s; TimeoutError is a plain error -> loadError
+      .subscribe({
+        next: (u) => {
+          this._user.set(u);
           this._isLoading.set(false);
-        }
-      },
-    });
+        },
+        error: (e: unknown) => {
+          if ((e as { status?: number }).status === 401) this.logout();
+          else {
+            this._loadError.set(errorMessage(e));
+            this._isLoading.set(false);
+          }
+        },
+      });
   }
 
   logout(): void {
@@ -119,6 +124,16 @@ export class AuthService {
   }
 
   private applyAuth(r: AuthResult): void {
+    // validate before any state/storage change
+    if (typeof r?.token !== 'string' || !r.token || !r.user) {
+      const bad: ApiFailure = {
+        success: false,
+        code: 'INTERNAL',
+        message: 'Có lỗi xảy ra. Vui lòng thử lại!',
+        status: 200,
+      };
+      throw bad;
+    }
     this.loading?.unsubscribe(); // a pending /me must not overwrite the fresh session
     this.tokens.set(r.token);
     this._user.set(r.user);

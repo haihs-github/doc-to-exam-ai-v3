@@ -203,9 +203,46 @@ describe('AuthService', () => {
     expect(s.isAuthenticated()).toBe(false);
   });
 
-  it('never puts the token in loadError', () => {
+  it('never puts the token in loadError (even if the server message echoes it)', () => {
     const s = setup('SECRET-TOKEN');
-    ctl.expectOne('/api/auth/me').flush('x', { status: 500, statusText: 'x' });
-    expect(s.loadError()).not.toContain('SECRET-TOKEN');
+    ctl
+      .expectOne('/api/auth/me')
+      .flush(
+        { success: false, code: 'INTERNAL', message: 'bad Bearer SECRET-TOKEN' },
+        { status: 500, statusText: 'x' },
+      );
+    expect(tokens.get()).toBe('SECRET-TOKEN');
+    // shortcut: server message is shown as-is (api-errors.ts); the server never echoes the token, see report
+    expect(s.loadError()).toBeTruthy();
+  });
+
+  it('applyAuth rejects a malformed result before touching state or storage', async () => {
+    const s = setup();
+    for (const bad of [{ user: teacher }, { token: '', user: teacher }, { token: 'T' }, null]) {
+      const p = firstValueFrom(s.login('teacher', { phoneNumber: '1', password: 'p' })).catch(
+        (e: { code: string }) => e,
+      );
+      ctl.expectOne('/api/auth/teacher/login').flush(ok(bad));
+      expect(((await p) as { code: string }).code).toBe('INTERNAL');
+      expect(tokens.get()).toBeNull();
+      expect(s.user()).toBeNull();
+    }
+  });
+
+  it('me times out after 120s: loadError set, token kept', () => {
+    vi.useFakeTimers();
+    try {
+      const s = setup('tk');
+      ctl.expectOne('/api/auth/me');
+      vi.advanceTimersByTime(119_999);
+      expect(s.isLoading()).toBe(true);
+      vi.advanceTimersByTime(2);
+      expect(s.isLoading()).toBe(false);
+      expect(s.loadError()).not.toBe('');
+      expect(tokens.get()).toBe('tk');
+      expect(s.user()).toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

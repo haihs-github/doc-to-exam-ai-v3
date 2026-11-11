@@ -32,8 +32,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     catchError((e: unknown) => {
       if (api && e instanceof HttpErrorResponse) {
         if (e.status === 401) {
-          tokens.clear();
-          window.dispatchEvent(new CustomEvent(UNAUTHENTICATED_EVENT));
+          // only the token this request carried is dead; a rotated token (changePassword) must survive
+          if (tokens.get() === token) {
+            tokens.clear();
+            window.dispatchEvent(new CustomEvent(UNAUTHENTICATED_EVENT));
+          }
         } else if (
           e.status === 403 &&
           (e.error as { code?: unknown } | null)?.code === 'MUST_CHANGE_PASSWORD'

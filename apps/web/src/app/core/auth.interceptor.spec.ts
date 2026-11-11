@@ -118,4 +118,52 @@ describe('authInterceptor', () => {
     e.off();
     u.off();
   });
+
+  it('401 for a request sent with an old token does NOT clear a rotated token nor emit the event', () => {
+    const e = events(UNAUTHENTICATED_EVENT);
+    tokens.set('A');
+    http.get('/api/x').subscribe({ error: () => undefined });
+    const req = ctl.expectOne('/api/x');
+    expect(req.request.headers.get('Authorization')).toBe('Bearer A');
+    tokens.set('B'); // e.g. changePassword stored the new token while the request was in flight
+    req.flush(
+      { success: false, code: 'UNAUTHENTICATED', message: 'm' },
+      { status: 401, statusText: 'x' },
+    );
+    expect(tokens.get()).toBe('B');
+    expect(e.spy).not.toHaveBeenCalled();
+    e.off();
+  });
+
+  it('401 without any token (e.g. login INVALID_CREDENTIALS) breaks nothing; still emits', () => {
+    const e = events(UNAUTHENTICATED_EVENT);
+    http.post('/api/auth/teacher/login', {}).subscribe({ error: () => undefined });
+    ctl
+      .expectOne('/api/auth/teacher/login')
+      .flush(
+        { success: false, code: 'INVALID_CREDENTIALS', message: 'm' },
+        { status: 401, statusText: 'x' },
+      );
+    expect(tokens.get()).toBeNull();
+    expect(e.spy).toHaveBeenCalledTimes(1);
+    e.off();
+  });
+
+  it('login 401 while an old token is stored clears that token (same token sent and stored)', () => {
+    tokens.set('OLD');
+    http.post('/api/auth/teacher/login', {}).subscribe({ error: () => undefined });
+    ctl
+      .expectOne('/api/auth/teacher/login')
+      .flush(
+        { success: false, code: 'INVALID_CREDENTIALS', message: 'm' },
+        { status: 401, statusText: 'x' },
+      );
+    expect(tokens.get()).toBeNull();
+  });
+
+  it('protocol-relative //evil.com/api/x gets no token', () => {
+    tokens.set('tok123');
+    http.get('//evil.com/api/x').subscribe();
+    expect(ctl.expectOne('//evil.com/api/x').request.headers.has('Authorization')).toBe(false);
+  });
 });

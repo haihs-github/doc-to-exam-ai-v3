@@ -13,7 +13,7 @@ import {
 import { Observable, firstValueFrom, isObservable } from 'rxjs';
 import type { AuthUser } from '@doc-to-exam/contract';
 import { AuthService } from './auth.service';
-import { authGuard } from './auth.guard';
+import { SESSION_ERROR_PATH, authGuard } from './auth.guard';
 
 const mk = (over: Partial<AuthUser> = {}): AuthUser => ({
   id: '1',
@@ -27,6 +27,7 @@ const mk = (over: Partial<AuthUser> = {}): AuthUser => ({
 describe('authGuard', () => {
   const user = signal<AuthUser | null>(null);
   const isLoading = signal(false);
+  const loadError = signal('');
   const run = (guard: ReturnType<typeof authGuard>, url: string) =>
     TestBed.runInInjectionContext(() =>
       guard({} as ActivatedRouteSnapshot, { url } as RouterStateSnapshot),
@@ -34,8 +35,12 @@ describe('authGuard', () => {
   beforeEach(() => {
     user.set(null);
     isLoading.set(false);
+    loadError.set('');
     TestBed.configureTestingModule({
-      providers: [provideRouter([]), { provide: AuthService, useValue: { user, isLoading } }],
+      providers: [
+        provideRouter([]),
+        { provide: AuthService, useValue: { user, isLoading, loadError } },
+      ],
     });
   });
   const str = (r: unknown) => TestBed.inject(Router).serializeUrl(r as UrlTree);
@@ -76,5 +81,33 @@ describe('authGuard', () => {
     isLoading.set(false);
     TestBed.tick();
     expect(await p).toBe(true);
+  });
+
+  it('token kept + loadError (user null) -> /session-error with state.from, NOT login', () => {
+    loadError.set('Không kết nối được máy chủ.');
+    for (const g of [authGuard(['teacher']), authGuard(['student'], 'student'), authGuard()]) {
+      const r = run(g, '/exams/1') as RedirectCommand;
+      expect(r).toBeInstanceOf(RedirectCommand);
+      expect(str(r.redirectTo)).toBe('/session-error');
+      expect(r.navigationBehaviorOptions?.state).toEqual({ from: '/exams/1' });
+      expect(r.navigationBehaviorOptions?.replaceUrl).toBe(true);
+    }
+    expect(SESSION_ERROR_PATH).toBe('/session-error');
+  });
+
+  it('loadError ignored when a user exists; no loadError and user null -> login as before', () => {
+    user.set(mk());
+    loadError.set('x');
+    expect(run(authGuard(['teacher']), '/x')).toBe(true);
+    user.set(null);
+    loadError.set('');
+    expect(str((run(authGuard(['teacher']), '/x') as RedirectCommand).redirectTo)).toBe(
+      '/teacher/login',
+    );
+  });
+
+  it('login redirect uses replaceUrl', () => {
+    const r = run(authGuard(['teacher']), '/x') as RedirectCommand;
+    expect(r.navigationBehaviorOptions?.replaceUrl).toBe(true);
   });
 });
