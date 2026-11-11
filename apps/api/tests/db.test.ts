@@ -113,6 +113,8 @@ describe('connectDb in-memory fallback', () => {
     await connectDb({ serverSelectionTimeoutMS: 300 });
     expect(mongoose.connection.readyState).toBe(1);
     expect(start).toHaveBeenCalledTimes(1);
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(warnText(warn)).toBe('Using an in-memory MongoDB (dev/test only): all data is lost when the server stops.');
     const t = warnText(warn);
     for (const bad of ['user', 'pass', '127.0.0.1', 'mongodb://']) expect(t).not.toContain(bad);
   });
@@ -157,6 +159,22 @@ describe('connectDb in-memory fallback', () => {
     const { start } = stubServer();
     await Promise.all([connectDb(), connectDb(), connectDb()]);
     expect(start).toHaveBeenCalledTimes(1);
+  });
+
+  it('start failure: fixed console.error, rejects, cache cleared, retry succeeds', async () => {
+    vi.stubEnv('NODE_ENV', 'development');
+    process.env.MONGODB_URI = 'mongodb://user:pass@127.0.0.1:1/db';
+    vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const err = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    vi.spyOn(memoryMongo, 'start').mockRejectedValueOnce(new Error('download failed http://secret/host'));
+    await expect(connectDb({ serverSelectionTimeoutMS: 300 })).rejects.toThrow(/Cannot connect to MongoDB/);
+    expect(err).toHaveBeenCalledTimes(1);
+    const t = err.mock.calls.flat().join(' ');
+    for (const bad of ['user', 'pass', '127.0.0.1', 'mongodb://', 'secret', 'download failed']) expect(t).not.toContain(bad);
+    expect(t).toMatch(/mongodb-memory-server/);
+    stubServer();
+    await connectDb({ serverSelectionTimeoutMS: 300 });
+    expect(mongoose.connection.readyState).toBe(1);
   });
 
   it('real mongod: dev + no URI works end to end and the server is stopped on close', async () => {

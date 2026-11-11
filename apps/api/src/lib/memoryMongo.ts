@@ -23,23 +23,24 @@ export const memoryMongo = {
 };
 
 async function connectInMemory(options: ConnectOptions): Promise<typeof mongoose> {
-  const server = await memoryMongo.start();
-  // mongod is a child process: stop it when the connection closes and, best effort, on exit.
-  const onExit = () => void server.stop().catch(() => undefined);
-  process.once('exit', onExit);
+  const server = await memoryMongo.start().catch((e: unknown) => {
+    // fixed text (db.ts replaces the thrown error): no URI, credentials or driver message
+    console.error(
+      'In-memory MongoDB could not start (dev/test only): set MONGODB_URI or check the mongodb-memory-server install/binary download',
+    );
+    throw e;
+  });
+  // Orphan protection is mongodb-memory-server's own mongo_killer process (watches this pid);
+  // here we only stop mongod promptly when the connection closes.
   try {
     const m = await mongoose.connect(server.uri, options);
-    m.connection.once('close', () => {
-      process.off('exit', onExit);
-      void server.stop().catch(() => undefined);
-    });
+    m.connection.once('close', () => void server.stop().catch(() => undefined));
     // fixed text: no URI, credentials or driver error
     console.warn(
       'Using an in-memory MongoDB (dev/test only): all data is lost when the server stops.',
     );
     return m;
   } catch (e) {
-    process.off('exit', onExit);
     await server.stop().catch(() => undefined);
     throw e;
   }
@@ -50,8 +51,7 @@ export async function connectWithFallback(
   env: Env,
   options: ConnectOptions,
 ): Promise<typeof mongoose> {
-  const configured = (process.env.MONGODB_URI ?? '').trim() !== '';
-  if (env.allowInMemoryDb && !configured) return connectInMemory(options);
+  if (env.allowInMemoryDb && !env.hasMongoUri) return connectInMemory(options);
   try {
     return await mongoose.connect(env.mongodbUri, options);
   } catch (e) {

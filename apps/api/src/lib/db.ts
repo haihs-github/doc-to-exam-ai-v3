@@ -21,9 +21,12 @@ export async function connectDb(options: ConnectOptions = {}): Promise<typeof mo
   // Cache is cleared only on an explicit close or a failed connect: a transient readyState 0 is
   // the driver auto-reconnecting the SAME client, and a second connect would leak a MongoClient.
   if (!g[KEY]) {
-    // const p: Promise<typeof mongoose> = mongoose // Haihs: đóng code cũ, fallback MongoDB in-memory cho dev/E2E (D16), loadEnv() vẫn chạy đồng bộ nên lỗi env nêu tên biến - start - end
-    //   .connect(loadEnv().mongodbUri, { serverSelectionTimeoutMS: 8000, ...options }) // Haihs: đóng code cũ, fallback MongoDB in-memory cho dev/E2E (D16), loadEnv() vẫn chạy đồng bộ nên lỗi env nêu tên biến - start - end
-    const p: Promise<typeof mongoose> = connectWithFallback(loadEnv(), { serverSelectionTimeoutMS: 8000, ...options }) // Haihs: fallback MongoDB in-memory cho dev/E2E (D16), loadEnv() vẫn chạy đồng bộ nên lỗi env nêu tên biến - start - end
+    // Haihs: fallback MongoDB in-memory cho dev/E2E (D16), loadEnv() vẫn chạy đồng bộ nên lỗi env nêu tên biến - start
+    // đóng code cũ
+    // const p: Promise<typeof mongoose> = mongoose
+    //   .connect(loadEnv().mongodbUri, { serverSelectionTimeoutMS: 8000, ...options })
+    const p: Promise<typeof mongoose> = connectWithFallback(loadEnv(), { serverSelectionTimeoutMS: 8000, ...options })
+    // Haihs: fallback MongoDB in-memory cho dev/E2E (D16), loadEnv() vẫn chạy đồng bộ nên lỗi env nêu tên biến - end
       .then((m) => {
         m.connection.once('close', () => {
           if (g[KEY] === p) g[KEY] = undefined;
@@ -40,3 +43,4 @@ export async function connectDb(options: ConnectOptions = {}): Promise<typeof mo
   return g[KEY]!;
 } // Haihs: async để lỗi env thành rejected promise; kết nối lại khi readyState 0/3 - end
 // shortcut: no in-memory fallback (source db.js:295-297); deferred decision for a later milestone
+// Haihs: ghi chú — fallback in-memory đã có từ M1 Task 3 (memoryMongo.ts), comment trên là lịch sử - start - end
