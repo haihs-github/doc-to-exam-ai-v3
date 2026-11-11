@@ -32,7 +32,7 @@ export const HTTP_STATUS: Record<ErrorCode, number> = {
   UNAUTHENTICATED: 401, // middlewares/authMiddleware.js:84
   FORBIDDEN: 403, // middlewares/authMiddleware.js:100
   NOT_FOUND: 404, // middlewares/authMiddleware.js:120
-  CONFLICT: 409,
+  CONFLICT: 409, // no source evidence; standard HTTP 409 (brief)
   RATE_LIMITED: 429, // middlewares/rateLimit.js:72
   PAYLOAD_TOO_LARGE: 413, // middlewares/rateLimit.js:161
   MUST_CHANGE_PASSWORD: 403, // middlewares/authMiddleware.js:59
@@ -40,6 +40,7 @@ export const HTTP_STATUS: Record<ErrorCode, number> = {
   INTERNAL: 500, // middlewares/authMiddleware.js:69 (source wire code is 'INTERNAL_ERROR')
 };
 
+// shortcut: code is only checked to be a string, not an ErrorCode member; tighten when a client needs the narrowing
 export function isApiError(x: unknown): x is ApiError {
   if (typeof x !== 'object' || x === null) return false;
   const o = x as Record<string, unknown>;
