@@ -63,8 +63,24 @@ describe('loadEnv', () => {
     expect(() => loadEnv({ ...prod, TEACHER_SECRET_KEY: 'x'.repeat(8) })).not.toThrow();
   });
 
-  it('nodeEnv: test stays test; unknown value behaves as development (source env.js:16-17: only exact "production"/"test" are special)', () => {
+  it('nodeEnv: only exact development/test are relaxed; staging and unknown values follow production rules', () => {
     expect(loadEnv({ NODE_ENV: 'test' }).nodeEnv).toBe('test');
-    expect(loadEnv({ NODE_ENV: 'staging' }).nodeEnv).toBe('development');
+    expect(loadEnv({ NODE_ENV: 'development' }).nodeEnv).toBe('development');
+    expect(loadEnv({ NODE_ENV: '' }).nodeEnv).toBe('development');
+    expect(() => loadEnv({ NODE_ENV: 'staging' })).toThrow(/JWT_SECRET.*API_KEY_ENCRYPTION_SECRET/s);
+    expect(() => loadEnv({ NODE_ENV: 'Production ' })).toThrow(/JWT_SECRET/);
+    expect(loadEnv({ ...prod, NODE_ENV: 'staging', ALLOW_IN_MEMORY_DB: 'true' })).toMatchObject({
+      nodeEnv: 'production',
+      allowInMemoryDb: false,
+    });
+  });
+
+  it('dev secrets are random per process, stable across calls, long enough and not public constants', () => {
+    const a = loadEnv({});
+    const b = loadEnv({});
+    expect(b.jwtSecret).toBe(a.jwtSecret);
+    expect(a.jwtSecret.length).toBeGreaterThanOrEqual(32);
+    expect(a.jwtSecret).not.toBe(a.apiKeyEncryptionSecret);
+    expect(a.jwtSecret).not.toContain('dev-only');
   });
 });

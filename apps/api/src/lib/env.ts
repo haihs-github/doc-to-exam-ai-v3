@@ -1,5 +1,7 @@
 // Created by Haihs on 11/11/2026
 // Validated environment loader (port of the source app's server/config/env.js semantics).
+import { randomBytes } from 'node:crypto';
+
 export interface Env {
   nodeEnv: 'development' | 'test' | 'production';
   mongodbUri: string;
@@ -11,16 +13,20 @@ export interface Env {
 
 const MIN_SECRET = 16;
 const MIN_TEACHER_KEY = 8;
-// shortcut: fixed dev placeholders (public in source), source auto-generates into .dev-secrets.json; revisit in a later milestone
+// Dev/test secrets are random per process (never public constants); cached so loadEnv is stable within a process.
+// shortcut: not persisted across restarts (source writes .dev-secrets.json), so dev tokens die on restart; revisit if that hurts
+const rand = () => randomBytes(32).toString('hex');
 const DEV = {
   mongodbUri: 'mongodb://127.0.0.1:27017/doc_to_exam_db',
-  jwtSecret: 'dev-only-jwt-secret-change-me',
-  apiKeyEncryptionSecret: 'dev-only-encryption-secret-change-me',
-  teacherSecretKey: 'dev-teacher',
+  jwtSecret: rand(),
+  apiKeyEncryptionSecret: rand(),
+  teacherSecretKey: rand(),
 };
 
 export function loadEnv(src: Record<string, string | undefined> = process.env): Env {
-  const nodeEnv = src.NODE_ENV === 'production' || src.NODE_ENV === 'test' ? src.NODE_ENV : 'development';
+  // Only exact development/test (or unset/empty) are relaxed; any other value (staging, typos) gets production rules.
+  const raw = src.NODE_ENV;
+  const nodeEnv: Env['nodeEnv'] = raw === 'test' ? 'test' : !raw || raw === 'development' ? 'development' : 'production';
   const get = (k: string) => (src[k] ?? '').trim();
   const isProd = nodeEnv === 'production';
 
