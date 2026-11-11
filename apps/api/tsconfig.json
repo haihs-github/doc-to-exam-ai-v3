@@ -1,3 +1,5 @@
+// Created by Haihs on 11/11/2026
+// TypeScript config for the Next.js API app.
 {
   "compilerOptions": {
     "target": "ES2022",

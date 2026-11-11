@@ -26,7 +26,8 @@ const DEV = {
 export function loadEnv(src: Record<string, string | undefined> = process.env): Env {
   // Only exact development/test (or unset/empty) are relaxed; any other value (staging, typos) gets production rules.
   const raw = src.NODE_ENV;
-  const nodeEnv: Env['nodeEnv'] = raw === 'test' ? 'test' : !raw || raw === 'development' ? 'development' : 'production';
+  const nodeEnv: Env['nodeEnv'] =
+    raw === 'test' ? 'test' : !raw || raw === 'development' ? 'development' : 'production';
   const get = (k: string) => (src[k] ?? '').trim();
   const isProd = nodeEnv === 'production';
 

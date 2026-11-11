@@ -8,28 +8,48 @@ const json = async (r: Response) => ({ status: r.status, body: await r.json() })
 
 describe('fail', () => {
   it('maps code to HTTP_STATUS with 3 keys when no extra', async () => {
-    expect(await json(fail('NOT_FOUND', 'm'))).toEqual({ status: 404, body: { success: false, code: 'NOT_FOUND', message: 'm' } });
+    expect(await json(fail('NOT_FOUND', 'm'))).toEqual({
+      status: 404,
+      body: { success: false, code: 'NOT_FOUND', message: 'm' },
+    });
   });
   it('adds field and data only when given', async () => {
     const r = await json(fail('CONFLICT', 'm', { field: 'code', data: { a: 1 } }));
     expect(r.status).toBe(409);
-    expect(r.body).toEqual({ success: false, code: 'CONFLICT', message: 'm', field: 'code', data: { a: 1 } });
+    expect(r.body).toEqual({
+      success: false,
+      code: 'CONFLICT',
+      message: 'm',
+      field: 'code',
+      data: { a: 1 },
+    });
   });
 });
 
 describe('ok', () => {
   it('defaults to 200 {success,data}', async () => {
-    expect(await json(ok({ x: 1 }))).toEqual({ status: 200, body: { success: true, data: { x: 1 } } });
+    expect(await json(ok({ x: 1 }))).toEqual({
+      status: 200,
+      body: { success: true, data: { x: 1 } },
+    });
   });
   it('supports status and message', async () => {
-    expect(await json(ok(null, { status: 201, message: 'done' }))).toEqual({ status: 201, body: { success: true, data: null, message: 'done' } });
+    expect(await json(ok(null, { status: 201, message: 'done' }))).toEqual({
+      status: 201,
+      body: { success: true, data: null, message: 'done' },
+    });
   });
 });
 
 describe('parsePage', () => {
-  const p = (q: string, o?: { defaultLimit?: number; maxLimit?: number }) => parsePage(new URLSearchParams(q), o);
+  const p = (q: string, o?: { defaultLimit?: number; maxLimit?: number }) =>
+    parsePage(new URLSearchParams(q), o);
   it('garbage falls back to defaults', () => {
-    expect(p('page=-3&limit=abc', { defaultLimit: 20, maxLimit: 100 })).toEqual({ page: 1, limit: 20, skip: 0 });
+    expect(p('page=-3&limit=abc', { defaultLimit: 20, maxLimit: 100 })).toEqual({
+      page: 1,
+      limit: 20,
+      skip: 0,
+    });
   });
   it('clamps limit to maxLimit and page to 100000', () => {
     expect(p('limit=99999', { maxLimit: 50 }).limit).toBe(50);
@@ -42,7 +62,13 @@ describe('parsePage', () => {
 
 describe('pageResult', () => {
   it('totalPages = ceil(total/limit); total 0 -> 0', () => {
-    expect(pageResult([1], 21, { page: 1, limit: 10 })).toEqual({ items: [1], total: 21, page: 1, limit: 10, totalPages: 3 });
+    expect(pageResult([1], 21, { page: 1, limit: 10 })).toEqual({
+      items: [1],
+      total: 21,
+      page: 1,
+      limit: 10,
+      totalPages: 3,
+    });
     expect(pageResult([], 0, { page: 1, limit: 10 }).totalPages).toBe(0);
   });
 });

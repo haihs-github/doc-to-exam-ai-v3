@@ -25,7 +25,9 @@ export function toVnFields(v: DateInput) {
 // dateFormat.js:25
 export function formatDateParts(v: DateInput) {
   const f = toVnFields(v);
-  return f ? { date: `${f.dd}/${f.mm}/${f.yyyy}`, time: `${f.hh}:${f.mi}` } : { date: '', time: '' };
+  return f
+    ? { date: `${f.dd}/${f.mm}/${f.yyyy}`, time: `${f.hh}:${f.mi}` }
+    : { date: '', time: '' };
 }
 
 // dateFormat.js:29

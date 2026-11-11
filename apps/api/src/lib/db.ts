@@ -16,6 +16,8 @@ const g = globalThis as unknown as Record<string, Promise<typeof mongoose> | und
 //     });
 //   return g[KEY]!;
 // } // Haihs: đóng code cũ, sửa cache chết sau disconnect và ném đồng bộ khi env sai - end
+// Prettier would move the end-of-line Haihs marker off the signature line.
+// prettier-ignore
 export async function connectDb(options: ConnectOptions = {}): Promise<typeof mongoose> { // Haihs: async để lỗi env thành rejected promise; kết nối lại khi readyState 0/3 - start
   // Cache is cleared only on an explicit close or a failed connect: a transient readyState 0 is
   // the driver auto-reconnecting the SAME client, and a second connect would leak a MongoClient.

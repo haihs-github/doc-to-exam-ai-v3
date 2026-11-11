@@ -4,7 +4,11 @@ import type { ErrorCode } from '@doc-to-exam/contract';
 import { fail } from './apiResponse';
 
 export class HttpError extends Error {
-  constructor(public code: ErrorCode, message?: string, public extra?: { field?: string; data?: unknown }) {
+  constructor(
+    public code: ErrorCode,
+    message?: string,
+    public extra?: { field?: string; data?: unknown },
+  ) {
     super(message ?? code);
     this.name = 'HttpError';
   }

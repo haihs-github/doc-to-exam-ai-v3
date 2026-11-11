@@ -1,7 +1,12 @@
 // Created by Haihs on 11/11/2026
 // Tests for backoff + jitter + Retry-After and retryWithBackoff (port of client/tests/retry.test.js; axios-style errors become ApiFailure {status, retryAfter}).
 import {
-  parseRetryAfterMs, computeBackoffDelayMs, isRetryableError, getRetryAfterFromError, retryWithBackoff, RETRYABLE_STATUSES,
+  parseRetryAfterMs,
+  computeBackoffDelayMs,
+  isRetryableError,
+  getRetryAfterFromError,
+  retryWithBackoff,
+  RETRYABLE_STATUSES,
 } from './retry';
 
 const httpError = (status: number, retryAfter?: string) => ({ status, retryAfter });
@@ -26,23 +31,49 @@ describe('retry', () => {
     const lo = () => 0;
     const hi = () => 0.999999;
     expect(computeBackoffDelayMs({ attempt: 1, baseMs: 1000, maxMs: 20000, random: lo })).toBe(500);
-    expect(computeBackoffDelayMs({ attempt: 1, baseMs: 1000, maxMs: 20000, random: hi })).toBe(1000);
-    expect(computeBackoffDelayMs({ attempt: 3, baseMs: 1000, maxMs: 20000, random: hi })).toBe(4000);
-    expect(computeBackoffDelayMs({ attempt: 10, baseMs: 1000, maxMs: 20000, random: hi })).toBe(20000);
-    expect(computeBackoffDelayMs({ attempt: 10, baseMs: 1000, maxMs: 20000, random: lo })).toBe(10000);
+    expect(computeBackoffDelayMs({ attempt: 1, baseMs: 1000, maxMs: 20000, random: hi })).toBe(
+      1000,
+    );
+    expect(computeBackoffDelayMs({ attempt: 3, baseMs: 1000, maxMs: 20000, random: hi })).toBe(
+      4000,
+    );
+    expect(computeBackoffDelayMs({ attempt: 10, baseMs: 1000, maxMs: 20000, random: hi })).toBe(
+      20000,
+    );
+    expect(computeBackoffDelayMs({ attempt: 10, baseMs: 1000, maxMs: 20000, random: lo })).toBe(
+      10000,
+    );
   });
 
   it('computeBackoffDelayMs luôn chờ ít nhất Retry-After và cộng jitter', () => {
-    const delayLow = computeBackoffDelayMs({ attempt: 1, baseMs: 1000, retryAfterMs: 3000, random: () => 0 });
+    const delayLow = computeBackoffDelayMs({
+      attempt: 1,
+      baseMs: 1000,
+      retryAfterMs: 3000,
+      random: () => 0,
+    });
     expect(delayLow).toBe(3000);
-    const delayHigh = computeBackoffDelayMs({ attempt: 1, baseMs: 1000, retryAfterMs: 3000, random: () => 0.999999 });
+    const delayHigh = computeBackoffDelayMs({
+      attempt: 1,
+      baseMs: 1000,
+      retryAfterMs: 3000,
+      random: () => 0.999999,
+    });
     expect(delayHigh).toBeGreaterThanOrEqual(3000);
     expect(delayHigh).toBeLessThanOrEqual(4500);
   });
 
   it('hai client cùng gặp 503 không quay lại cùng một thời điểm (jitter)', () => {
     const delays = new Set<number>();
-    for (let i = 0; i < 20; i += 1) delays.add(computeBackoffDelayMs({ attempt: 2, baseMs: 1500, retryAfterMs: 3000, random: Math.random }));
+    for (let i = 0; i < 20; i += 1)
+      delays.add(
+        computeBackoffDelayMs({
+          attempt: 2,
+          baseMs: 1500,
+          retryAfterMs: 3000,
+          random: Math.random,
+        }),
+      );
     expect(delays.size).toBeGreaterThan(10);
   });
 
@@ -65,13 +96,21 @@ describe('retry', () => {
     const sleeps: number[] = [];
     const retries: number[] = [];
     let calls = 0;
-    const result = await retryWithBackoff(async () => {
-      calls += 1;
-      if (calls < 3) throw httpError(503, '2');
-      return 'ok';
-    }, {
-      baseMs: 1000, random: () => 0, sleep: async (ms) => { sleeps.push(ms); }, onRetry: (info) => retries.push(info.attempt),
-    });
+    const result = await retryWithBackoff(
+      async () => {
+        calls += 1;
+        if (calls < 3) throw httpError(503, '2');
+        return 'ok';
+      },
+      {
+        baseMs: 1000,
+        random: () => 0,
+        sleep: async (ms) => {
+          sleeps.push(ms);
+        },
+        onRetry: (info) => retries.push(info.attempt),
+      },
+    );
     expect(result).toBe('ok');
     expect(calls).toBe(3);
     expect(sleeps).toEqual([2000, 2000]);
@@ -80,11 +119,27 @@ describe('retry', () => {
 
   it('retryWithBackoff dừng ngay với lỗi không đáng thử lại và sau maxAttempts', async () => {
     let calls = 0;
-    await expect(retryWithBackoff(async () => { calls += 1; throw httpError(413); }, { sleep: async () => undefined })).rejects.toBeTruthy();
+    await expect(
+      retryWithBackoff(
+        async () => {
+          calls += 1;
+          throw httpError(413);
+        },
+        { sleep: async () => undefined },
+      ),
+    ).rejects.toBeTruthy();
     expect(calls).toBe(1);
 
     calls = 0;
-    await expect(retryWithBackoff(async () => { calls += 1; throw httpError(503); }, { maxAttempts: 4, sleep: async () => undefined })).rejects.toBeTruthy();
+    await expect(
+      retryWithBackoff(
+        async () => {
+          calls += 1;
+          throw httpError(503);
+        },
+        { maxAttempts: 4, sleep: async () => undefined },
+      ),
+    ).rejects.toBeTruthy();
     expect(calls).toBe(4);
   });
 
@@ -92,7 +147,12 @@ describe('retry', () => {
     vi.useFakeTimers();
     try {
       const ac = new AbortController();
-      const p = retryWithBackoff(async () => { throw httpError(503); }, { random: () => 0, signal: ac.signal });
+      const p = retryWithBackoff(
+        async () => {
+          throw httpError(503);
+        },
+        { random: () => 0, signal: ac.signal },
+      );
       const assertion = expect(p).rejects.toMatchObject({ code: 'ERR_CANCELED' });
       await vi.advanceTimersByTimeAsync(0);
       ac.abort();

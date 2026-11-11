@@ -1,6 +1,12 @@
 // Created by Haihs on 11/11/2026
 // Tests for UTC+7 date formatting (port of client/tests/dateFormat.test.js; formatVn is the new alias of formatDateTime).
-import { formatDate, formatDateTime, formatTimeSecondsDate, formatDateParts, formatVn } from './date-format';
+import {
+  formatDate,
+  formatDateTime,
+  formatTimeSecondsDate,
+  formatDateParts,
+  formatVn,
+} from './date-format';
 
 describe('date-format', () => {
   it('nửa đêm UTC+7 và zero-pad', () => {
@@ -22,7 +28,10 @@ describe('date-format', () => {
   });
 
   it('formatDateParts tách ngày và giờ', () => {
-    expect(formatDateParts(new Date('2026-11-04T05:09:00Z'))).toEqual({ date: '04/11/2026', time: '12:09' });
+    expect(formatDateParts(new Date('2026-11-04T05:09:00Z'))).toEqual({
+      date: '04/11/2026',
+      time: '12:09',
+    });
   });
 
   it('rỗng/không hợp lệ -> chuỗi rỗng', () => {
