@@ -1,5 +1,5 @@
 // Created by Haihs on 11/11/2026
-// GET /api/health: liveness probe, same JSON as the source Express app.
+// GET /api/health: liveness probe, returns the contract ok() envelope.
 import { withErrors } from '../../../src/lib/handler'; // Haihs: wire withErrors so next build exercises the contract import - start - end
 import { ok } from '../../../src/lib/apiResponse';
 export const runtime = 'nodejs';

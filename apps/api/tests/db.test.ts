@@ -20,6 +20,9 @@ afterEach(async () => {
   vi.unstubAllEnvs();
 });
 
+// the property is read-only in the typings but has a setter that emits the state events
+const setReadyState = (n: number) => ((mongoose.connection as { readyState: number }).readyState = n);
+
 describe('connectDb', () => {
   it('returns the same instance twice and does not grow connections', async () => {
     process.env.MONGODB_URI = db.uri;
@@ -57,10 +60,10 @@ describe('connectDb', () => {
     process.env.MONGODB_URI = db.uri;
     await connectDb();
     const spy = vi.spyOn(mongoose, 'connect');
-    mongoose.connection.readyState = 0; // driver auto-reconnect: state flips to disconnected, no 'close' event
+    setReadyState(0); // driver auto-reconnect: state flips to disconnected, no 'close' event
     await expect(connectDb()).resolves.toBe(mongoose);
     expect(spy).not.toHaveBeenCalled();
-    mongoose.connection.readyState = 1;
+    setReadyState(1);
   });
 
   it('concurrent calls share one connect and one instance', async () => {
