@@ -185,20 +185,20 @@ describe('env', () => {
 describe('limiters buckets', () => {
   it('match backend inventory 1.4', () => {
     const t = Object.fromEntries(
-      Object.entries(LIMITERS).map(([k, l]) => [k, [l.max, l.windowMs]]),
+      Object.entries(LIMITERS).map(([k, l]) => [k, [l.max, l.windowMs, l.count, l.refund5xx]]),
     );
     const M = 60_000;
     expect(t).toEqual({
-      LOGIN: [10, 15 * M],
-      REGISTER: [5, 60 * M],
-      STUDENT_REGISTER: [300, 60 * M],
-      REGISTER_PHONE: [5, 60 * M],
-      STUDENT_LOGIN: [600, 15 * M],
-      LOGIN_IP_FAIL: [150, 15 * M],
-      LOGIN_ACCOUNT: [10, 15 * M],
-      LOGIN_PHONE_GLOBAL: [100, 15 * M],
-      CHANGE_PASSWORD: [10, 15 * M],
-      STUDENT_API: [3000, M],
+      LOGIN: [10, 15 * M, 'all', false],
+      REGISTER: [5, 60 * M, 'all', false],
+      STUDENT_REGISTER: [300, 60 * M, 'all', true],
+      REGISTER_PHONE: [5, 60 * M, 'all', true],
+      STUDENT_LOGIN: [600, 15 * M, 'all', true],
+      LOGIN_IP_FAIL: [150, 15 * M, 'failures', false],
+      LOGIN_ACCOUNT: [10, 15 * M, 'failures', false],
+      LOGIN_PHONE_GLOBAL: [100, 15 * M, 'failures', false],
+      CHANGE_PASSWORD: [10, 15 * M, 'failures', false],
+      STUDENT_API: [3000, M, 'all', false],
     });
   });
   it('REGISTER_PHONE keys by valid phone+IP from the body without consuming it; others by ip: key', async () => {
