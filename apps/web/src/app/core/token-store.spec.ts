@@ -36,4 +36,26 @@ describe('TokenStore', () => {
     expect(() => s.set('a')).not.toThrow();
     expect(() => s.clear()).not.toThrow();
   });
+
+  it('clear() xóa cả khóa legacy', () => {
+    localStorage.setItem('auth_token', 'a');
+    localStorage.setItem('teacher_auth_token', 'old');
+    new TokenStore().clear();
+    expect(localStorage.getItem('teacher_auth_token')).toBeNull();
+    expect(localStorage.getItem('auth_token')).toBeNull();
+  });
+
+  it('clear() vẫn xóa legacy khi removeItem(TOKEN_KEY) ném lỗi', () => {
+    localStorage.setItem('teacher_auth_token', 'old');
+    const real = Storage.prototype.removeItem;
+    vi.spyOn(Storage.prototype, 'removeItem').mockImplementation(function (
+      this: Storage,
+      k: string,
+    ) {
+      if (k === 'auth_token') throw new Error('x');
+      real.call(this, k);
+    });
+    new TokenStore().clear();
+    expect(localStorage.getItem('teacher_auth_token')).toBeNull();
+  });
 });

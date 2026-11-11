@@ -60,6 +60,34 @@ describe('decideRoute', () => {
   });
 });
 
+describe('decideRoute edge cases', () => {
+  it('admin bị chặn khỏi route teacher/student', () => {
+    expect(decideRoute({ user: u('admin'), roles: ['teacher'] })).toEqual({
+      kind: 'redirect',
+      to: '/',
+    });
+    expect(decideRoute({ user: u('admin'), roles: ['student'] })).toEqual({
+      kind: 'redirect',
+      to: '/',
+    });
+  });
+  it('audience thắng roles khi chưa đăng nhập', () => {
+    expect(decideRoute({ user: null, audience: 'student', roles: ['teacher'] })).toMatchObject({
+      to: '/login',
+    });
+  });
+  it('roles teacher+admin chưa đăng nhập về /login', () => {
+    expect(decideRoute({ user: null, roles: ['teacher', 'admin'] })).toMatchObject({
+      to: '/login',
+    });
+  });
+  it('mustChangePassword ở /change-password với role không khớp vẫn allow', () => {
+    expect(
+      decideRoute({ user: u('student', true), roles: ['teacher'], path: '/change-password' }),
+    ).toEqual({ kind: 'allow' });
+  });
+});
+
 describe('postLoginPath', () => {
   it('phân luồng theo vai trò, mustChangePassword và trang đang định vào', () => {
     expect(homePathForRole('teacher')).toBe('/');

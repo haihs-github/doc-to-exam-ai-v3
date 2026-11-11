@@ -25,6 +25,10 @@ export class TokenStore {
   clear(): void {
     try {
       localStorage.removeItem(TOKEN_KEY);
+    } catch {
+      /* storage unavailable */
+    }
+    try {
       localStorage.removeItem(LEGACY_KEY);
     } catch {
       /* storage unavailable */

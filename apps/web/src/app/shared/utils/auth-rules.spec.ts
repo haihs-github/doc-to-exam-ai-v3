@@ -48,3 +48,20 @@ describe('validateFullName', () => {
       expect(validateFullName(raw), raw).toBe(false);
   });
 });
+
+describe('edge cases', () => {
+  it('phone: cắt khoảng trắng hai đầu; "0" sai', () => {
+    expect(validatePhone(' 0912345678 ')).toBe(true);
+    expect(validatePhone('0')).toBe(false);
+  });
+  it('tên: "Ab" hợp lệ, NFD được chuẩn hóa, có chữ số bị từ chối', () => {
+    expect(validateFullName('Ab')).toBe(true);
+    expect(validateFullName('Nguyễn'.normalize('NFD'))).toBe(true);
+    expect(validateFullName('Mai 2')).toBe(false);
+    // NFD 'ễ' = 3 code points: 254 + 3 = 257 > 255 unless normalized to NFC (1 code point)
+    expect(validateFullName('a'.repeat(254) + 'ễ'.normalize('NFD'))).toBe(true);
+  });
+  it('mật khẩu 4 emoji (16 byte) rớt vì < 8 ký tự', () => {
+    expect(validatePasswordInput('😀'.repeat(4)).ok).toBe(false);
+  });
+});
