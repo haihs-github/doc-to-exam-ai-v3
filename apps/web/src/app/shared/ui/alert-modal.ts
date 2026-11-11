@@ -1,6 +1,6 @@
 // Created by Haihs on 11/11/2026
 // <app-alert-host>: renders the AlertService popup (port of AlertModal.jsx); mount once in the app shell.
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject } from '@angular/core';
 import { AlertService, AlertVariant } from './alert.service';
 import { ModalFocus } from './modal-focus';
 
@@ -22,6 +22,7 @@ const VARIANTS: Record<AlertVariant, { box: string; title: string; button: strin
   },
 };
 
+/** Mount exactly ONCE in the app shell: two hosts would show every popup twice. */
 @Component({
   selector: 'app-alert-host',
   imports: [ModalFocus],
@@ -31,6 +32,7 @@ const VARIANTS: Record<AlertVariant, { box: string; title: string; button: strin
       <!-- Backdrop click is a mouse convenience; keyboard users close with Esc (ModalFocus) or the button. -->
       <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
       <div
+        data-allow-busy
         class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
         (click)="$event.target === $event.currentTarget && svc.close()"
       >
@@ -83,6 +85,11 @@ const VARIANTS: Record<AlertVariant, { box: string; title: string; button: strin
 })
 export class AlertHost {
   protected readonly svc = inject(AlertService);
+
+  constructor() {
+    inject(DestroyRef).onDestroy(() => this.svc.clear());
+  }
+
   protected readonly shown = computed(() => {
     const c = this.svc.current();
     return c ? [c] : [];

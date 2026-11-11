@@ -4,9 +4,10 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
-  afterRenderEffect,
+  afterEveryRender,
   inject,
   input,
+  signal,
 } from '@angular/core';
 
 let nextId = 0;
@@ -18,7 +19,7 @@ const CONTROL = 'input, select, textarea';
   template: `
     @if (label()) {
       <label
-        [attr.for]="id"
+        [attr.for]="controlId()"
         class="mb-1.5 block text-base font-medium text-gray-800 dark:text-gray-200"
       >
         {{ label() }}
@@ -49,25 +50,31 @@ export class FormField {
   readonly hint = input('');
   readonly required = input(false);
   protected readonly id = `ff-${nextId++}`;
+  protected readonly controlId = signal(this.id);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
   constructor() {
-    // The projected control is found in the DOM (content projection exposes no handle to it).
-    afterRenderEffect(() => {
-      const describedBy =
-        [this.error() && `${this.id}-err`, this.hint() && `${this.id}-hint`]
-          .filter(Boolean)
-          .join(' ') || null;
+    // Runs after every render so a control that appears later (@if, nested component) is wired too.
+    // Content projection exposes no handle to it, hence the DOM query. Every write is idempotent.
+    afterEveryRender(() => {
       const control = this.host.nativeElement.querySelector(CONTROL);
       if (!control) return;
-      control.id = this.id;
-      this.set(control, 'aria-describedby', describedBy);
+      if (!control.id) control.id = this.id; // an id set by the author wins
+      if (this.controlId() !== control.id) this.controlId.set(control.id);
+      const mine = [`${this.id}-err`, `${this.id}-hint`];
+      const ids = [this.error() && mine[0], this.hint() && mine[1]].filter(Boolean) as string[];
+      // Merge into the author's list instead of replacing it.
+      const others = (control.getAttribute('aria-describedby') ?? '')
+        .split(/\s+/)
+        .filter((t) => t && !mine.includes(t));
+      this.set(control, 'aria-describedby', [...others, ...ids].join(' ') || null);
       this.set(control, 'aria-invalid', this.error() ? 'true' : null);
       this.set(control, 'aria-required', this.required() ? 'true' : null);
     });
   }
 
   private set(el: Element, name: string, value: string | null): void {
+    if (el.getAttribute(name) === value) return;
     if (value === null) el.removeAttribute(name);
     else el.setAttribute(name, value);
   }

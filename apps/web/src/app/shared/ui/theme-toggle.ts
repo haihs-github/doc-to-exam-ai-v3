@@ -1,5 +1,6 @@
 // Created by Haihs on 11/11/2026
 // <app-theme-toggle>: light/dark switch through applyTheme (port of ThemeToggle.jsx).
+// TODO(web): chia sẻ signal theme giữa nhiều ThemeToggle (navbar hiện có thể mount 2 nút lệch trạng thái)
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { applyTheme } from '../../theme';
 

@@ -5,6 +5,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { filter } from 'rxjs';
 import { AuthService } from '../../core/auth.service';
+import { ConfirmService } from './confirm-modal';
 import { ThemeToggle } from './theme-toggle';
 
 /** Student exam pages (/ca/*) hide the navbar, except the result page (source Navbar.jsx Pha 4G). */
@@ -40,36 +41,82 @@ const ACTIVE = 'bg-primary-100 !text-primary-900 dark:bg-sky-900/50 dark:!text-s
           >
             @if (!auth.isAuthenticated()) {
               <!-- TODO(web): M4 — route /about chưa tồn tại -->
-              <a routerLink="/about" [class]="link" [routerLinkActive]="active">Giới thiệu</a>
+              <a
+                routerLink="/about"
+                [class]="link"
+                [routerLinkActive]="active"
+                ariaCurrentWhenActive="page"
+                >Giới thiệu</a
+              >
               <app-theme-toggle />
-              <a routerLink="/login" [class]="link" [routerLinkActive]="active">Đăng nhập</a>
-              <a routerLink="/register" [class]="link" [routerLinkActive]="active">Đăng ký</a>
-              <a routerLink="/teacher/login" [class]="link" [routerLinkActive]="active"
+              <a
+                routerLink="/login"
+                [class]="link"
+                [routerLinkActive]="active"
+                ariaCurrentWhenActive="page"
+                >Đăng nhập</a
+              >
+              <a
+                routerLink="/register"
+                [class]="link"
+                [routerLinkActive]="active"
+                ariaCurrentWhenActive="page"
+                >Đăng ký</a
+              >
+              <a
+                routerLink="/teacher/login"
+                [class]="link"
+                [routerLinkActive]="active"
+                ariaCurrentWhenActive="page"
                 >Giáo viên</a
               >
             } @else {
               @if (!auth.user()?.mustChangePassword) {
                 @if (auth.isStudent()) {
                   <!-- TODO(web): M2/M3 — route chưa tồn tại -->
-                  <a routerLink="/sittings" [class]="link" [routerLinkActive]="active"
+                  <a
+                    routerLink="/sittings"
+                    [class]="link"
+                    [routerLinkActive]="active"
+                    ariaCurrentWhenActive="page"
                     >Ca thi của tôi</a
                   >
-                  <a routerLink="/classes" [class]="link" [routerLinkActive]="active"
+                  <a
+                    routerLink="/classes"
+                    [class]="link"
+                    [routerLinkActive]="active"
+                    ariaCurrentWhenActive="page"
                     >Lớp của tôi</a
                   >
                 } @else {
                   <!-- TODO(web): M2/M3 — route chưa tồn tại -->
-                  <a routerLink="/teacher/templates" [class]="link" [routerLinkActive]="active"
+                  <a
+                    routerLink="/teacher/templates"
+                    [class]="link"
+                    [routerLinkActive]="active"
+                    ariaCurrentWhenActive="page"
                     >Đề mẫu</a
                   >
-                  <a routerLink="/teacher/sittings" [class]="link" [routerLinkActive]="active"
+                  <a
+                    routerLink="/teacher/sittings"
+                    [class]="link"
+                    [routerLinkActive]="active"
+                    ariaCurrentWhenActive="page"
                     >Ca thi</a
                   >
-                  <a routerLink="/teacher/classes" [class]="link" [routerLinkActive]="active"
+                  <a
+                    routerLink="/teacher/classes"
+                    [class]="link"
+                    [routerLinkActive]="active"
+                    ariaCurrentWhenActive="page"
                     >Lớp học</a
                   >
                 }
-                <a routerLink="/change-password" [class]="link" [routerLinkActive]="active"
+                <a
+                  routerLink="/change-password"
+                  [class]="link"
+                  [routerLinkActive]="active"
+                  ariaCurrentWhenActive="page"
                   >Đổi mật khẩu</a
                 >
                 @if (auth.isTeacher()) {
@@ -109,6 +156,7 @@ const ACTIVE = 'bg-primary-100 !text-primary-900 dark:bg-sky-900/50 dark:!text-s
 export class Navbar {
   protected readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly confirm = inject(ConfirmService);
   protected readonly link = LINK;
   protected readonly active = ACTIVE;
   protected readonly visible = signal(navbarVisible(this.router.url));
@@ -127,8 +175,20 @@ export class Navbar {
     window.dispatchEvent(new CustomEvent('open-api-key-modal'));
   }
 
-  protected logout(): void {
+  /** Asks first (source Navbar.jsx ý 14); afterwards goes to the login page of the role that logged out. */
+  protected async logout(): Promise<void> {
+    const dest = this.auth.isStudent() ? '/login' : '/teacher/login';
+    const ok = await this.confirm.confirm(
+      'Bạn có chắc chắn muốn đăng xuất khỏi tài khoản trên thiết bị này không?',
+      {
+        title: 'Đăng xuất',
+        confirmText: 'Đăng xuất',
+        cancelText: 'Ở lại',
+        danger: true,
+      },
+    );
+    if (!ok) return;
     this.auth.logout();
-    void this.router.navigateByUrl('/');
+    await this.router.navigateByUrl(dest);
   }
 }

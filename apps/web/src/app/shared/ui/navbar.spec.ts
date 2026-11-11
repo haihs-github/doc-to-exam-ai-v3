@@ -7,6 +7,7 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Router, provideRouter } from '@angular/router';
 import type { AuthUser } from '@doc-to-exam/contract';
 import { AuthService } from '../../core/auth.service';
+import { ConfirmHost } from './confirm-modal';
 import { Navbar, navbarVisible } from './navbar';
 
 @Component({ template: '' })
@@ -53,11 +54,17 @@ describe('Navbar', () => {
     await router.navigateByUrl(url);
     const f = TestBed.createComponent(Navbar);
     await f.whenStable();
+    const host = TestBed.createComponent(ConfirmHost); // the logout confirmation renders here
+    await host.whenStable();
+    const confirmBtn = (t: string) =>
+      [...(host.nativeElement as HTMLElement).querySelectorAll('button')].find(
+        (b) => b.textContent?.trim() === t,
+      );
     const el = f.nativeElement as HTMLElement;
     const hrefs = () => [...el.querySelectorAll('a')].map((a) => a.getAttribute('href'));
     const btn = (t: string) =>
       [...el.querySelectorAll('button')].find((b) => b.textContent?.includes(t));
-    return { f, el, auth, router, hrefs, btn };
+    return { f, host, confirmBtn, el, auth, router, hrefs, btn };
   };
 
   it('guest: About, Đăng nhập, Đăng ký, Giáo viên; no logout', async () => {
@@ -104,13 +111,41 @@ describe('Navbar', () => {
     expect(btn('Đăng xuất')).toBeDefined();
   });
 
-  it('logout clears the session and navigates to /', async () => {
-    const { f, auth, router, btn, el } = await setup(teacher, '/teacher/classes');
+  it.each([
+    [teacher, '/teacher/login'],
+    [student, '/login'],
+  ])(
+    'logout asks for confirmation, then clears the session and goes to the role login (%#)',
+    async (user, dest) => {
+      const { f, host, auth, router, btn, confirmBtn } = await setup(user, '/change-password');
+      btn('Đăng xuất')!.click();
+      await host.whenStable();
+      expect(auth.isAuthenticated()).toBe(true); // nothing happens before the answer
+      confirmBtn('Đăng xuất')!.click();
+      await host.whenStable();
+      await f.whenStable();
+      expect(auth.isAuthenticated()).toBe(false);
+      expect(router.url).toBe(dest);
+    },
+  );
+
+  it('cancelling the logout confirmation keeps the session and the page', async () => {
+    const { f, host, auth, router, btn, confirmBtn } = await setup(teacher, '/teacher/classes');
     btn('Đăng xuất')!.click();
+    await host.whenStable();
+    confirmBtn('Ở lại')!.click();
+    await host.whenStable();
     await f.whenStable();
-    expect(auth.isAuthenticated()).toBe(false);
-    expect(router.url).toBe('/');
-    expect(el.textContent).toContain('Đăng nhập');
+    expect(auth.isAuthenticated()).toBe(true);
+    expect(router.url).toBe('/teacher/classes');
+  });
+
+  it('the active link has aria-current=page, others do not', async () => {
+    const { el } = await setup(teacher, '/teacher/classes');
+    const cur = [...el.querySelectorAll('nav a')].filter(
+      (a) => a.getAttribute('aria-current') === 'page',
+    );
+    expect(cur.map((a) => a.getAttribute('href'))).toEqual(['/teacher/classes']);
   });
 
   it('is hidden on /ca/ABC/room, visible on /ca/ABC/result, reacts to navigation', async () => {

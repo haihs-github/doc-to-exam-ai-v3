@@ -15,7 +15,7 @@ const tick = async (f: { detectChanges(): void }, ms: number) => {
   await vi.advanceTimersByTimeAsync(ms);
   f.detectChanges();
 };
-const bar = (el: HTMLElement) => el.querySelector('[role="progressbar"]');
+const bar = (el: HTMLElement) => el.querySelector('[data-api-progress]');
 
 describe('ApiProgress', () => {
   beforeEach(() => vi.useFakeTimers());
@@ -41,12 +41,13 @@ describe('ApiProgress', () => {
     expect(bar(el)).toBeNull();
   });
 
-  it('is announced politely, labelled in Vietnamese and respects prefers-reduced-motion', async () => {
+  it('is decorative (aria-hidden, no progressbar role) and respects prefers-reduced-motion', async () => {
     const { f, el, api } = await setup();
     api.begin('GET');
     await tick(f, 200);
     const b = bar(el)!;
-    expect(b.getAttribute('aria-label')).toBe('Đang tải dữ liệu');
+    expect(b.getAttribute('aria-hidden')).toBe('true');
+    expect(b.hasAttribute('role')).toBe(false);
     expect(b.firstElementChild!.className).toContain('motion-reduce:animate-none');
     expect(b.firstElementChild!.className).toContain('animate-progress');
   });
@@ -75,6 +76,7 @@ describe('ApiProgress', () => {
     api.begin('POST');
     f.detectChanges();
     expect(document.documentElement.dataset['apiBusy']).toBe('write');
+    expect(document.body.getAttribute('aria-busy')).toBe('true');
     click('a');
     click('s'); // would submit the form
     click('b');
@@ -83,6 +85,7 @@ describe('ApiProgress', () => {
     api.end('POST');
     f.detectChanges();
     expect(document.documentElement.dataset['apiBusy']).toBeUndefined();
+    expect(document.body.hasAttribute('aria-busy')).toBe(false);
     click('a');
     expect(hits).toEqual(['a', 'b', 'a']);
     host.remove();

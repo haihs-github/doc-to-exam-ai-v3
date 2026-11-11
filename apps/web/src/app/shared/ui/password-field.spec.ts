@@ -4,9 +4,13 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { PasswordField } from './password-field';
 
-@Component({ imports: [PasswordField], template: `<app-password-field [(value)]="pw" />` })
+@Component({
+  imports: [PasswordField],
+  template: `<app-password-field [(value)]="pw" (blurred)="blurs = blurs + 1" />`,
+})
 class Host {
   readonly pw = signal('');
+  blurs = 0;
 }
 
 describe('PasswordField', () => {
@@ -18,12 +22,12 @@ describe('PasswordField', () => {
     const btn = el.querySelector('button')!;
     expect(input.type).toBe('password');
     expect(btn.getAttribute('aria-pressed')).toBe('false');
-    expect(btn.getAttribute('aria-label')).toBe('Hiện mật khẩu');
+    expect(btn.getAttribute('aria-label')).toBe('Hiển thị mật khẩu');
     btn.click();
     await f.whenStable();
     expect(input.type).toBe('text');
     expect(btn.getAttribute('aria-pressed')).toBe('true');
-    expect(btn.getAttribute('aria-label')).toBe('Ẩn mật khẩu');
+    expect(btn.getAttribute('aria-label')).toBe('Hiển thị mật khẩu'); // fixed label, only aria-pressed changes
     btn.click();
     await f.whenStable();
     expect(input.type).toBe('password');
@@ -38,5 +42,15 @@ describe('PasswordField', () => {
     input.value = 'secret1';
     input.dispatchEvent(new Event('input'));
     expect(f.componentInstance.pw()).toBe('secret1');
+  });
+
+  it('disables autocapitalize/spellcheck and emits (blurred) on blur', async () => {
+    const f = TestBed.createComponent(Host);
+    await f.whenStable();
+    const input = (f.nativeElement as HTMLElement).querySelector('input')!;
+    expect(input.getAttribute('autocapitalize')).toBe('off');
+    expect(input.getAttribute('spellcheck')).toBe('false');
+    input.dispatchEvent(new Event('blur'));
+    expect(f.componentInstance.blurs).toBe(1);
   });
 });
