@@ -6,12 +6,17 @@ export const runtime = 'nodejs';
 // Haihs: bọc GET bằng withErrors - start
 // đóng code cũ
 // export async function GET(): Promise<Response> {
+//   return Response.json({
+//     status: 'OK',
+//     timestamp: new Date(),
+//     service: 'Doc to Exam AI Backend',
+//   });
+// }
 export const GET = withErrors(async (): Promise<Response> => {
   return Response.json({
     status: 'OK',
     timestamp: new Date(),
     service: 'Doc to Exam AI Backend',
   });
-// }
 });
 // Haihs: bọc GET bằng withErrors - end
