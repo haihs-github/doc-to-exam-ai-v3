@@ -10,6 +10,7 @@ export interface Env {
   teacherSecretKey: string;
   allowInMemoryDb: boolean;
   hasMongoUri: boolean; // Haihs: phân biệt URI do người dùng cấu hình với URI mặc định dev - start - end
+  jwtExpiresIn: string; // Haihs: thời hạn token đăng nhập (JWT_EXPIRES_IN, mặc định 7d) - start - end
   trustProxy: number; // Haihs: số proxy tin cậy phía trước app (X-Forwarded-For), dùng cho rate limit - start - end
 }
 
@@ -58,6 +59,7 @@ export function loadEnv(src: Record<string, string | undefined> = process.env): 
     // in-memory DB loses data: never outside dev/test (source env.js:164-166, hardened for production)
     allowInMemoryDb: !isProd && get('ALLOW_IN_MEMORY_DB') !== 'false',
     hasMongoUri: mongodbUri !== '', // Haihs: phân biệt URI do người dùng cấu hình với URI mặc định dev - start - end
+    jwtExpiresIn: get('JWT_EXPIRES_IN') || '7d', // Haihs: thời hạn token đăng nhập, mặc định 7d như nguồn - start - end
     trustProxy: readTrustProxy(src), // Haihs: trust proxy mặc định 1 ở production, 0 nơi khác - start - end
   };
 }
