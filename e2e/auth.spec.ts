@@ -180,7 +180,7 @@ test('revoked session is sent to login by its next API call (no page reload)', a
   }
 });
 
-test('student cannot reach teacher-only pages', async ({ page }) => {
+test('unknown teacher route falls back to home', async ({ page }) => {
   await register(page, 'student', newPhone());
   await expect(home(page)).toBeVisible();
 
@@ -201,13 +201,32 @@ test('teacher saves an API key and afterwards sees only its last 4 characters', 
   await nav.getByRole('button', { name: 'Cài đặt API Key' }).click();
   const modal = page.getByRole('dialog', { name: 'Cài đặt Gemini API Key' });
   await field(page, 'geminiApiKey').fill(key);
-  await modal.getByRole('button', { name: 'Lưu key' }).click();
+  const [saved] = await Promise.all([
+    page.waitForResponse(
+      (r) => r.url().endsWith('/api/auth/api-key') && r.request().method() === 'PUT',
+    ),
+    modal.getByRole('button', { name: 'Lưu key' }).click(),
+  ]);
+  const savedText = await saved.text();
+  expect(savedText).toContain('1234');
+  expect(savedText).not.toContain('AIzaSyE2E');
   await dialog(page).getByRole('button', { name: 'OK' }).click();
   await expect(modal).toBeHidden();
+
+  // A fresh /me (after reload) must not carry the key either, only the last 4 characters.
+  const [me] = await Promise.all([
+    page.waitForResponse((r) => r.url().endsWith('/api/auth/me')),
+    page.reload(),
+  ]);
+  const meText = await me.text();
+  expect(meText).toContain('1234');
+  expect(meText).not.toContain('AIzaSyE2E');
+  await expect(home(page)).toBeVisible();
 
   await nav.getByRole('button', { name: 'Gemini API: Đã có Key' }).click();
   await expect(modal).toContainText('Đã lưu: ••••1234');
   await expect(field(page, 'geminiApiKey')).toHaveValue('');
+  await expect(field(page, 'geminiApiKey')).not.toHaveValue(/AIza/);
   await expect(page.locator('body')).not.toContainText('AIzaSyE2E');
 });
 
