@@ -6,33 +6,66 @@ import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from 'node:
 const PREFIX = 'enc:v1:';
 const ALGORITHM = 'aes-256-gcm';
 
-// scrypt (fixed salt, as in the source) lets a secret of any length become a 32-byte key.
-const deriveKey = (secret: string) => scryptSync(secret, 'doc-to-exam-ai', 32);
+const TAG_LEN = 16;
+const IV_LEN = 12;
+const B64 = /^[A-Za-z0-9+/]+={0,2}$/;
 
-/** No secret: returns the value unchanged (source behaviour). Already-encrypted values are not re-encrypted. */
+// scrypt (fixed salt, as in the source) lets a secret of any length become a 32-byte key.
+// Memoized (one entry): scryptSync blocks the event loop for tens of ms.
+let cached: { secret: string; key: Buffer } | undefined;
+const deriveKey = (secret: string) => {
+  if (cached?.secret !== secret) cached = { secret, key: scryptSync(secret, 'doc-to-exam-ai', 32) };
+  return cached.key;
+};
+
+// Same rule as env.ts: only exact development/test (or unset/empty) NODE_ENV is relaxed.
+const isProductionEnv = () => {
+  const raw = process.env.NODE_ENV;
+  return !!raw && raw !== 'development' && raw !== 'test';
+};
+
+export const isEncrypted = (value: string): boolean => value.startsWith(PREFIX);
+
+/**
+ * No secret: dev/test returns the value unchanged (source parity); production THROWS (never store a raw key).
+ * Idempotent: a value already starting with `enc:v1:` is returned as-is, so callers must reject such INPUT
+ * (use isEncrypted) BEFORE encrypting, or an attacker-supplied "enc:v1:..." would be stored unencrypted.
+ * TODO(api): Task 8 — validate Gemini key (từ chối giá trị bắt đầu bằng 'enc:v1:'), bọc decryptField bằng try/catch → coi như chưa có key (REQUIRE_API_KEY), không 500
+ */
 export function encryptField(plain: string, secret: string | undefined): string {
   if (!plain) return '';
-  if (!secret || plain.startsWith(PREFIX)) return plain;
-  const iv = randomBytes(12);
-  const cipher = createCipheriv(ALGORITHM, deriveKey(secret), iv);
+  if (!secret) {
+    if (isProductionEnv()) throw new Error('Encryption secret is required in production');
+    return plain;
+  }
+  if (isEncrypted(plain)) return plain;
+  const iv = randomBytes(IV_LEN);
+  const cipher = createCipheriv(ALGORITHM, deriveKey(secret), iv, { authTagLength: TAG_LEN });
   const data = Buffer.concat([cipher.update(plain, 'utf8'), cipher.final()]);
   return `${PREFIX}${iv.toString('base64')}:${cipher.getAuthTag().toString('base64')}:${data.toString('base64')}`;
 }
 
+const strictB64 = (x: string | undefined) => {
+  if (!x || !B64.test(x)) throw new Error('Malformed encrypted field');
+  const buf = Buffer.from(x, 'base64');
+  if (buf.toString('base64') !== x) throw new Error('Malformed encrypted field');
+  return buf;
+};
+
 /**
  * Legacy plain values (no prefix) come back unchanged. Unlike the source (which returns '' with a warning),
- * a missing/wrong secret or tampered data throws: callers decide how to degrade.
+ * a missing/wrong secret, malformed format or tampered data throws: callers decide how to degrade.
  */
 export function decryptField(stored: string, secret: string | undefined): string {
-  if (!stored || !stored.startsWith(PREFIX)) return stored;
+  if (!stored || !isEncrypted(stored)) return stored;
   if (!secret) throw new Error('Encrypted field but no encryption secret configured');
-  const [iv, tag, data] = stored.slice(PREFIX.length).split(':');
-  if (!iv || !tag || !data) throw new Error('Malformed encrypted field');
-  const decipher = createDecipheriv(ALGORITHM, deriveKey(secret), Buffer.from(iv, 'base64'));
-  decipher.setAuthTag(Buffer.from(tag, 'base64'));
-  return Buffer.concat([decipher.update(Buffer.from(data, 'base64')), decipher.final()]).toString(
-    'utf8',
-  );
+  const parts = stored.slice(PREFIX.length).split(':');
+  if (parts.length !== 3) throw new Error('Malformed encrypted field');
+  const [iv, tag, data] = parts.map(strictB64) as [Buffer, Buffer, Buffer];
+  if (iv.length !== IV_LEN || tag.length !== TAG_LEN) throw new Error('Malformed encrypted field');
+  const decipher = createDecipheriv(ALGORITHM, deriveKey(secret), iv, { authTagLength: TAG_LEN });
+  decipher.setAuthTag(tag);
+  return Buffer.concat([decipher.update(data), decipher.final()]).toString('utf8');
 }
 
 export const last4 = (plain: string): string => plain.slice(-4);
