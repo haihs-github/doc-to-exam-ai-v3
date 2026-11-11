@@ -30,6 +30,10 @@ interface IUserMethods {
 type UserModelType = Model<IUser, object, IUserMethods>;
 
 let warned = false;
+/** Test hook: re-arm the one-time decrypt warning. */
+export const resetWarned = (): void => {
+  warned = false;
+};
 const readKey = (stored: string): string => {
   try {
     return decryptField(stored, loadEnv().apiKeyEncryptionSecret);
@@ -43,6 +47,16 @@ const readKey = (stored: string): string => {
   }
 };
 
+const hideSensitive = (_doc: unknown, ret: Record<string, unknown>): Record<string, unknown> => {
+  for (const k of ['geminiApiKey', 'password', 'nameSearch', 'tokenVersion']) delete ret[k];
+  return ret;
+};
+
+const assertPlainKey = (v: string): void => {
+  if (isEncrypted(v.trim()))
+    throw new HttpError('VALIDATION', 'API key không hợp lệ.', { field: 'geminiApiKey' });
+};
+
 const UserSchema = new Schema<IUser, UserModelType, IUserMethods>(
   {
     phoneNumber: {
@@ -50,6 +64,8 @@ const UserSchema = new Schema<IUser, UserModelType, IUserMethods>(
       required: [true, 'Số điện thoại là bắt buộc'],
       unique: true,
       trim: true,
+      // Defensive only. TODO(api): Task 7 — chuẩn hóa sdt bằng đúng hàm chuẩn hóa của limiter TRƯỚC khi lưu/tra
+      match: [/^0\d{9,10}$/, 'Số điện thoại không hợp lệ'],
     },
     fullName: {
       type: String,
@@ -65,12 +81,15 @@ const UserSchema = new Schema<IUser, UserModelType, IUserMethods>(
       required: [true, 'Mật khẩu là bắt buộc'],
       minlength: [6, 'Mật khẩu tối thiểu 6 ký tự'],
     },
-    // Stored encrypted; only setGeminiApiKey should write it (the setter is a plain encrypt, no input validation).
+    // Stored encrypted. The setter refuses `enc:v1:` input itself (encryptField would keep it as-is = stored unencrypted).
     geminiApiKey: {
       type: String,
       default: '',
-      set: (v: unknown) =>
-        typeof v === 'string' ? encryptField(v.trim(), loadEnv().apiKeyEncryptionSecret) : v,
+      set: (v: unknown) => {
+        if (typeof v !== 'string') return v;
+        assertPlainKey(v);
+        return encryptField(v.trim(), loadEnv().apiKeyEncryptionSecret);
+      },
       get: (v: string | undefined) => (v ? readKey(v) : ''),
     },
     tokenVersion: { type: Number, default: 0 },
@@ -83,19 +102,23 @@ const UserSchema = new Schema<IUser, UserModelType, IUserMethods>(
     createdAt: { type: Date, default: Date.now },
   },
   {
-    toObject: { getters: true },
-    toJSON: {
-      getters: true,
-      transform: (_doc, ret: Record<string, unknown>) => {
-        for (const k of ['geminiApiKey', 'password', 'nameSearch', 'tokenVersion']) delete ret[k];
-        return ret;
-      },
-    },
+    // virtuals (id) only: getters would decrypt the key on every serialisation. Use doc.geminiApiKey explicitly.
+    toObject: { virtuals: true, transform: hideSensitive },
+    toJSON: { virtuals: true, transform: hideSensitive },
   },
 );
 
 UserSchema.pre('validate', function setNameSearch() {
   if (this.isNew || this.isModified('fullName')) this.nameSearch = toSearchKey(this.fullName);
+});
+// pre('validate') does not run on query updates: keep nameSearch in sync there too.
+UserSchema.pre(['updateOne', 'findOneAndUpdate', 'updateMany'], function syncNameSearch() {
+  const u = this.getUpdate();
+  if (!u || Array.isArray(u)) return;
+  const rec = u as Record<string, unknown>;
+  const set = rec.$set as Record<string, unknown> | undefined;
+  const name = set?.fullName ?? rec.fullName;
+  if (typeof name === 'string') rec.$set = { ...set, nameSearch: toSearchKey(name) };
 });
 UserSchema.index({ role: 1, nameSearch: 1 });
 
@@ -103,9 +126,7 @@ UserSchema.methods.setGeminiApiKey = function setGeminiApiKey(
   this: HydratedDocument<IUser>,
   plain: string,
 ): void {
-  if (isEncrypted(plain.trim())) {
-    throw new HttpError('VALIDATION', 'API key không hợp lệ.', { field: 'geminiApiKey' });
-  }
+  assertPlainKey(plain); // explicit so callers get HttpError (Mongoose would wrap a setter throw)
   this.geminiApiKey = plain;
 };
 

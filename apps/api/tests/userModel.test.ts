@@ -3,7 +3,8 @@
 import mongoose from 'mongoose';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { HttpError } from '../src/lib/handler';
-import { UserModel } from '../src/models/User';
+import { inspect } from 'node:util';
+import { UserModel, resetWarned } from '../src/models/User';
 import { startTestDb } from './helpers';
 
 let db: Awaited<ReturnType<typeof startTestDb>>;
@@ -19,6 +20,7 @@ afterAll(async () => {
 beforeEach(async () => {
   await UserModel.deleteMany({});
   vi.restoreAllMocks();
+  resetWarned();
 });
 
 const mk = (over: Record<string, unknown> = {}) =>
@@ -121,5 +123,59 @@ describe('User model', () => {
     const a = s.toAuthUser();
     expect(a).not.toHaveProperty('hasApiKey');
     expect(a).not.toHaveProperty('apiKeyLast4');
+  });
+});
+
+describe('User model hardening', () => {
+  it('toObject, JSON.stringify and util.inspect leak no sensitive field or value', async () => {
+    const u = await mk();
+    u.setGeminiApiKey('AIza-leak-check-5555');
+    await u.save();
+    const dump = [
+      Object.keys(u.toObject()).join(','),
+      JSON.stringify(u),
+      inspect(u, { depth: 5 }),
+    ].join('\n');
+    for (const bad of [
+      'AIza-leak-check-5555',
+      'hash-hash-hash',
+      'tokenVersion',
+      'nameSearch',
+      'geminiApiKey',
+      'password',
+    ])
+      expect(dump).not.toContain(bad);
+    expect(u.toObject()).toHaveProperty('id');
+  });
+
+  it('updateOne / findOneAndUpdate / updateMany on fullName recompute nameSearch', async () => {
+    const u = await mk();
+    await UserModel.updateOne({ _id: u._id }, { $set: { fullName: 'Lê Đình Ân' } });
+    expect((await UserModel.collection.findOne({ _id: u._id }))?.nameSearch).toBe('le dinh an');
+    await UserModel.findOneAndUpdate({ _id: u._id }, { fullName: 'Phạm Thị Bưởi' });
+    expect((await UserModel.collection.findOne({ _id: u._id }))?.nameSearch).toBe('pham thi buoi');
+    await UserModel.updateMany({}, { $set: { fullName: 'Trần Văn Ơn' } });
+    expect((await UserModel.collection.findOne({ _id: u._id }))?.nameSearch).toBe('tran van on');
+  });
+
+  it('updateOne $set geminiApiKey stores enc:v1: in the raw doc', async () => {
+    const u = await mk();
+    await UserModel.updateOne({ _id: u._id }, { $set: { geminiApiKey: 'AIza-upd-key' } });
+    const raw = await UserModel.collection.findOne({ _id: u._id });
+    expect(raw?.geminiApiKey).toMatch(/^enc:v1:/);
+    expect((await UserModel.findById(u._id))?.geminiApiKey).toBe('AIza-upd-key');
+  });
+
+  it('the schema itself rejects enc:v1: values on create and update', async () => {
+    await expect(mk({ geminiApiKey: 'enc:v1:junk' })).rejects.toBeDefined();
+    const u = await mk();
+    await expect(
+      UserModel.updateOne({ _id: u._id }, { $set: { geminiApiKey: 'enc:v1:junk' } }),
+    ).rejects.toBeDefined();
+    expect((await UserModel.collection.findOne({ _id: u._id }))?.geminiApiKey).toBe('');
+  });
+
+  it('rejects a phone with spaces', async () => {
+    await expect(mk({ phoneNumber: '090 123 4567' })).rejects.toBeDefined();
   });
 });
