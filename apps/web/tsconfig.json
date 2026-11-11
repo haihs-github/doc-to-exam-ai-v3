@@ -6,8 +6,9 @@
   "compileOnSave": false,
   "compilerOptions": {
     "noImplicitOverride": true,
-    "noPropertyAccessFromIndexSignature": true,
-    "strict": true,
+    // "noPropertyAccessFromIndexSignature": true, // Haihs: đóng code cũ, packages/contract (nguồn .ts) dùng o.code trên Record và bị biên dịch theo cờ này - start - end
+    "noPropertyAccessFromIndexSignature": true, // Haihs: bật lại cờ sau khi contract dùng bracket access - start - end
+    "strict": true, // Haihs: bật strict theo yêu cầu Task 7 - start - end
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
