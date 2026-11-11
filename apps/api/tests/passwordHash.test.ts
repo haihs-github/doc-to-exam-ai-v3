@@ -4,6 +4,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { HttpError } from '../src/lib/handler';
 import {
   assertPasswordPolicy,
+  bcryptCost,
+  bcryptTempCost,
   compareDummy,
   comparePassword,
   createGate,
@@ -57,6 +59,27 @@ describe('hash / compare', () => {
   it('hashTempPassword uses BCRYPT_TEMP_COST', async () => {
     vi.stubEnv('BCRYPT_TEMP_COST', '5');
     expect(await hashTempPassword('abcdefgh')).toMatch(/^\$2[aby]\$05\$/);
+  });
+  it('cost parsing: strict integers, boundaries', () => {
+    for (const bad of ['0x0a', '1e1', '10.5', '', ' ', '-5', 'abc'])
+      expect(bcryptCost({ BCRYPT_COST: bad })).toBe(10);
+    expect([3, 4, 15, 16].map((n) => bcryptCost({ BCRYPT_COST: String(n) }))).toEqual([
+      10, 4, 15, 10,
+    ]);
+    expect([3, 4, 14, 15].map((n) => bcryptTempCost({ BCRYPT_TEMP_COST: String(n) }))).toEqual([
+      8, 4, 14, 8,
+    ]);
+    expect(bcryptTempCost({})).toBe(8);
+  });
+  it('hash rejects >72 bytes / non-string; compare never throws for them', async () => {
+    await expect(hashPassword('a'.repeat(73))).rejects.toMatchObject({ code: 'VALIDATION' });
+    await expect(hashTempPassword(5 as unknown as string)).rejects.toMatchObject({
+      code: 'VALIDATION',
+    });
+    const h = await hashPassword('abcdefgh');
+    expect(await comparePassword('x'.repeat(500), h)).toBe(false);
+    expect(await comparePassword(undefined as unknown as string, h)).toBe(false);
+    await expect(compareDummy(undefined as unknown as string)).resolves.toBeUndefined();
   });
   it('invalid cost falls back to default', async () => {
     vi.stubEnv('BCRYPT_COST', '99');
@@ -116,6 +139,25 @@ describe('createGate', () => {
     expect(busy).toHaveLength(1);
     expect((busy[0] as HttpError).code).toBe('SERVER_BUSY');
     expect(out.filter((o) => o === 'ok')).toHaveLength(5);
+  });
+
+  it('never exceeds N concurrent and serves the queue FIFO', async () => {
+    const gate = createGate({ concurrency: 2, maxQueue: 10 });
+    let active = 0;
+    let max = 0;
+    const started: number[] = [];
+    const tasks = Array.from({ length: 6 }, (_, i) =>
+      gate(async () => {
+        started.push(i);
+        active += 1;
+        max = Math.max(max, active);
+        await new Promise((r) => setTimeout(r, 5));
+        active -= 1;
+      }),
+    );
+    await Promise.all(tasks);
+    expect(max).toBe(2);
+    expect(started).toEqual([0, 1, 2, 3, 4, 5]);
   });
 
   it('releases slots when a task fails (no deadlock)', async () => {

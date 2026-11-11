@@ -8,6 +8,7 @@ interface Bcrypt {
   compare(plain: string, hash: string): Promise<boolean>;
 }
 
+// shortcut: bcryptjs fallback blocks the main thread under load, install native bcrypt in prod.
 // Native runs in the libuv threadpool (does not block the event loop); fall back to pure JS with one warning.
 let bcryptPromise: Promise<Bcrypt> | undefined;
 const loadBcrypt = (): Promise<Bcrypt> =>
@@ -27,8 +28,9 @@ const MIN_PASSWORD_LENGTH = 8;
 const MAX_PASSWORD_BYTES = 72; // bcrypt truncates beyond this: reject instead of silently cutting
 
 const costFrom = (raw: string | undefined, min: number, max: number, fallback: number) => {
-  const v = Number(raw);
-  return raw?.trim() && Number.isInteger(v) && v >= min && v <= max ? v : fallback;
+  const t = raw?.trim() ?? '';
+  const v = /^\d+$/.test(t) ? Number(t) : NaN;
+  return v >= min && v <= max ? v : fallback;
 };
 // Read per call so tests can stub env; invalid values fall back to the default.
 export const bcryptCost = (src: Record<string, string | undefined> = process.env) =>
@@ -64,15 +66,22 @@ export function createGate({ concurrency, maxQueue }: { concurrency: number; max
 
 const gate = createGate({ concurrency: MAX_CONCURRENT, maxQueue: MAX_QUEUE });
 
-const hashWith = (plain: string, cost: number) =>
-  gate(async () => (await loadBcrypt()).hash(plain, cost));
-export const hashPassword = (plain: string) => hashWith(plain, bcryptCost());
-export const hashTempPassword = (plain: string) => hashWith(plain, bcryptTempCost());
-export const comparePassword = (plain: string, hash: string) =>
-  gate(async () => (await loadBcrypt()).compare(plain, hash));
+const hashWith = (plain: string, cost: number) => {
+  // Defensive: callers should run assertPasswordPolicy; never let bcrypt silently truncate.
+  if (typeof plain !== 'string' || Buffer.byteLength(plain, 'utf8') > MAX_PASSWORD_BYTES) {
+    throw new HttpError('VALIDATION', 'Mật khẩu không hợp lệ.', { field: 'password' });
+  }
+  return gate(async () => (await loadBcrypt()).hash(plain, cost));
+};
+export const hashPassword = async (plain: string) => hashWith(plain, bcryptCost());
+export const hashTempPassword = async (plain: string) => hashWith(plain, bcryptTempCost());
+// Login path: must NOT throw for long or non-string passwords (returns false); bcrypt compare truncates safely.
+export const comparePassword = async (plain: string, hash: string): Promise<boolean> =>
+  typeof plain !== 'string' ? false : gate(async () => (await loadBcrypt()).compare(plain, hash));
 
 // Dummy hash so the "no such user" path costs about the same as a real compare (same cost, same gate).
 // Failures are not cached: a cached rejection would make unknown accounts fail forever, an account oracle.
+// shortcut: dummy hash is built lazily on first call, so the first unknown-user login is slower; precompute at boot if it matters.
 let dummyHash: Promise<string> | undefined;
 const getDummyHash = () =>
   (dummyHash ??= hashPassword(randomBytes(16).toString('hex')).catch((err: unknown) => {
@@ -82,8 +91,9 @@ const getDummyHash = () =>
 export const resetDummyHash = () => {
   dummyHash = undefined;
 };
+// Never throws for long/non-string input (non-string runs the compare with '').
 export async function compareDummy(plain: string): Promise<void> {
-  await comparePassword(plain, await getDummyHash());
+  await comparePassword(typeof plain === 'string' ? plain : '', await getDummyHash());
 }
 
 /** Throws VALIDATION unless the NEW password is >= 8 code points and <= 72 UTF-8 bytes. */
