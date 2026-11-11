@@ -14,12 +14,14 @@ describe('App', () => {
   });
 
   it('should create the app', () => {
+    TestBed.overrideProvider(ApiClient, { useValue: { get: () => new Subject() } }); // Haihs: tránh gửi request thật - start - end
     const fixture = TestBed.createComponent(App);
     const app = fixture.componentInstance;
     expect(app).toBeTruthy();
   });
 
   it('should render title', async () => {
+    TestBed.overrideProvider(ApiClient, { useValue: { get: () => new Subject() } }); // Haihs: tránh gửi request thật - start - end
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
@@ -49,6 +51,24 @@ describe('App', () => {
       s$.next({ status: 'OK', timestamp: 't', service: 's' });
       await fixture.whenStable();
       expect(el.querySelector('[role="status"]')?.textContent).toContain('OK');
+      expect(el.querySelector('h1')?.textContent).toBe('Doc to Exam AI');
+    });
+
+    it('shows not-ready when status is not OK', async () => {
+      const s$ = new Subject<unknown>();
+      const { fixture, el } = setup(() => s$);
+      s$.next({ status: 'DOWN', timestamp: 't', service: 's' });
+      await fixture.whenStable();
+      expect(el.querySelector('[role="status"]')?.textContent).toContain('không sẵn sàng');
+    });
+
+    it('unsubscribes when destroyed', () => {
+      const s$ = new Subject<unknown>();
+      const { fixture } = setup(() => s$);
+      expect(s$.observed).toBe(true);
+      fixture.destroy();
+      expect(s$.observed).toBe(false);
+      expect(() => s$.next({ status: 'OK' })).not.toThrow();
     });
 
     it('shows a Vietnamese message on error without throwing', async () => {
