@@ -2,3 +2,5 @@
 // Public entry of @doc-to-exam/contract (source-only package).
 export * from './errors';
 export * from './auth'; // Haihs: xuất kiểu auth M1 - start - end
+export * from './classes'; // Haihs: xuất kiểu lớp học M2 - start - end
+export * from './phone'; // Haihs: normalizePhone/PHONE_RE dùng chung - start - end

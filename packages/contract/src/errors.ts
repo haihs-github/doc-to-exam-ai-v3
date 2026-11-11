@@ -16,6 +16,16 @@ export type ErrorCode =
   | 'SECRET_KEY_INVALID'
   | 'SERVER_BUSY'
   // Haihs: thêm mã lỗi auth M1 - end
+  // Haihs: thêm mã lỗi lớp học M2 - start
+  | 'INVITE_INVALID'
+  | 'CLASS_CODE_TAKEN'
+  | 'STUDENT_NOT_FOUND'
+  | 'TEACHER_NOT_FOUND'
+  | 'CLASS_NOT_ACCEPTING'
+  | 'LAST_TEACHER'
+  | 'CSV_INVALID'
+  | 'CSV_TOO_MANY_ROWS'
+  // Haihs: thêm mã lỗi lớp học M2 - end
   | 'INTERNAL';
 
 export interface ApiError {
@@ -49,6 +59,16 @@ export const HTTP_STATUS: Record<ErrorCode, number> = {
   SECRET_KEY_INVALID: 403, // controllers/authController.js:247
   SERVER_BUSY: 503, // controllers/authController.js:204
   // Haihs: status mã lỗi auth M1 - end
+  // Haihs: status mã lỗi lớp học M2 - start
+  INVITE_INVALID: 404, // controllers/classController.js:196
+  CLASS_CODE_TAKEN: 409, // controllers/classController.js:27
+  STUDENT_NOT_FOUND: 404, // controllers/studentAdminController.js:44, memberController.js:19,22
+  TEACHER_NOT_FOUND: 404, // controllers/memberController.js:20,22
+  CLASS_NOT_ACCEPTING: 409, // controllers/memberController.js:27
+  LAST_TEACHER: 409, // controllers/memberController.js:183
+  CSV_INVALID: 422, // controllers/studentAdminController.js:86 (source also sends 400 for a bad multipart request at :81; one status per code here)
+  CSV_TOO_MANY_ROWS: 422, // controllers/studentAdminController.js:115
+  // Haihs: status mã lỗi lớp học M2 - end
   INTERNAL: 500, // middlewares/authMiddleware.js:69 (source wire code is 'INTERNAL_ERROR')
 };
 
