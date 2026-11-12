@@ -1,4 +1,4 @@
-// Created by Haihs on 13/11/2026
+// Created by Haihs on 12/11/2026
 // Prints fresh random secrets for apps/api/.env (JWT, API-key encryption, teacher registration key). Run: node scripts/generate-secrets.mjs
 import { randomBytes } from 'node:crypto';
 

@@ -1,4 +1,4 @@
-// Created by Haihs on 13/11/2026
+// Created by Haihs on 12/11/2026
 // Pure tests: question validation, scoring scale, mcq grading with shuffled options, shuffling, copy names, regrade signature.
 import { describe, expect, it } from 'vitest';
 import { buildCopyTitle, stripCopySuffix } from '../src/lib/examCopyName';
