@@ -15,6 +15,15 @@ import { AuthService } from '../core/auth.service';
         Xin chào, {{ auth.user()?.fullName }}
       </h1>
       <p class="text-base text-gray-600 dark:text-gray-400">Các trang chính đang được xây dựng.</p>
+      <!-- Haihs: M2 Task 15 - liên kết tới trang lớp thật theo vai trò - start -->
+      <p>
+        <a
+          [routerLink]="auth.user()?.role === 'student' ? '/classes' : '/teacher/classes'"
+          class="text-primary-700 dark:text-sky-400 font-semibold hover:underline"
+          >{{ auth.user()?.role === 'student' ? 'Lớp của tôi' : 'Lớp học' }}</a
+        >
+      </p>
+      <!-- Haihs: M2 Task 15 - end -->
       <p>
         <a
           routerLink="/change-password"
