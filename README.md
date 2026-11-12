@@ -108,3 +108,13 @@ Playwright tự khởi động API (DB in-memory, rate limit nới lên 100000, 
 - Import học sinh: `.csv` ≤ 256KB hoặc `.xlsx` ≤ 1MB, tối đa 200 dòng; dependency `read-excel-file` (API) và `qrcode` (web).
 - Trạng thái: M2 chưa có test chạy; toàn bộ test (api, web, E2E `e2e/classes.spec.ts`) chạy một lần sau khi xong mọi milestone.
 <!-- Haihs: tài liệu M2 (lớp học) - end -->
+
+<!-- Haihs: tài liệu M3-M8 - start -->
+## Đề mẫu, ca thi, làm bài, kết quả (M3–M8)
+- Giáo viên: `/teacher/templates` (đề mẫu, thùng rác, tạo đề từ file bằng Gemini — cần API key của chính giáo viên), `/teacher/sittings` (ca thi: mã `/ca/<mã>`, QR, lớp, quyền vào ca, kết quả, chấm tự luận, công bố, xuất Excel).
+- Học sinh: `/sittings` (ca của tôi, nhập mã), `/ca/:mã` → phòng thi `/ca/:mã/room` → `/ca/:mã/result` khi giáo viên đã công bố.
+- Bảo mật: đáp án/giải thích/rubric không bao giờ có trong câu hỏi gửi cho học sinh; điểm tính ở server; nộp trùng bị chặn bằng unique index; route upload dùng cùng kiểm tra `tokenVersion` với các route khác.
+- Biến môi trường tùy chọn: `TEMPLATE_TRASH_DAYS`, `EXAM_CACHE_TTL_MS`, `ESSAY_UPLOAD_*`, `ESSAY_MEDIA_*`, `HTTPS_PROXY` (gọi Gemini qua proxy). Tạo secret: `node scripts/generate-secrets.mjs`.
+- Chạy một instance duy nhất (cache đề, rate limit và semaphore upload nằm trong RAM).
+- Trạng thái: toàn bộ M3–M8 viết xong nhưng CHƯA có test chạy; pha test (api, web, E2E) làm sau.
+<!-- Haihs: tài liệu M3-M8 - end -->

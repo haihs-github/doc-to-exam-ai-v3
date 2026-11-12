@@ -6,6 +6,7 @@ import { CanActivateFn, GuardResult, Router, Routes } from '@angular/router';
 import { filter, map, take } from 'rxjs';
 import { AuthService } from './core/auth.service';
 import { authGuard } from './core/auth.guard';
+import { homePathForRole } from './shared/utils/auth-routing'; // Haihs: M8 - start - end
 import { ChangePassword } from './pages/change-password';
 import { Login } from './pages/login';
 import { About } from './pages/about';
@@ -50,12 +51,20 @@ const rootGuard: CanActivateFn = (route, state) => {
   const auth = inject(AuthService);
   const router = inject(Router);
   const injector = inject(Injector); // the decision may run after the load, outside the injection context
-  return afterLoad(
-    () =>
-      !auth.user() && !auth.loadError()
-        ? router.parseUrl('/about')
-        : (runInInjectionContext(injector, () => authGuard()(route, state)) as GuardResult), // isLoading is false here: synchronous
-  );
+  // return afterLoad(
+  //   () =>
+  //     !auth.user() && !auth.loadError()
+  //       ? router.parseUrl('/about')
+  //       : (runInInjectionContext(injector, () => authGuard()(route, state)) as GuardResult), // isLoading is false here: synchronous
+  // );
+  return afterLoad(() => {
+    if (!auth.user() && !auth.loadError()) return router.parseUrl('/about');
+    // Haihs: M8 - người đã đăng nhập vào / được đưa tới trang chủ theo vai trò (nguồn App.jsx RootRoute) - start
+    const decision = runInInjectionContext(injector, () => authGuard()(route, state)) as GuardResult; // isLoading is false here: synchronous
+    const user = auth.user();
+    return decision === true && user ? router.parseUrl(homePathForRole(user.role)) : decision;
+    // Haihs: M8 - end
+  });
 };
 
 /** /session-error only makes sense with a pending loadError; otherwise go home (which decides by session). */

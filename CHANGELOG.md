@@ -35,6 +35,16 @@
 - `e2e/classes.spec.ts`: luồng lớp (viết, chưa chạy).
 <!-- Haihs: changelog M2 (lớp học) - end -->
 
+<!-- Haihs: changelog M3-M8 (đề mẫu, ca thi, làm bài, tự luận, kết quả, hoàn thiện) - start -->
+### M3–M8 — Đề mẫu, ca thi, làm bài, tự luận, kết quả (viết xong, chưa chạy test: chế độ native)
+- M3 Đề mẫu: model `ExamTemplate` (tên duy nhất theo chủ, thùng rác 30 ngày + TTL), CRUD/nhân bản/khôi phục/xóa vĩnh viễn, validate câu hỏi (`examValidation`), tách đề bằng Gemini (`/api/templates/parse`: trích PDF/Word, chọn model theo phiên bản, hết quota thì thử model khác); web: danh sách + thùng rác, trình soạn câu hỏi (trắc nghiệm/tự luận + rubric), tải file tách đề (`f644666`, `ba815a8`).
+- M4 Ca thi (giáo viên): `ExamSitting`, `SittingGrant`, `SittingSession`, `SittingSubmission`, `EssayUpload`, `EssayMedia`; tạo từ đề mẫu (sao chép câu hỏi), mã ca 6 ký tự, trùng giờ mở theo lớp, khóa sửa câu hỏi khi đang thi + chấm lại, đổi lớp (khóa lạc quan), quyền vào ca; web: danh sách, tạo, chi tiết (mã/QR/lớp/quyền), sửa (`6a63b9c`, `879a2f5`).
+- M5 Làm bài trắc nghiệm: `/api/me/sittings` (danh sách, resolve mã, start với đồng hồ ở server, session, submit chấm trắc nghiệm, chống nộp trùng); đảo câu/phương án theo khối bài đọc; web: Ca của tôi, vào ca, phòng thi (đồng hồ, nháp, chống gian lận, tự nộp khi hết giờ, nộp có thử lại), xong (`ce6bec6`, `477c8e6`).
+- M6 Tự luận: `/api/essay-uploads` (token phiên + JWT cùng kiểm `tokenVersion`, magic bytes, trích .txt/.docx, ảnh/PDF lưu Mongo, semaphore), gắn vào bài nộp, chấm tay có khóa lạc quan, xem tệp gốc, xóa log vi phạm; web: tải tệp trong phòng thi, hộp chấm bài (`d17f76e`, `ac5e2c6`).
+- M7 Công bố/kết quả/xuất: kết quả theo ca (lọc, sắp, thống kê), xuất JSON/CSV/xlsx, tiến độ chấm, công bố/thu hồi nguyên tử, kết quả của học sinh (chỉ điểm, tính lại lúc đọc) (`d17f76e`, `ac5e2c6`).
+- M8 Hoàn thiện: trang chủ theo vai trò, `scripts/generate-secrets.mjs`, `e2e/exam-flow.spec.ts`, tài liệu.
+<!-- Haihs: changelog M3-M8 - end -->
+
 ### Changed
 - Bỏ `.nvmrc`, dùng `engines.node >=22` (`06193b5`, `052a4a7`); README sửa theo.
 - CI: quyền `contents: read`, timeout, concurrency, đổi tên job e2e, cấu hình Playwright, ignore `apps/api/AGENTS.md` (`8b97c41`).
