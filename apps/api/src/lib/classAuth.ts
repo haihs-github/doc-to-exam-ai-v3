@@ -23,16 +23,16 @@ const KNOWN = new Set(Object.values(PERMISSIONS).flat());
 // Same answer for every "you may not know this class exists" reason.
 const notFound = () => fail('NOT_FOUND', 'Không tìm thấy lớp.');
 
-/** Includes authentication (do not also wrap in withAuth). Route param `id` is the class id. */
+/** Includes authentication (do not also wrap in withAuth). Route param `id` (or opts.param) is the class id. */
 export function withClassPermission(
   classPerm: string,
   h: ClassHandler,
-  opts: { withDeleted?: boolean } = {},
+  opts: { withDeleted?: boolean; param?: string } = {},
 ): Handler {
   if (!KNOWN.has(classPerm)) throw new Error(`Unknown permission: ${classPerm}`);
   return withAuth(async (req, ctx: AuthCtx) => {
     const params = ((await ctx.params) ?? {}) as Record<string, string>;
-    const id = params.id;
+    const id = params[opts.param ?? 'id'];
     if (typeof id !== 'string' || !ID_RE.test(id)) return notFound(); // before any DB call
     const classDoc = await ClassModel.findOne({ _id: id }).setOptions({
       withDeleted: opts.withDeleted === true,
