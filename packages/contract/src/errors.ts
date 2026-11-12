@@ -41,6 +41,20 @@ export type ErrorCode =
   | 'SITTING_HAS_SUBMISSIONS'
   | 'SITTING_CLASSES_CHANGED'
   // Haihs: thêm mã lỗi ca thi M4 - end
+  // Haihs: thêm mã lỗi làm bài M5 (và kết quả/tự luận M6-M7) - start
+  | 'INVALID_CODE'
+  | 'SITTING_NOT_FOUND'
+  | 'NOT_GRANTED'
+  | 'NO_SESSION'
+  | 'TIME_UP'
+  | 'SITTING_NOT_STARTED'
+  | 'SITTING_ENDED'
+  | 'ALREADY_SUBMITTED'
+  | 'INVALID_UPLOAD'
+  | 'NO_SUBMISSION'
+  | 'RESULTS_NOT_PUBLISHED'
+  | 'RESULT_UPDATING'
+  // Haihs: thêm mã lỗi làm bài M5 (và kết quả/tự luận M6-M7) - end
   | 'INTERNAL';
 
 export interface ApiError {
@@ -99,6 +113,20 @@ export const HTTP_STATUS: Record<ErrorCode, number> = {
   SITTING_HAS_SUBMISSIONS: 409, // controllers/sittingController.js (deleteSitting)
   SITTING_CLASSES_CHANGED: 409, // controllers/sittingController.js (updateClasses)
   // Haihs: status mã lỗi ca thi M4 - end
+  // Haihs: status mã lỗi làm bài - start
+  INVALID_CODE: 400, // controllers/meSittingController.js (resolve)
+  SITTING_NOT_FOUND: 404,
+  NOT_GRANTED: 403,
+  NO_SESSION: 403,
+  TIME_UP: 403,
+  SITTING_NOT_STARTED: 403,
+  SITTING_ENDED: 403,
+  ALREADY_SUBMITTED: 409,
+  INVALID_UPLOAD: 400,
+  NO_SUBMISSION: 404,
+  RESULTS_NOT_PUBLISHED: 403,
+  RESULT_UPDATING: 409,
+  // Haihs: status mã lỗi làm bài - end
   INTERNAL: 500, // middlewares/authMiddleware.js:69 (source wire code is 'INTERNAL_ERROR')
 };
 
