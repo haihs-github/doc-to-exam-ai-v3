@@ -13,7 +13,8 @@ const newPhone = () =>
 
 const field = (page: Page, name: string) => page.locator(`input[name="${name}"]`);
 const dialog = (page: Page) => page.getByRole('alertdialog');
-const home = (page: Page) => page.getByRole('heading', { name: `Xin chào, ${NAME}` });
+// const home = (page: Page) => page.getByRole('heading', { name: `Xin chào, ${NAME}` }); // Haihs: đóng code cũ, M8 - đăng nhập xong vào trang chủ theo vai trò - start - end
+const home = (page: Page) => page.getByRole('heading', { name: /^(Đề mẫu|Ca thi của tôi)$/ }); // Haihs: M8 - trang chủ theo vai trò - start - end
 
 async function register(page: Page, kind: 'teacher' | 'student', phone: string) {
   await page.goto(kind === 'teacher' ? '/teacher/register' : '/register');
@@ -186,7 +187,8 @@ test('unknown teacher route falls back to home', async ({ page }) => {
 
   // M1 has no /teacher/* routes yet: the router's `**` sends everything unknown to `/` (the role guard is unit-tested).
   await page.goto('/teacher/templates');
-  await expect(page).toHaveURL(/:\d+\/$/);
+  // await expect(page).toHaveURL(/:\d+\/$/); // Haihs: đóng code cũ, M8 - học sinh vào route giáo viên bị đưa về trang chủ của học sinh - start - end
+  await expect(page).toHaveURL(/\/sittings$/); // Haihs: M8 - start - end
   await expect(home(page)).toBeVisible();
 });
 

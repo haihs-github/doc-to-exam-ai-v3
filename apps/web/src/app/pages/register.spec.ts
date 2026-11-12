@@ -249,7 +249,8 @@ describe('Register (teacher)', () => {
       secretKey: 'key-123',
       website: '',
     });
-    expect(s.router.url).toBe('/');
+    // expect(s.router.url).toBe('/'); // Haihs: đóng code cũ M8 trang chủ theo vai trò (TEACHER_HOME, / chuyển hướng) - start - end
+    expect(s.router.url).toBe('/teacher/templates'); // Haihs: M8 trang chủ theo vai trò (TEACHER_HOME, / chuyển hướng) - start - end
   });
 
   it('a filled honeypot is sent as `website` for teachers too', async () => {

@@ -90,9 +90,11 @@ describe('decideRoute edge cases', () => {
 
 describe('postLoginPath', () => {
   it('phân luồng theo vai trò, mustChangePassword và trang đang định vào', () => {
-    expect(homePathForRole('teacher')).toBe('/');
+    // expect(homePathForRole('teacher')).toBe('/'); // Haihs: đóng code cũ M8 trang chủ theo vai trò (TEACHER_HOME, / chuyển hướng) - start - end
+    expect(homePathForRole('teacher')).toBe('/teacher/templates'); // Haihs: M8 trang chủ theo vai trò (TEACHER_HOME, / chuyển hướng) - start - end
     expect(homePathForRole('student')).toBe('/sittings');
-    expect(postLoginPath(u('teacher'))).toBe('/');
+    // expect(postLoginPath(u('teacher'))).toBe('/'); // Haihs: đóng code cũ M8 trang chủ theo vai trò (TEACHER_HOME, / chuyển hướng) - start - end
+    expect(postLoginPath(u('teacher'))).toBe('/teacher/templates'); // Haihs: M8 trang chủ theo vai trò (TEACHER_HOME, / chuyển hướng) - start - end
     expect(postLoginPath(u('student'))).toBe('/sittings');
     expect(postLoginPath(u('student'), '/')).toBe('/sittings');
     expect(postLoginPath(u('student'), '/join/abc')).toBe('/join/abc');

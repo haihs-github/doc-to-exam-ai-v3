@@ -200,7 +200,7 @@ export async function saveUpload(
       try {
         previous = await EssayUploadModel.findOneAndUpdate(filter, update, {
           upsert: true,
-          new: false,
+          returnDocument: 'before',
           lean: true,
         });
         break;

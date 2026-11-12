@@ -640,7 +640,7 @@ export async function regenerateCode(_req: Request, ctx: AuthCtx): Promise<Respo
     ExamSittingModel.findOneAndUpdate(
       { _id: sitting._id, createdBy: ctx.user._id },
       { $set: { code } },
-      { new: true },
+      { returnDocument: 'after' },
     ).lean(),
   );
   if (!updated) throw notFound();

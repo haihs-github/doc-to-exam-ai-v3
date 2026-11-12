@@ -6,6 +6,10 @@ const SECRET = process.env.E2E_TEACHER_SECRET_KEY ?? 'e2e-teacher-secret'; // sa
 const PASSWORD = 'Passw0rd!1';
 const STUDENT_NAME = 'Tran Thi Hoc Sinh';
 
+// `next dev` compiles every route on its first hit, which can take seconds: generous timeouts
+test.describe.configure({ timeout: 120_000 });
+expect.configure({ timeout: 30_000 });
+
 let seq = 0;
 /** Unique 10-digit phone per call: Date.now() tail + in-process counter. */
 const newPhone = () =>
@@ -22,7 +26,7 @@ async function register(page: Page, kind: 'teacher' | 'student', phone: string, 
   await field(page, 'password').fill(PASSWORD);
   if (kind === 'teacher') await field(page, 'secretKey').fill(SECRET);
   await page.getByRole('button', { name: 'Đăng Ký Tài Khoản' }).click();
-  await expect(page.getByRole('heading', { name: `Xin chào, ${name}` })).toBeVisible();
+  await expect(page).not.toHaveURL(/\/register$/); // registered: the app moved on to the role home
 }
 
 /** A separate browser context = a separate device (own localStorage). */
@@ -39,7 +43,8 @@ async function createClass(page: Page, name: string, code: string) {
   await field(page, 'startYear').fill('2025');
   await field(page, 'endYear').fill('2026');
   await page.getByRole('dialog').getByRole('button', { name: 'Tạo lớp' }).click();
-  await expect(page.getByRole('link', { name })).toBeVisible();
+  await dialog(page).getByRole('button', { name: 'OK' }).click(); // the success popup must be dismissed first
+  await expect(page.getByRole('link', { name: name.toUpperCase() })).toBeVisible(); // names are upper-cased
 }
 
 test('duplicate class code is reported under the field', async ({ page }) => {
@@ -53,7 +58,7 @@ test('duplicate class code is reported under the field', async ({ page }) => {
   await field(page, 'startYear').fill('2025');
   await field(page, 'endYear').fill('2026');
   await page.getByRole('dialog').getByRole('button', { name: 'Tạo lớp' }).click();
-  await expect(page.getByRole('dialog')).toContainText('Mã lớp đã được dùng');
+  await expect(page.getByRole('dialog')).toContainText('Mã lớp đã được lớp khác sử dụng');
 });
 
 test('invite link -> student joins (pending) -> teacher approves -> student sees the class', async ({
@@ -66,7 +71,7 @@ test('invite link -> student joins (pending) -> teacher approves -> student sees
   const className = `Lop ${code}`;
   await createClass(page, className, code);
 
-  await page.getByRole('link', { name: className }).click();
+  await page.getByRole('link', { name: className.toUpperCase() }).click();
   await page.getByRole('tab', { name: 'Mời tham gia' }).click();
   await page.getByRole('button', { name: 'Hiện link' }).first().click();
   const link = (await page.locator('p.font-mono').first().innerText()).trim();
@@ -82,9 +87,11 @@ test('invite link -> student joins (pending) -> teacher approves -> student sees
   await page.getByRole('button', { name: 'Chờ duyệt' }).click();
   await page.getByRole('button', { name: 'Thao tác với Tran Thi Hoc Sinh' }).click();
   await page.getByRole('menuitem', { name: 'Duyệt' }).click();
+  await expect(dialog(page)).toContainText('Đã duyệt học sinh'); // the POST has finished (cold-compiled)
+  await dialog(page).getByRole('button', { name: 'OK' }).click();
 
   await student.page.goto('/classes');
-  await expect(student.page.getByRole('link', { name: className })).toBeVisible();
+  await expect(student.page.getByRole('link', { name: className.toUpperCase() })).toBeVisible();
   await student.context.close();
 });
 
@@ -96,7 +103,7 @@ test('teacher resets a password; the student must change it', async ({
   await register(page, 'teacher', newPhone(), 'Giao Vien C');
   const code = `RST${uniq()}`;
   await createClass(page, `Lop ${code}`, code);
-  await page.getByRole('link', { name: `Lop ${code}` }).click();
+  await page.getByRole('link', { name: `LOP ${code}` }).click();
   const studentPhone = newPhone();
 
   // the student joins through the invite link
@@ -106,16 +113,19 @@ test('teacher resets a password; the student must change it', async ({
   const student = await newDevice(browser, baseURL);
   await register(student.page, 'student', studentPhone, STUDENT_NAME);
   await student.page.goto(link);
+  await expect(student.page.getByRole('status')).toContainText('chờ giáo viên duyệt'); // the join has finished
 
   await page.getByRole('tab', { name: 'Học sinh' }).click();
   await page.getByRole('button', { name: 'Chờ duyệt' }).click();
   await page.getByRole('button', { name: 'Duyệt tất cả' }).click();
   await dialog(page).getByRole('button', { name: 'Duyệt tất cả' }).click();
+  await expect(dialog(page)).toContainText('Đã duyệt tất cả');
+  await dialog(page).getByRole('button', { name: 'OK' }).click();
   await page.getByRole('button', { name: 'Đã duyệt' }).click();
   await page.getByRole('button', { name: 'Thao tác với Tran Thi Hoc Sinh' }).click();
   await page.getByRole('menuitem', { name: 'Đặt lại mật khẩu' }).click();
   await dialog(page).getByRole('button', { name: 'Đặt lại' }).click();
-  const temp = (await page.getByLabel('Mật khẩu tạm').innerText()).trim();
+  const temp = (await page.getByLabel('Mật khẩu tạm', { exact: true }).innerText()).trim();
   expect(temp).toMatch(/^[A-Z2-9]{10}$/);
   await page.getByRole('button', { name: 'Đã lưu, đóng' }).click();
 
@@ -135,14 +145,17 @@ test('delete moves the class to the trash and restore brings it back', async ({ 
   const name = `Lop ${code}`;
   await createClass(page, name, code);
 
-  await page.getByRole('button', { name: `Thao tác với lớp ${name}` }).click();
+  await page.getByRole('button', { name: `Thao tác với lớp ${name.toUpperCase()}` }).click();
   await page.getByRole('menuitem', { name: 'Xóa' }).click();
   await dialog(page).getByRole('button', { name: 'Xóa lớp' }).click();
+  await expect(page.getByRole('link', { name: name.toUpperCase() })).toHaveCount(0); // the DELETE (cold-compiled by `next dev`) has finished
   await page.getByRole('button', { name: 'Thùng rác' }).click();
-  await expect(page.getByText(name)).toBeVisible();
+  await expect(page.getByText(name.toUpperCase())).toBeVisible();
 
-  await page.getByRole('button', { name: `Thao tác với lớp ${name}` }).click();
+  await page.getByRole('button', { name: `Thao tác với lớp ${name.toUpperCase()}` }).click();
   await page.getByRole('menuitem', { name: 'Khôi phục' }).click();
+  await expect(dialog(page)).toContainText('Đã khôi phục lớp');
+  await dialog(page).getByRole('button', { name: 'OK' }).click();
   await page.getByRole('button', { name: 'Đang hoạt động' }).click();
-  await expect(page.getByRole('link', { name })).toBeVisible();
+  await expect(page.getByRole('link', { name: name.toUpperCase() })).toBeVisible();
 });

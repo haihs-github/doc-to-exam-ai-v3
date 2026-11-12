@@ -15,6 +15,28 @@ const RATE_LIMITS = [
   'LOGIN_PHONE_GLOBAL',
   'CHANGE_PASSWORD',
   'STUDENT_API',
+  // Haihs: M2-M6 - các bucket lớp/ca thi/upload cũng được nới cho E2E - start
+  'CLASS_JOIN',
+  'CLASS_JOIN_IP',
+  'MEMBER_SEARCH',
+  'MEMBER_SEARCH_DAY',
+  'MEMBER_LOOKUP',
+  'CSV_IMPORT',
+  'RESET_PASSWORD',
+  'DUPLICATE',
+  'TEACHER_UPLOAD',
+  'SITTING_RESOLVE',
+  'SITTING_RESOLVE_IP',
+  'SITTING_START',
+  'SITTING_START_USER',
+  'SITTING_SUBMIT',
+  'SITTING_SUBMIT_USER',
+  'RESULT_VIEW',
+  'RESULT_VIEW_USER',
+  'ESSAY_UPLOAD_IP',
+  'ESSAY_UPLOAD_BAD',
+  'ESSAY_UPLOAD_SESSION',
+  // Haihs: M2-M6 - end
 ];
 // Haihs: hằng số cho env E2E của API - end
 

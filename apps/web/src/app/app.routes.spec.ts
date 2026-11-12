@@ -2,6 +2,8 @@
 // Route table + guards integration: real `routes`, stubbed AuthService.
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http'; // Haihs: M8 - / chuyển tới trang thật cần HttpClient - start - end
+import { provideHttpClientTesting } from '@angular/common/http/testing'; // Haihs: M8 - start - end
 import { Router, provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import type { AuthUser } from '@doc-to-exam/contract';
@@ -27,6 +29,8 @@ const setup = async () => {
   const loadError = signal('');
   TestBed.configureTestingModule({
     providers: [
+      provideHttpClient(), // Haihs: M8 - start - end
+      provideHttpClientTesting(), // Haihs: M8 - start - end
       provideRouter([
         { path: 'teacher-only', canActivate: [authGuard(['teacher'])], component: TeacherOnly },
         ...routes,
@@ -80,23 +84,30 @@ describe('routes', () => {
   it('student: / shows the placeholder home; unbuilt targets fall through to / without looping', async () => {
     const s = await setup();
     s.user.set(mk());
-    expect(await s.go('/')).toBe('/');
-    expect(s.harness.routeNativeElement?.textContent).toContain('Xin chào, Nguyễn A');
-    expect(await s.go('/sittings')).toBe('/');
-    expect(await s.go('/teacher/templates')).toBe('/');
+    // expect(await s.go('/')).toBe('/'); // Haihs: đóng code cũ M8 trang chủ theo vai trò (TEACHER_HOME, / chuyển hướng) - start - end
+    expect(await s.go('/')).toBe('/sittings'); // Haihs: M8 trang chủ theo vai trò (TEACHER_HOME, / chuyển hướng) - start - end
+    // expect(s.harness.routeNativeElement?.textContent).toContain('Xin chào, Nguyễn A'); // Haihs: đóng code cũ M8 trang chủ theo vai trò (TEACHER_HOME, / chuyển hướng) - start - end
+    expect(s.harness.routeNativeElement?.textContent).toContain('Ca thi của tôi'); // Haihs: M8 trang chủ theo vai trò (TEACHER_HOME, / chuyển hướng) - start - end
+    // expect(await s.go('/sittings')).toBe('/'); // Haihs: đóng code cũ M8 trang chủ theo vai trò (TEACHER_HOME, / chuyển hướng) - start - end
+    expect(await s.go('/sittings')).toBe('/sittings'); // Haihs: M8 trang chủ theo vai trò (TEACHER_HOME, / chuyển hướng) - start - end
+    // expect(await s.go('/teacher/templates')).toBe('/'); // Haihs: đóng code cũ M8 trang chủ theo vai trò (TEACHER_HOME, / chuyển hướng) - start - end
+    expect(await s.go('/teacher/templates')).toBe('/sittings'); // Haihs: M8 trang chủ theo vai trò (TEACHER_HOME, / chuyển hướng) - start - end
   });
 
   it('teacher: / shows the placeholder home', async () => {
     const s = await setup();
     s.user.set(mk({ role: 'teacher', fullName: 'Cô B' }));
-    expect(await s.go('/')).toBe('/');
-    expect(s.harness.routeNativeElement?.textContent).toContain('Xin chào, Cô B');
+    // expect(await s.go('/')).toBe('/'); // Haihs: đóng code cũ M8 trang chủ theo vai trò (TEACHER_HOME, / chuyển hướng) - start - end
+    expect(await s.go('/')).toBe('/teacher/templates'); // Haihs: M8 trang chủ theo vai trò (TEACHER_HOME, / chuyển hướng) - start - end
+    // expect(s.harness.routeNativeElement?.textContent).toContain('Xin chào, Cô B'); // Haihs: đóng code cũ M8 trang chủ theo vai trò (TEACHER_HOME, / chuyển hướng) - start - end
+    expect(s.harness.routeNativeElement?.textContent).toContain('Đề mẫu'); // Haihs: M8 trang chủ theo vai trò (TEACHER_HOME, / chuyển hướng) - start - end
   });
 
   it('student on a teacher route -> /', async () => {
     const s = await setup();
     s.user.set(mk());
-    expect(await s.go('/teacher-only')).toBe('/');
+    // expect(await s.go('/teacher-only')).toBe('/'); // Haihs: đóng code cũ M8 trang chủ theo vai trò (TEACHER_HOME, / chuyển hướng) - start - end
+    expect(await s.go('/teacher-only')).toBe('/sittings'); // Haihs: M8 trang chủ theo vai trò (TEACHER_HOME, / chuyển hướng) - start - end
   });
 
   it('mustChangePassword: / and guarded routes -> /change-password, which itself is reachable', async () => {
@@ -128,7 +139,8 @@ describe('routes', () => {
     const s = await setup();
     expect(await s.go('/session-error')).toBe('/about');
     s.user.set(mk());
-    expect(await s.go('/session-error')).toBe('/');
+    // expect(await s.go('/session-error')).toBe('/'); // Haihs: đóng code cũ M8 trang chủ theo vai trò (TEACHER_HOME, / chuyển hướng) - start - end
+    expect(await s.go('/session-error')).toBe('/sittings'); // Haihs: M8 trang chủ theo vai trò (TEACHER_HOME, / chuyển hướng) - start - end
   });
 
   it('/ waits for the startup /me load (no flash of /about for a logged-in user)', async () => {
@@ -141,6 +153,7 @@ describe('routes', () => {
     s.isLoading.set(false);
     TestBed.tick();
     await nav;
-    expect(s.router.url).toBe('/');
+    // expect(s.router.url).toBe('/'); // Haihs: đóng code cũ M8 trang chủ theo vai trò (TEACHER_HOME, / chuyển hướng) - start - end
+    expect(s.router.url).toBe('/sittings'); // Haihs: M8 trang chủ theo vai trò (TEACHER_HOME, / chuyển hướng) - start - end
   });
 });
