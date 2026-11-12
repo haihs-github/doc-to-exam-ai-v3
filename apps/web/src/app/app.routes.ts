@@ -15,6 +15,8 @@ import { SessionError } from './pages/session-error';
 import { JoinClass } from './pages/join-class'; // Haihs: M2 Task 14 - trang học sinh - start - end
 import { MyClassDetail } from './pages/my-class-detail'; // Haihs: M2 Task 14 - start - end
 import { MyClasses } from './pages/my-classes'; // Haihs: M2 Task 14 - start - end
+import { TeacherTemplates } from './pages/teacher-templates'; // Haihs: M3 - trang đề mẫu - start - end
+import { TemplateEditor } from './pages/template-editor'; // Haihs: M3 - start - end
 import { TeacherClasses } from './pages/teacher-classes';
 import { TeacherClassDetail } from './pages/teacher-class-detail'; // Haihs: M2 Task 12 - chi tiết lớp - start - end
 
@@ -72,5 +74,10 @@ export const routes: Routes = [
   { path: 'classes', canActivate: [authGuard(['student'], 'student')], component: MyClasses },
   { path: 'classes/:id', canActivate: [authGuard(['student'], 'student')], component: MyClassDetail },
   // Haihs: M2 Task 14 - end
+  // Haihs: M3 - đề mẫu giáo viên: danh sách/thùng rác, soạn mới, sửa - start
+  { path: 'teacher/templates', canActivate: [authGuard(['teacher'], 'teacher')], component: TeacherTemplates },
+  { path: 'teacher/templates/new', canActivate: [authGuard(['teacher'], 'teacher')], component: TemplateEditor },
+  { path: 'teacher/templates/:id/edit', canActivate: [authGuard(['teacher'], 'teacher')], component: TemplateEditor },
+  // Haihs: M3 - end
   { path: '**', redirectTo: '' },
 ];
