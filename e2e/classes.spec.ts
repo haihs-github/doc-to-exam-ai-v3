@@ -1,6 +1,6 @@
 // Created by Haihs on 12/11/2026
 // Classes E2E (M2): teacher creates a class and an invite link, student joins and is approved, reset password, trash/restore.
-import { expect, test, type Browser, type Page } from '@playwright/test';
+import { expect as baseExpect, test, type Browser, type Page } from '@playwright/test';
 
 const SECRET = process.env.E2E_TEACHER_SECRET_KEY ?? 'e2e-teacher-secret'; // same default as playwright.config.ts
 const PASSWORD = 'Passw0rd!1';
@@ -8,7 +8,7 @@ const STUDENT_NAME = 'Tran Thi Hoc Sinh';
 
 // `next dev` compiles every route on its first hit, which can take seconds: generous timeouts
 test.describe.configure({ timeout: 120_000 });
-expect.configure({ timeout: 30_000 });
+const expect = baseExpect.configure({ timeout: 30_000 }); // configure() returns a NEW expect
 
 let seq = 0;
 /** Unique 10-digit phone per call: Date.now() tail + in-process counter. */

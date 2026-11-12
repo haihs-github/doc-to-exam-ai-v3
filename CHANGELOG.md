@@ -28,7 +28,7 @@
 - README: hướng dẫn chạy dev, test qua `scripts/limited.sh`, giới hạn một instance (D9), same-origin (D13).
 
 <!-- Haihs: changelog M2 (lớp học) - start -->
-### M2 — Lớp và học sinh (chưa chạy test: theo yêu cầu "native", test dồn về cuối)
+### M2 — Lớp và học sinh (T4–T8, T11–T15 viết ở chế độ native; đã được test tích hợp và E2E ở pha test cuối)
 - `packages/contract`: kiểu lớp/thành viên/mời/import, 8 mã lỗi lớp, `normalizePhone` dùng chung (`0cb2cb3`).
 - `apps/api`: plugin soft-delete, `Class`, `ClassMember`, `toUpperVi` (`59a023e`, `aadc321`); `withClassPermission` (404 cho người ngoài lớp), CRUD/khôi phục lớp (`772e6d8`); link mời + `POST /api/classes/join` (`02d94da`); quản lý học sinh, đặt lại mật khẩu, quản lý giáo viên, `/api/me/classes`, import CSV/XLSX (commit native cuối nhánh `m2/api`).
 - `apps/web`: `ClassesApi`, tiện ích lớp (`dec05d5`), UI kit Pager/Skeleton/ActionMenu/QR/Select (`37d0281`, `5e986c8`), danh sách lớp giáo viên với 3 tab (`f50f269`, `abd3175`), chi tiết lớp + tab học sinh/giáo viên/mời + import + mật khẩu tạm, trang học sinh Join/MyClasses/MyClassDetail (`a869929`).
@@ -36,7 +36,7 @@
 <!-- Haihs: changelog M2 (lớp học) - end -->
 
 <!-- Haihs: changelog M3-M8 (đề mẫu, ca thi, làm bài, tự luận, kết quả, hoàn thiện) - start -->
-### M3–M8 — Đề mẫu, ca thi, làm bài, tự luận, kết quả (viết xong, chưa chạy test: chế độ native)
+### M3–M8 — Đề mẫu, ca thi, làm bài, tự luận, kết quả (đã chạy: API 409 test, web 430 test, E2E 20 test xanh)
 - M3 Đề mẫu: model `ExamTemplate` (tên duy nhất theo chủ, thùng rác 30 ngày + TTL), CRUD/nhân bản/khôi phục/xóa vĩnh viễn, validate câu hỏi (`examValidation`), tách đề bằng Gemini (`/api/templates/parse`: trích PDF/Word, chọn model theo phiên bản, hết quota thì thử model khác); web: danh sách + thùng rác, trình soạn câu hỏi (trắc nghiệm/tự luận + rubric), tải file tách đề (`f644666`, `ba815a8`).
 - M4 Ca thi (giáo viên): `ExamSitting`, `SittingGrant`, `SittingSession`, `SittingSubmission`, `EssayUpload`, `EssayMedia`; tạo từ đề mẫu (sao chép câu hỏi), mã ca 6 ký tự, trùng giờ mở theo lớp, khóa sửa câu hỏi khi đang thi + chấm lại, đổi lớp (khóa lạc quan), quyền vào ca; web: danh sách, tạo, chi tiết (mã/QR/lớp/quyền), sửa (`6a63b9c`, `879a2f5`).
 - M5 Làm bài trắc nghiệm: `/api/me/sittings` (danh sách, resolve mã, start với đồng hồ ở server, session, submit chấm trắc nghiệm, chống nộp trùng); đảo câu/phương án theo khối bài đọc; web: Ca của tôi, vào ca, phòng thi (đồng hồ, nháp, chống gian lận, tự nộp khi hết giờ, nộp có thử lại), xong (`ce6bec6`, `477c8e6`).
