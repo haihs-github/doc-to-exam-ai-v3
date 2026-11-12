@@ -6,3 +6,4 @@ export * from './classes'; // Haihs: xuất kiểu lớp học M2 - start - end
 export * from './phone'; // Haihs: normalizePhone/PHONE_RE dùng chung - start - end
 export * from './templates'; // Haihs: xuất kiểu đề mẫu M3 - start - end
 export * from './sittings'; // Haihs: xuất kiểu ca thi M4 - start - end
+export * from './exam-taking'; // Haihs: xuất kiểu làm bài M5 - start - end

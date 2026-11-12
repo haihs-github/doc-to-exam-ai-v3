@@ -139,4 +139,14 @@ export const LIMITERS = {
   // Haihs: limiter tách đề bằng AI (tốn quota Gemini, theo user: 10 lần/10 phút) - start
   TEACHER_UPLOAD: createRateLimiter({ name: 'TEACHER_UPLOAD', max: 10, windowMs: 10 * M, key: user }),
   // Haihs: limiter tách đề bằng AI - end
+  // Haihs: limiter luồng ca thi của học sinh (nguồn rateLimit.js: resolve chỉ lần sai; start/submit hoàn lượt khi 5xx) - start
+  SITTING_RESOLVE: createRateLimiter({ name: 'SITTING_RESOLVE', max: 20, windowMs: 10 * M, key: user, count: 'failures' }),
+  SITTING_RESOLVE_IP: createRateLimiter({ name: 'SITTING_RESOLVE_IP', max: 300, windowMs: 10 * M, key: ip, count: 'failures' }),
+  SITTING_START: createRateLimiter({ name: 'SITTING_START', max: 400, windowMs: M, key: ip, refund5xx: true }),
+  SITTING_START_USER: createRateLimiter({ name: 'SITTING_START_USER', max: 30, windowMs: M, key: user, refund5xx: true }),
+  SITTING_SUBMIT: createRateLimiter({ name: 'SITTING_SUBMIT', max: 400, windowMs: M, key: ip, refund5xx: true }),
+  SITTING_SUBMIT_USER: createRateLimiter({ name: 'SITTING_SUBMIT_USER', max: 10, windowMs: M, key: user, refund5xx: true }),
+  RESULT_VIEW: createRateLimiter({ name: 'RESULT_VIEW', max: 400, windowMs: M, key: ip, refund5xx: true }),
+  RESULT_VIEW_USER: createRateLimiter({ name: 'RESULT_VIEW_USER', max: 30, windowMs: M, key: user, refund5xx: true }),
+  // Haihs: limiter luồng ca thi của học sinh - end
 } as const;
