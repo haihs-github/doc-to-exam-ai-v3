@@ -100,3 +100,11 @@ scripts/limited.sh npx playwright test
 
 Playwright tự khởi động API (DB in-memory, rate limit nới lên 100000, `TEACHER_SECRET_KEY` lấy từ `E2E_TEACHER_SECRET_KEY`, mặc định `e2e-teacher-secret`) và web. Timeout khởi động API là 240 giây vì lần đầu phải tải binary MongoDB. Server đang chạy sẵn (ngoài CI) được tái dùng và khi đó cấu hình env của Playwright không áp dụng.
 <!-- Haihs: tài liệu M1 (tài khoản, auth, biến môi trường, DB dev, E2E) - end -->
+
+<!-- Haihs: tài liệu M2 (lớp học) - start -->
+## Lớp học (M2)
+- API: `/api/classes/**` (giáo viên) và `/api/me/classes/**` (học sinh); người ngoài lớp luôn nhận 404; token mời chỉ trả cho giáo viên của lớp, mật khẩu tạm chỉ xuất hiện một lần trong response (`Cache-Control: no-store`).
+- Web: `/teacher/classes`, `/teacher/classes/:id?tab=students|teachers|invite`, `/join`, `/join/:token`, `/classes`, `/classes/:id`.
+- Import học sinh: `.csv` ≤ 256KB hoặc `.xlsx` ≤ 1MB, tối đa 200 dòng; dependency `read-excel-file` (API) và `qrcode` (web).
+- Trạng thái: M2 chưa có test chạy; toàn bộ test (api, web, E2E `e2e/classes.spec.ts`) chạy một lần sau khi xong mọi milestone.
+<!-- Haihs: tài liệu M2 (lớp học) - end -->
