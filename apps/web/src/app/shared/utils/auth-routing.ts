@@ -2,7 +2,11 @@
 // Pure route decisions by role / mustChangePassword (port of client authRouting.js; no Angular imports).
 import type { AuthUser, UserRole } from '@doc-to-exam/contract';
 
-export const TEACHER_HOME = '/';
+// Haihs: M8 - trang chủ giáo viên là danh sách đề mẫu (nguồn: /teacher/templates) - start
+// đóng code cũ
+// export const TEACHER_HOME = '/';
+export const TEACHER_HOME = '/teacher/templates';
+// Haihs: M8 - trang chủ giáo viên là danh sách đề mẫu - end
 export const STUDENT_HOME = '/sittings';
 export const CHANGE_PASSWORD_PATH = '/change-password';
 export const TEACHER_LOGIN_PATH = '/teacher/login';
