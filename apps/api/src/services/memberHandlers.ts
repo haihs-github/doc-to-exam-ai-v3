@@ -266,3 +266,35 @@ export const removeMember =
     await guardedDeleteMember(classDoc._id, member.userId); // throws LAST_TEACHER
     return ok(null, { message: 'Đã gỡ.' });
   };
+
+export const listTeachers: ClassHandler = async (req, { classDoc }) => {
+  const status = statusOr(new URL(req.url).searchParams.get('status'), 'approved');
+  const wanted = (STATUSES as readonly string[]).includes(
+    new URL(req.url).searchParams.get('status') ?? '',
+  );
+  const members = await ClassMemberModel.find({
+    classId: classDoc._id,
+    memberRole: 'teacher',
+    ...(wanted ? { status } : {}),
+  })
+    .select('userId status requestedAt approvedAt')
+    .lean();
+  const users = await UserModel.find({ _id: { $in: members.map((m) => m.userId) } })
+    .select('fullName phoneNumber nameSearch')
+    .sort({ nameSearch: 1 })
+    .lean();
+  const byId = new Map(members.map((m) => [String(m.userId), m]));
+  return ok(
+    users.map((u) => {
+      const m = byId.get(String(u._id))!;
+      return {
+        userId: String(u._id),
+        fullName: u.fullName,
+        phoneNumber: u.phoneNumber,
+        status: m.status,
+        requestedAt: m.requestedAt.toISOString(),
+        ...(m.approvedAt ? { approvedAt: m.approvedAt.toISOString() } : {}),
+      };
+    }),
+  );
+};
