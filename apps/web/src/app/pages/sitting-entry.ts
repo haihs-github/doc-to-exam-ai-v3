@@ -71,8 +71,10 @@ import {
           }}</a>
         }
         @if (s.myState === 'submitted') {
-          <a [routerLink]="['/ca', s.code, 'done']" class="btn-secondary inline-flex"
-            >Xem trạng thái bài nộp</a
+          <a
+            [routerLink]="['/ca', s.code, s.result ? 'result' : 'done']"
+            class="btn-secondary inline-flex"
+            >{{ s.result ? 'Xem kết quả' : 'Xem trạng thái bài nộp' }}</a
           >
         }
       }

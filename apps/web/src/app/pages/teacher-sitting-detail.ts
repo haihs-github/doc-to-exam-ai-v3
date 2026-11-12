@@ -18,22 +18,23 @@ import { AlertService } from '../shared/ui/alert.service';
 import { ConfirmService } from '../shared/ui/confirm-modal';
 import { QrCode } from '../shared/ui/qr-code';
 import { SittingGrantsTab } from '../shared/ui/sitting-grants-tab';
+import { SittingResultsPanel } from '../shared/ui/sitting-results-panel';
 import { Skeleton } from '../shared/ui/skeleton';
 import { copyToClipboard } from '../shared/utils/browser';
 import { formatDateTime } from '../shared/utils/date-format';
 import { fetchAll } from '../shared/utils/fetch-all';
 import { STATUS_LABEL, describeSittingError } from '../shared/utils/sitting-ui';
 
-type Tab = 'info' | 'grants';
-// TODO(web): M7 thêm tab `results` (kết quả, chấm tự luận, công bố)
+type Tab = 'info' | 'grants' | 'results';
 const TABS: [Tab, string][] = [
   ['info', 'Thông tin'],
   ['grants', 'Học sinh được vào ca'],
+  ['results', 'Kết quả'],
 ];
 
 @Component({
   selector: 'app-teacher-sitting-detail',
-  imports: [RouterLink, QrCode, SittingGrantsTab, Skeleton],
+  imports: [RouterLink, QrCode, SittingGrantsTab, SittingResultsPanel, Skeleton],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="container-fluid space-y-6 py-8">
@@ -187,6 +188,8 @@ const TABS: [Tab, string][] = [
                 </button>
               </section>
             </div>
+          } @else if (tab() === 'results') {
+            <app-sitting-results-panel [sittingId]="s.id" />
           } @else {
             <app-sitting-grants-tab
               [sittingId]="s.id"

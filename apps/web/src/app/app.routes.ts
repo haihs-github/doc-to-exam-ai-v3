@@ -25,6 +25,7 @@ import { ExamRoom } from './pages/exam-room'; // Haihs: M5 - học sinh làm bà
 import { ExamSuccess } from './pages/exam-success'; // Haihs: M5 - start - end
 import { MySittings } from './pages/my-sittings'; // Haihs: M5 - start - end
 import { SittingEntry } from './pages/sitting-entry'; // Haihs: M5 - start - end
+import { SittingResult } from './pages/sitting-result'; // Haihs: M7 - kết quả của học sinh - start - end
 import { TeacherClasses } from './pages/teacher-classes';
 import { TeacherClassDetail } from './pages/teacher-class-detail'; // Haihs: M2 Task 12 - chi tiết lớp - start - end
 
@@ -97,6 +98,7 @@ export const routes: Routes = [
   { path: 'sittings', canActivate: [authGuard(['student'], 'student')], component: MySittings },
   { path: 'ca/:code', canActivate: [authGuard(['student', 'teacher'], 'student')], component: SittingEntry },
   { path: 'ca/:code/room', canActivate: [authGuard(['student', 'teacher'], 'student')], component: ExamRoom },
+  { path: 'ca/:code/result', canActivate: [authGuard(['student', 'teacher'], 'student')], component: SittingResult }, // Haihs: M7 - start - end
   { path: 'ca/:code/done', canActivate: [authGuard(['student', 'teacher'], 'student')], component: ExamSuccess },
   // Haihs: M5 - end
   { path: '**', redirectTo: '' },
