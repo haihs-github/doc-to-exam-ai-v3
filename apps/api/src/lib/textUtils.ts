@@ -25,3 +25,9 @@ export const toSearchKey = (raw: unknown): string =>
 // Haihs: escapeRegExp cho tìm kiếm lớp theo tên/mã (Task 3) - start
 export const escapeRegExp = (str: unknown): string => String(str ?? '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 // Haihs: escapeRegExp cho tìm kiếm lớp theo tên/mã (Task 3) - end
+// Haihs: normalizeString + giới hạn độ dài dùng cho đề mẫu/ca thi (M3) - start
+export const LIMITS = { TITLE_MAX: 255, DESCRIPTION_MAX: 255 } as const;
+/** Key for unique names: trim, lower-case, collapse whitespace (no accent stripping). */
+export const normalizeString = (str: unknown): string =>
+  str === null || str === undefined ? '' : String(str).trim().toLowerCase().replace(/\s+/g, ' ');
+// Haihs: normalizeString + giới hạn độ dài dùng cho đề mẫu/ca thi (M3) - end

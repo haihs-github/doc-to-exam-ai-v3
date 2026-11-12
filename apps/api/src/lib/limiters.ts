@@ -133,4 +133,10 @@ export const LIMITERS = {
     refund5xx: true,
   }),
   // Haihs: limiter tìm/thêm thành viên, đặt lại mật khẩu, import - end
+  // Haihs: limiter nhân bản đề mẫu (nguồn: DUPLICATE_RATE_MAX/WINDOW_MS, mặc định 10/phút theo user) - start
+  DUPLICATE: createRateLimiter({ name: 'DUPLICATE', max: 10, windowMs: M, key: user }),
+  // Haihs: limiter nhân bản đề mẫu - end
+  // Haihs: limiter tách đề bằng AI (tốn quota Gemini, theo user: 10 lần/10 phút) - start
+  TEACHER_UPLOAD: createRateLimiter({ name: 'TEACHER_UPLOAD', max: 10, windowMs: 10 * M, key: user }),
+  // Haihs: limiter tách đề bằng AI - end
 } as const;
