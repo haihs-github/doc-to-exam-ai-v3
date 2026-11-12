@@ -67,3 +67,23 @@ Vai trò agent (mỗi agent một việc, context riêng): nghiên cứu · vi�
 
 ## 7. Để lại cho người lập kế hoạch
 Chọn phiên bản cụ thể (Next, Angular, Tailwind 3.4 hay mới hơn — hỏi người dùng nếu đổi), thư viện validation, cách đóng gói/triển khai hai app, chia nhỏ task trong từng milestone, định dạng chính xác của `code` lỗi (liệt kê trong `packages/contract`).
+
+## 8. Quyết định bổ sung (M1 — Tài khoản), 11/11/2026
+Người dùng đã chốt qua AskUserQuestion:
+| # | Quyết định |
+|---|---|
+| D15 | M1 làm parity auth ĐẦY ĐỦ: giáo viên + học sinh (đăng ký/đăng nhập), RBAC, đủ bucket rate limit, UI auth (Login/Register/ChangePassword/ApiKey) |
+| D16 | `connectDb` có fallback MongoDB in-memory cho dev/E2E (như nguồn); production luôn tắt (giữ quy tắc M0: `ALLOW_IN_MEMORY_DB` chỉ có nghĩa ở development/test) |
+| D17 | JWT lưu `localStorage['auth_token']` + header `Authorization: Bearer` như nguồn (rủi ro XSS được ghi nhận) |
+| D18 | M0 chưa merge vào `main`; chỉ merge sau khi xong tất cả milestone (người dùng chốt) |
+| D19 | Prettier chỉ áp cho file MỚI từ M1; file M0 giữ nguyên dòng cũ (đã chốt khi hoàn tác format M0) |
+
+Các lựa chọn của người viết (chưa duyệt riêng): rate limit trong RAM tự viết (D9 một instance) với đủ bucket trong backend inventory §1.4; `TRUST_PROXY` đọc từ env (production mặc định 1 hop, dev 0) để lấy IP; `instrumentation.ts` gọi `loadEnv()` + `connectDb()` + `seedRbac()` lúc khởi động (fail-fast, chỉ runtime nodejs, không chạy trong `next build`); CSP/header bảo mật cho SPA đặt ở reverse proxy (API chỉ đặt `nosniff`, `Cache-Control: no-store` cho auth); sửa M0 trong M1: `HttpError` bắt buộc có `message`, `readJson` có trần byte (413 `PAYLOAD_TOO_LARGE`).
+
+## 9. Quyết định bổ sung (M2 — Lớp & học sinh), 12/11/2026
+Người dùng đã chốt qua AskUserQuestion; đồng thời yêu cầu "làm luôn, không cần duyệt plan":
+| # | Quyết định |
+|---|---|
+| D20 | M2 làm CẢ HAI phía: toàn bộ API `/api/classes` + `/api/me/classes`, UI giáo viên (danh sách/chi tiết lớp, tab giáo viên/học sinh/mời/import) và UI học sinh (JoinClass, MyClasses, MyClassDetail) |
+| D21 | Plan M2 không cần người dùng duyệt trước khi chạy; các quyết định nhỏ do người viết tự chốt và ghi trong plan (mục "Lựa chọn của người viết") + sổ ledger, báo lại ở cuối |
+| D22 | Quy ước comment M2 đo theo điểm bắt đầu nhánh M2 (HEAD `m1/auth` lúc tách = ae1b080): file TẠO ở M2 = file mới; sửa file đã có ở ae1b080 phải có marker `Haihs:` (cùng cách đã duyệt ở M1) |

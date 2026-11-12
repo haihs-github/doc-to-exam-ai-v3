@@ -1,0 +1,129 @@
+# Created by Haihs on 11/11/2026
+# CI: lint, unit tests, build, smoke E2E and dependency audit as separate jobs.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Haihs: job không dùng DB nên bỏ tải binary mongod ở postinstall (MONGOMS_DISABLE_POSTINSTALL) - start
+    env:
+      MONGOMS_DISABLE_POSTINSTALL: '1'
+    # Haihs: job không dùng DB nên bỏ tải binary mongod ở postinstall (MONGOMS_DISABLE_POSTINSTALL) - end
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+  test-api:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run test:api
+      - run: npm run test:contract
+  test-web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Haihs: job không dùng DB nên bỏ tải binary mongod ở postinstall (MONGOMS_DISABLE_POSTINSTALL) - start
+    env:
+      MONGOMS_DISABLE_POSTINSTALL: '1'
+    # Haihs: job không dùng DB nên bỏ tải binary mongod ở postinstall (MONGOMS_DISABLE_POSTINSTALL) - end
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run test:web
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Haihs: job không dùng DB nên bỏ tải binary mongod ở postinstall (MONGOMS_DISABLE_POSTINSTALL) - start
+    env:
+      MONGOMS_DISABLE_POSTINSTALL: '1'
+    # Haihs: job không dùng DB nên bỏ tải binary mongod ở postinstall (MONGOMS_DISABLE_POSTINSTALL) - end
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      # Haihs: đặt bước cache trước npm ci (postinstall của mongodb-memory-server tải binary trong npm ci) - start
+      # đóng code cũ
+      # - run: npm ci
+      # - run: npx playwright install --with-deps chromium
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/mongodb-binaries
+          key: mongodb-binaries-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: mongodb-binaries-${{ runner.os }}-
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      # Haihs: đặt bước cache trước npm ci (postinstall của mongodb-memory-server tải binary trong npm ci) - end
+      # Haihs: E2E_TEACHER_SECRET_KEY cho API webServer (playwright.config.ts truyền thành TEACHER_SECRET_KEY) - start
+      # đóng code cũ
+      # - run: npx playwright test
+      #   env:
+      #     CI: 'true'
+      - run: npx playwright test
+        env:
+          CI: 'true'
+          E2E_TEACHER_SECRET_KEY: ci-e2e-teacher-secret
+      # Haihs: E2E_TEACHER_SECRET_KEY cho API webServer (playwright.config.ts truyền thành TEACHER_SECRET_KEY) - end
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: ignore
+
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Haihs: job không dùng DB nên bỏ tải binary mongod ở postinstall (MONGOMS_DISABLE_POSTINSTALL) - start
+    env:
+      MONGOMS_DISABLE_POSTINSTALL: '1'
+    # Haihs: job không dùng DB nên bỏ tải binary mongod ở postinstall (MONGOMS_DISABLE_POSTINSTALL) - end
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm audit --audit-level=high

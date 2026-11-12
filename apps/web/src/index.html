@@ -1,0 +1,26 @@
+<!doctype html>
+<!-- Created by Haihs on 11/11/2026 -->
+<!-- Host page: applies the saved theme before first paint to avoid a light/dark flash. -->
+<!-- <html lang="en"> Haihs: đóng code cũ, ứng dụng tiếng Việt - start - end -->
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <!-- <title>Web</title> Haihs: đóng code cũ, đặt tên ứng dụng - start - end -->
+  <title>Doc to Exam</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <!-- Haihs: áp theme trước khi vẽ (cùng logic với theme.ts) - start -->
+  <script>
+    try {
+      var m = localStorage.getItem('theme');
+      var dark = m === 'dark' || (m !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches);
+      if (dark) document.documentElement.classList.add('dark');
+    } catch (e) {}
+  </script>
+  <!-- Haihs: áp theme trước khi vẽ - end -->
+</head>
+<body>
+  <app-root></app-root>
+</body>
+</html>

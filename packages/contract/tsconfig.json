@@ -1,0 +1,13 @@
+// Created by Haihs on 11/11/2026
+// TypeScript config for the shared contract package (typecheck only).
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true
+  },
+  "include": ["src", "tests"]
+}

@@ -33,7 +33,7 @@
 Task 1–3 tuần tự trên `main`. Sau đó mở 2 worktree song song: **api** (Task 4–6) và **web** (Task 7–9). Task 10 làm sau khi merge cả hai. Agent riêng: implementer / test-writer độc lập / reviewer / `comment-checker` / merge.
 
 ### Task 1: Khung monorepo
-**Files:** Create `package.json` (workspaces `apps/*`, `packages/*`), `.gitignore`, `.nvmrc` (`22`), `README.md` (chạy dev, giới hạn D9), `CHANGELOG.md` (Keep a Changelog, mục `[Unreleased]`), `.editorconfig`.
+**Files:** Create `package.json` (workspaces `apps/*`, `packages/*`), `.gitignore`, `README.md` (chạy dev, giới hạn D9), `CHANGELOG.md` (Keep a Changelog, mục `[Unreleased]`), `.editorconfig`.
 **Interfaces:** Produces: scripts gốc `lint`, `test:api`, `test:web`, `build`, `dev` (chạy 2 app).
 - [ ] **Step 1:** Tạo các file trên; `.gitignore` gồm `node_modules`, `.next`, `dist`, `.angular`, `coverage`, `.env*` (trừ `.env.example`), `playwright-report`.
 - [ ] **Step 2:** Chạy `npm install` ở gốc. Expected: thành công, tạo `package-lock.json` (commit lock file).
