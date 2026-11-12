@@ -51,6 +51,8 @@ const rootGuard: CanActivateFn = (route, state) => {
   const auth = inject(AuthService);
   const router = inject(Router);
   const injector = inject(Injector); // the decision may run after the load, outside the injection context
+  // Haihs: M8 - người đã đăng nhập vào / được đưa tới trang chủ theo vai trò (nguồn App.jsx RootRoute) - start
+  // đóng code cũ
   // return afterLoad(
   //   () =>
   //     !auth.user() && !auth.loadError()
@@ -59,12 +61,11 @@ const rootGuard: CanActivateFn = (route, state) => {
   // );
   return afterLoad(() => {
     if (!auth.user() && !auth.loadError()) return router.parseUrl('/about');
-    // Haihs: M8 - người đã đăng nhập vào / được đưa tới trang chủ theo vai trò (nguồn App.jsx RootRoute) - start
     const decision = runInInjectionContext(injector, () => authGuard()(route, state)) as GuardResult; // isLoading is false here: synchronous
     const user = auth.user();
     return decision === true && user ? router.parseUrl(homePathForRole(user.role)) : decision;
-    // Haihs: M8 - end
   });
+  // Haihs: M8 - người đã đăng nhập vào / được đưa tới trang chủ theo vai trò (nguồn App.jsx RootRoute) - end
 };
 
 /** /session-error only makes sense with a pending loadError; otherwise go home (which decides by session). */
