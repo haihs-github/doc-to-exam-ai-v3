@@ -4,7 +4,13 @@
 // Haihs: đã xử lý ở instrumentation.ts (ensureIndexes() chạy trước seedRbac) - start - end
 import { ClassMemberModel } from '../models/ClassMember';
 import { ClassModel } from '../models/Class';
+import { EssayMediaModel } from '../models/EssayMedia';
+import { EssayUploadModel } from '../models/EssayUpload';
+import { ExamSittingModel } from '../models/ExamSitting';
 import { ExamTemplateModel } from '../models/ExamTemplate';
+import { SittingGrantModel } from '../models/SittingGrant';
+import { SittingSessionModel } from '../models/SittingSession';
+import { SittingSubmissionModel } from '../models/SittingSubmission';
 import { RoleModel } from '../models/Role';
 import { UserModel } from '../models/User';
 
@@ -16,5 +22,13 @@ import { UserModel } from '../models/User';
 export async function ensureIndexes(): Promise<void> {
   // await Promise.all([UserModel.init(), RoleModel.init(), ClassModel.init(), ClassMemberModel.init()]);
   await Promise.all([UserModel.init(), RoleModel.init(), ClassModel.init(), ClassMemberModel.init(), ExamTemplateModel.init()]);
+  await Promise.all([
+    ExamSittingModel.init(),
+    SittingGrantModel.init(),
+    SittingSessionModel.init(),
+    SittingSubmissionModel.init(),
+    EssayUploadModel.init(),
+    EssayMediaModel.init(),
+  ]);
 }
 // Haihs: init thêm Class/ClassMember (unique partial activeCodeKey) - end

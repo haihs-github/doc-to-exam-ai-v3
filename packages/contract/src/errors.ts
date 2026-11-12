@@ -30,6 +30,17 @@ export type ErrorCode =
   | 'TEMPLATE_TITLE_TAKEN'
   | 'TEMPLATE_NOT_IN_TRASH'
   // Haihs: thêm mã lỗi đề mẫu M3 - end
+  // Haihs: thêm mã lỗi ca thi M4 - start
+  | 'INVALID_CLASSES'
+  | 'INVALID_STUDENTS'
+  | 'SITTING_TITLE_TAKEN'
+  | 'SITTING_OVERLAP'
+  | 'CODE_GENERATION_FAILED'
+  | 'SITTING_LOCKED'
+  | 'RESULTS_PUBLISHED'
+  | 'SITTING_HAS_SUBMISSIONS'
+  | 'SITTING_CLASSES_CHANGED'
+  // Haihs: thêm mã lỗi ca thi M4 - end
   | 'INTERNAL';
 
 export interface ApiError {
@@ -77,6 +88,17 @@ export const HTTP_STATUS: Record<ErrorCode, number> = {
   TEMPLATE_TITLE_TAKEN: 409, // controllers/templateController.js:53
   TEMPLATE_NOT_IN_TRASH: 409, // controllers/templateController.js:~270
   // Haihs: status mã lỗi đề mẫu M3 - end
+  // Haihs: status mã lỗi ca thi M4 - start
+  INVALID_CLASSES: 400, // controllers/sittingController.js:~52
+  INVALID_STUDENTS: 400, // controllers/sittingController.js:~53
+  SITTING_TITLE_TAKEN: 409, // controllers/sittingController.js (createSitting)
+  SITTING_OVERLAP: 409, // controllers/sittingController.js (overlapError)
+  CODE_GENERATION_FAILED: 503, // services/sittingCode.js
+  SITTING_LOCKED: 409, // controllers/sittingController.js (updateSitting)
+  RESULTS_PUBLISHED: 409, // controllers/sittingController.js (updateSitting)
+  SITTING_HAS_SUBMISSIONS: 409, // controllers/sittingController.js (deleteSitting)
+  SITTING_CLASSES_CHANGED: 409, // controllers/sittingController.js (updateClasses)
+  // Haihs: status mã lỗi ca thi M4 - end
   INTERNAL: 500, // middlewares/authMiddleware.js:69 (source wire code is 'INTERNAL_ERROR')
 };
 
