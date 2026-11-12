@@ -3,10 +3,17 @@
 import { Types } from 'mongoose';
 import { HTTP_STATUS, type ApiError, type ApiOk, type ErrorCode } from '@doc-to-exam/contract';
 
-export function fail(code: ErrorCode, message: string, extra?: { field?: string; data?: unknown }): Response {
+// Haihs: extra.status ghi đè mã HTTP mặc định (CSV_INVALID: 422 mặc định, 400 khi multipart hỏng) - start
+// đóng code cũ
+// export function fail(code: ErrorCode, message: string, extra?: { field?: string; data?: unknown }): Response {
+//   const body = { success: false, code, message, ...(extra?.field ? { field: extra.field } : {}), ...(extra?.data !== undefined ? { data: extra.data } : {}) } satisfies ApiError;
+//   return Response.json(body, { status: HTTP_STATUS[code] });
+// }
+export function fail(code: ErrorCode, message: string, extra?: { field?: string; data?: unknown; status?: number }): Response {
   const body = { success: false, code, message, ...(extra?.field ? { field: extra.field } : {}), ...(extra?.data !== undefined ? { data: extra.data } : {}) } satisfies ApiError;
-  return Response.json(body, { status: HTTP_STATUS[code] });
+  return Response.json(body, { status: extra?.status ?? HTTP_STATUS[code] });
 }
+// Haihs: extra.status ghi đè mã HTTP mặc định (CSV_INVALID: 422 mặc định, 400 khi multipart hỏng) - end
 
 // Source successes are res.json({ success: true, data, message? }), e.g. controllers/sittingPublicationController.js:30
 export function ok<T>(data: T, init: { status?: number; message?: string } = {}): Response {
