@@ -27,6 +27,14 @@
 - `packages/contract`: `npm test`, script gốc `test:contract` và bước CI (`bdd259e`); script `format`/`format:check` và bước CI `format:check` (`201bda9`).
 - README: hướng dẫn chạy dev, test qua `scripts/limited.sh`, giới hạn một instance (D9), same-origin (D13).
 
+<!-- Haihs: changelog M2 (lớp học) - start -->
+### M2 — Lớp và học sinh (chưa chạy test: theo yêu cầu "native", test dồn về cuối)
+- `packages/contract`: kiểu lớp/thành viên/mời/import, 8 mã lỗi lớp, `normalizePhone` dùng chung (`0cb2cb3`).
+- `apps/api`: plugin soft-delete, `Class`, `ClassMember`, `toUpperVi` (`59a023e`, `aadc321`); `withClassPermission` (404 cho người ngoài lớp), CRUD/khôi phục lớp (`772e6d8`); link mời + `POST /api/classes/join` (`02d94da`); quản lý học sinh, đặt lại mật khẩu, quản lý giáo viên, `/api/me/classes`, import CSV/XLSX (commit native cuối nhánh `m2/api`).
+- `apps/web`: `ClassesApi`, tiện ích lớp (`dec05d5`), UI kit Pager/Skeleton/ActionMenu/QR/Select (`37d0281`, `5e986c8`), danh sách lớp giáo viên với 3 tab (`f50f269`, `abd3175`), chi tiết lớp + tab học sinh/giáo viên/mời + import + mật khẩu tạm, trang học sinh Join/MyClasses/MyClassDetail (`a869929`).
+- `e2e/classes.spec.ts`: luồng lớp (viết, chưa chạy).
+<!-- Haihs: changelog M2 (lớp học) - end -->
+
 ### Changed
 - Bỏ `.nvmrc`, dùng `engines.node >=22` (`06193b5`, `052a4a7`); README sửa theo.
 - CI: quyền `contents: read`, timeout, concurrency, đổi tên job e2e, cấu hình Playwright, ignore `apps/api/AGENTS.md` (`8b97c41`).
