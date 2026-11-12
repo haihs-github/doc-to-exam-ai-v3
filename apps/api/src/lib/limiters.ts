@@ -149,4 +149,18 @@ export const LIMITERS = {
   RESULT_VIEW: createRateLimiter({ name: 'RESULT_VIEW', max: 400, windowMs: M, key: ip, refund5xx: true }),
   RESULT_VIEW_USER: createRateLimiter({ name: 'RESULT_VIEW_USER', max: 30, windowMs: M, key: user, refund5xx: true }),
   // Haihs: limiter luồng ca thi của học sinh - end
+  // Haihs: limiter upload tự luận (nguồn essayUploadRoutes.js: IP 1200/phút, token sai 30/phút theo IP, 12 lượt/phút theo phiên) - start
+  ESSAY_UPLOAD_IP: createRateLimiter({ name: 'ESSAY_UPLOAD_IP', max: 1200, windowMs: M, key: ip, refund5xx: true }),
+  ESSAY_UPLOAD_BAD: createRateLimiter({ name: 'ESSAY_UPLOAD_BAD', max: 30, windowMs: M, key: ip, count: 'failures' }),
+  ESSAY_UPLOAD_SESSION: createRateLimiter({
+    name: 'ESSAY_UPLOAD_SESSION',
+    max: 12,
+    windowMs: M,
+    key: (req) => {
+      const t = req.headers.get('x-upload-token') ?? '';
+      return /^[0-9a-f]{48}$/.test(t) ? `s:${t}` : null; // a malformed token is refused later; never becomes a key
+    },
+    refund5xx: true,
+  }),
+  // Haihs: limiter upload tự luận - end
 } as const;

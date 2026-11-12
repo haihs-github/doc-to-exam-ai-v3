@@ -121,7 +121,8 @@ export function withRateLimit(limiters: RateLimiter[], h: Handler): Handler {
       // Haihs: HttpError ném ra được tính theo status HTTP thật (401 vào bucket failures, 503 được hoàn) - start
       // đóng code cũ
       // settle(500);
-      settle(err instanceof HttpError ? HTTP_STATUS[err.code] : 500);
+      // settle(err instanceof HttpError ? HTTP_STATUS[err.code] : 500);
+      settle(err instanceof HttpError ? (err.extra?.status ?? HTTP_STATUS[err.code]) : 500); // extra.status wins, same as fail()
       // Haihs: HttpError ném ra được tính theo status HTTP thật (401 vào bucket failures, 503 được hoàn) - end
       throw err;
     }
