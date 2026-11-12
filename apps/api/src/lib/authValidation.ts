@@ -33,6 +33,14 @@ export function parsePhone(raw: unknown): string {
   return phone;
 }
 
+// Haihs: parseFullName dùng chung cho sửa tên/import học sinh (Task 5) - start
+/** Proper-cased full name or null when it breaks the register rules. */
+export function parseFullName(raw: unknown): string | null {
+  const name = toProperName(raw);
+  return typeof name === 'string' && FULL_NAME_RE.test(name) ? name : null;
+}
+// Haihs: parseFullName dùng chung cho sửa tên/import học sinh (Task 5) - end
+
 // SHA-256 first so both buffers have the same length (timingSafeEqual) and neither length nor prefix leaks.
 const secretMatches = (given: string, expected: string) =>
   timingSafeEqual(

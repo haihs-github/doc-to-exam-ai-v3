@@ -111,4 +111,26 @@ export const LIMITERS = {
     count: 'failures',
   }),
   STUDENT_API: createRateLimiter({ name: 'STUDENT_API', max: 3000, windowMs: M, key: ip }),
+  // Haihs: giới hạn join lớp theo nguồn (CLASS_JOIN 20/10p user, CLASS_JOIN_IP 600/10p IP) - start
+  CLASS_JOIN_IP: createRateLimiter({ name: 'CLASS_JOIN_IP', max: 600, windowMs: 10 * M, key: ip }),
+  CLASS_JOIN: createRateLimiter({ name: 'CLASS_JOIN', max: 20, windowMs: 10 * M, key: user }),
+  // Haihs: giới hạn join lớp theo nguồn (CLASS_JOIN 20/10p user, CLASS_JOIN_IP 600/10p IP) - end
+  // Haihs: limiter tìm/thêm thành viên, đặt lại mật khẩu, import (nguồn rateLimit.js, theo user) - start
+  MEMBER_SEARCH: createRateLimiter({ name: 'MEMBER_SEARCH', max: 60, windowMs: 10 * M, key: user }),
+  MEMBER_SEARCH_DAY: createRateLimiter({
+    name: 'MEMBER_SEARCH_DAY',
+    max: 500,
+    windowMs: 24 * 60 * M,
+    key: user,
+  }),
+  MEMBER_LOOKUP: createRateLimiter({ name: 'MEMBER_LOOKUP', max: 200, windowMs: 10 * M, key: user }),
+  CSV_IMPORT: createRateLimiter({ name: 'CSV_IMPORT', max: 10, windowMs: 10 * M, key: user }),
+  RESET_PASSWORD: createRateLimiter({
+    name: 'RESET_PASSWORD',
+    max: 100,
+    windowMs: 10 * M,
+    key: user,
+    refund5xx: true,
+  }),
+  // Haihs: limiter tìm/thêm thành viên, đặt lại mật khẩu, import - end
 } as const;
