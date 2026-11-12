@@ -17,6 +17,10 @@ import { MyClassDetail } from './pages/my-class-detail'; // Haihs: M2 Task 14 - 
 import { MyClasses } from './pages/my-classes'; // Haihs: M2 Task 14 - start - end
 import { TeacherTemplates } from './pages/teacher-templates'; // Haihs: M3 - trang đề mẫu - start - end
 import { TemplateEditor } from './pages/template-editor'; // Haihs: M3 - start - end
+import { SittingCreate } from './pages/sitting-create'; // Haihs: M4 - ca thi giáo viên - start - end
+import { SittingEditor } from './pages/sitting-editor'; // Haihs: M4 - start - end
+import { TeacherSittingDetail } from './pages/teacher-sitting-detail'; // Haihs: M4 - start - end
+import { TeacherSittings } from './pages/teacher-sittings'; // Haihs: M4 - start - end
 import { TeacherClasses } from './pages/teacher-classes';
 import { TeacherClassDetail } from './pages/teacher-class-detail'; // Haihs: M2 Task 12 - chi tiết lớp - start - end
 
@@ -79,5 +83,11 @@ export const routes: Routes = [
   { path: 'teacher/templates/new', canActivate: [authGuard(['teacher'], 'teacher')], component: TemplateEditor },
   { path: 'teacher/templates/:id/edit', canActivate: [authGuard(['teacher'], 'teacher')], component: TemplateEditor },
   // Haihs: M3 - end
+  // Haihs: M4 - ca thi giáo viên - start
+  { path: 'teacher/sittings', canActivate: [authGuard(['teacher'], 'teacher')], component: TeacherSittings },
+  { path: 'teacher/sittings/new', canActivate: [authGuard(['teacher'], 'teacher')], component: SittingCreate },
+  { path: 'teacher/sittings/:id', canActivate: [authGuard(['teacher'], 'teacher')], component: TeacherSittingDetail },
+  { path: 'teacher/sittings/:id/edit', canActivate: [authGuard(['teacher'], 'teacher')], component: SittingEditor },
+  // Haihs: M4 - end
   { path: '**', redirectTo: '' },
 ];
