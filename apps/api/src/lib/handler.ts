@@ -8,7 +8,9 @@ export class HttpError extends Error {
   // đóng code cũ
   // constructor(public code: ErrorCode, message?: string, public extra?: { field?: string; data?: unknown }) {
   //     super(message ?? code);
-  constructor(public code: ErrorCode, message: string, public extra?: { field?: string; data?: unknown }) {
+  // constructor(public code: ErrorCode, message: string, public extra?: { field?: string; data?: unknown }) {
+  // extra.status overrides the default HTTP status of the code (see fail), e.g. CSV_INVALID 400 for a broken multipart
+  constructor(public code: ErrorCode, message: string, public extra?: { field?: string; data?: unknown; status?: number }) {
     super(message);
   // Haihs: message bắt buộc (bỏ mặc định = code) - end
     this.name = 'HttpError';
