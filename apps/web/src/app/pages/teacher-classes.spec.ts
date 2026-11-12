@@ -96,6 +96,11 @@ describe('TeacherClasses', () => {
     s.btn('Thùng rác').click();
     await s.flush();
     expect(s.el.textContent).toContain('Không có lớp nào trong thùng rác.');
+    s.btn('Đã tốt nghiệp').click();
+    await s.flush();
+    expect(s.api.list).toHaveBeenLastCalledWith(expect.objectContaining({ view: 'graduated' }));
+    expect(s.el.textContent).toContain('Chưa có lớp nào đã tốt nghiệp.');
+    expect(s.el.textContent).toContain('Lớp tốt nghiệp không nhận thành viên mới');
   });
 
   it('load error: inline message with Thử lại that reloads; no popup', async () => {
@@ -198,6 +203,28 @@ describe('TeacherClasses', () => {
     await s.menuAction(1, 'Sửa');
     const code = s.el.querySelector<HTMLInputElement>('app-class-form input[name="code"]')!;
     expect(code.value).toBe('C2');
+  });
+
+  it('changing the status in the edit form drops the row from the tab and reloads', async () => {
+    const s = await setup();
+    s.api.list.mockClear();
+    s.api.update.mockReturnValue(of(mkClass('1', { status: 'graduated' })));
+    await s.menuAction(0, 'Sửa');
+    const form = s.el.querySelector('app-class-form')!;
+    form.querySelector<HTMLElement>('[role="combobox"]')!.click();
+    await s.flush();
+    [...form.querySelectorAll<HTMLElement>('[role="option"]')]
+      .find((o) => o.textContent!.trim() === 'Đã tốt nghiệp')!
+      .click();
+    await s.flush();
+    form.querySelector('form')!.dispatchEvent(new Event('submit', { cancelable: true }));
+    await s.flush();
+    expect(s.api.update).toHaveBeenCalledWith(
+      '1',
+      expect.objectContaining({ status: 'graduated' }),
+    );
+    expect(s.el.querySelector('app-class-form')).toBeNull();
+    expect(s.api.list).toHaveBeenCalledTimes(1);
   });
 
   it('delete asks first; cancel does nothing, confirm deletes and reloads', async () => {

@@ -9,7 +9,7 @@ import {
   signal,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import type { ClassDto } from '@doc-to-exam/contract';
+import type { ClassBody, ClassDto } from '@doc-to-exam/contract';
 import { Observable, Subscription, finalize } from 'rxjs';
 import { ClassesApi, Paged } from '../core/classes.api';
 import { ActionMenu, ActionMenuItem } from '../shared/ui/action-menu';
@@ -23,9 +23,10 @@ import { describeClassError, formatSchoolYear, isClassCodeTaken } from '../share
 
 const PAGE_SIZE = 10; // server default 10, max 50
 const SEARCH_DEBOUNCE_MS = 300;
-type View = 'active' | 'deleted';
+type View = 'active' | 'graduated' | 'deleted';
 const TABS: [View, string][] = [
   ['active', 'Đang hoạt động'],
+  ['graduated', 'Đã tốt nghiệp'],
   ['deleted', 'Thùng rác'],
 ];
 
@@ -74,6 +75,12 @@ const TABS: [View, string][] = [
           (input)="onSearch($event)"
         />
       </div>
+
+      @if (view() === 'graduated') {
+        <p class="text-base text-gray-600 dark:text-gray-400">
+          Lớp tốt nghiệp không nhận thành viên mới và không gán được vào ca mới.
+        </p>
+      }
 
       @if (loadError()) {
         <div
@@ -153,7 +160,7 @@ const TABS: [View, string][] = [
     </div>
 
     @if (form(); as f) {
-      <app-class-form [cls]="f.cls" (saved)="onSaved()" (cancelled)="form.set(null)" />
+      <app-class-form [cls]="f.cls" (saved)="onSaved($event)" (cancelled)="form.set(null)" />
     }
     @if (restoring(); as c) {
       <app-class-restore-code-modal
@@ -208,9 +215,11 @@ export class TeacherClasses implements OnDestroy {
   protected readonly emptyText = computed(() =>
     this.view() === 'deleted'
       ? 'Không có lớp nào trong thùng rác.'
-      : this.applied
-        ? 'Không tìm thấy lớp phù hợp.'
-        : 'Chưa có lớp nào. Hãy tạo lớp hoặc tham gia bằng link mời.',
+      : this.view() === 'graduated'
+        ? 'Chưa có lớp nào đã tốt nghiệp.'
+        : this.applied
+          ? 'Không tìm thấy lớp phù hợp.'
+          : 'Chưa có lớp nào. Hãy tạo lớp hoặc tham gia bằng link mời.',
   );
   protected readonly year = (c: ClassDto) => formatSchoolYear(c.startYear, c.endYear);
 
@@ -278,13 +287,16 @@ export class TeacherClasses implements OnDestroy {
     this.load();
   }
 
-  protected onSaved(): void {
-    if (!this.form()?.cls) {
+  protected onSaved(body: ClassBody): void {
+    const editing = this.form()?.cls;
+    this.form.set(null);
+    if (!editing) {
       this.view.set('active');
       this.page.set(1);
-    }
-    this.form.set(null);
-    this.load();
+      this.load();
+    } else if (body.status && body.status !== editing.status)
+      this.reloadAfterRemove(); // row leaves this tab
+    else this.load();
   }
 
   protected onRestored(): void {

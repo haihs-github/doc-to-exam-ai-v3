@@ -98,8 +98,33 @@ describe('ClassForm', () => {
       code: '10A1',
       startYear: 2023,
       endYear: 2026,
+      status: 'active',
     });
     expect(s.success).toHaveBeenCalledWith('Đã lưu lớp.');
+  });
+
+  it('create has no status select', async () => {
+    const s = await setup();
+    expect(s.el.querySelector('app-select')).toBeNull();
+  });
+
+  it('edit: status select; choosing Đã tốt nghiệp sends status=graduated', async () => {
+    const s = await setup(cls);
+    const sel = s.el.querySelector('app-select')!;
+    expect(sel.textContent).toContain('Đang học');
+    sel.querySelector<HTMLElement>('[role="combobox"]')!.click();
+    await s.f.whenStable();
+    [...sel.querySelectorAll<HTMLElement>('[role="option"]')]
+      .find((o) => o.textContent!.trim() === 'Đã tốt nghiệp')!
+      .click();
+    await s.f.whenStable();
+    s.api.update.mockReturnValue(of(cls));
+    await s.submit();
+    expect(s.api.update).toHaveBeenCalledWith(
+      'c1',
+      expect.objectContaining({ status: 'graduated' }),
+    );
+    expect(s.saved).toHaveBeenCalledWith(expect.objectContaining({ status: 'graduated' }));
   });
 
   it('server error with field=code shows under the code input and focuses it, no popup', async () => {

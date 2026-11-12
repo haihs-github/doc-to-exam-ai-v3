@@ -26,11 +26,12 @@ import {
 import { LIMITS } from '../utils/limits';
 import { AlertService } from './alert.service';
 import { FormField } from './form-field';
+import { Select } from './select';
 import { ModalFocus } from './modal-focus';
 
 @Component({
   selector: 'app-class-form',
-  imports: [FormField, ModalFocus],
+  imports: [FormField, ModalFocus, Select],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div
@@ -100,6 +101,16 @@ import { ModalFocus } from './modal-focus';
               (input)="set('endYear', $event)"
             />
           </app-form-field>
+          @if (cls()) {
+            <div>
+              <app-select
+                label="Trạng thái"
+                [options]="statusOptions"
+                [value]="v().status"
+                (valueChange)="setStatus($event)"
+              />
+            </div>
+          }
         </div>
         <div class="flex justify-end gap-2">
           <button type="button" class="btn-secondary" [disabled]="busy()" (click)="cancel()">
@@ -115,9 +126,13 @@ import { ModalFocus } from './modal-focus';
 })
 export class ClassForm {
   readonly cls = input<ClassDto | null>(null);
-  readonly saved = output<void>();
+  readonly saved = output<ClassBody>();
   readonly cancelled = output<void>();
   protected readonly max = LIMITS;
+  protected readonly statusOptions = [
+    { value: 'active', label: 'Đang học' },
+    { value: 'graduated', label: 'Đã tốt nghiệp' },
+  ];
   private readonly api = inject(ClassesApi);
   private readonly alert = inject(AlertService);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
@@ -129,6 +144,7 @@ export class ClassForm {
       code: c?.code ?? '',
       startYear: c ? String(c.startYear) : '',
       endYear: c ? String(c.endYear) : '',
+      status: c?.status ?? 'active',
     };
   });
   protected readonly errors = signal<FormErrors>({});
@@ -143,6 +159,10 @@ export class ClassForm {
     this.errors.update((prev) =>
       Object.fromEntries(Object.entries(prev).filter(([k]) => fresh[k as ClassFormField])),
     );
+  }
+
+  protected setStatus(value: string): void {
+    this.v.update((cur) => ({ ...cur, status: value === 'graduated' ? 'graduated' : 'active' }));
   }
 
   protected cancel(): void {
@@ -165,12 +185,13 @@ export class ClassForm {
       endYear: Number(v.endYear),
     };
     const editing = this.cls();
+    if (editing) body.status = v.status; // create: server defaults to active
     this.busy.set(true);
     (editing ? this.api.update(editing.id, body) : this.api.create(body))
       .pipe(finalize(() => this.busy.set(false)))
       .subscribe({
         next: () => {
-          this.saved.emit();
+          this.saved.emit(body);
           void this.alert.success(editing ? 'Đã lưu lớp.' : 'Đã tạo lớp.');
         },
         error: (err: unknown) => {
