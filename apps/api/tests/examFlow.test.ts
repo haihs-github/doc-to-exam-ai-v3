@@ -647,7 +647,10 @@ describe('essay: upload, grading, publication, result', () => {
     expect(results.body.data.submissions[0]).toMatchObject({ essayGraded: true, totalScore: 10 });
 
     // the same query the web panel sends
-    const ui = await send(sitResults.GET, teacher, { params: { id }, url: `http://localhost/api/sittings/${id}/results?page=1&limit=50&sort=name` });
+    const ui = await send(sitResults.GET, teacher, {
+      params: { id },
+      url: `http://localhost/api/sittings/${id}/results?page=1&limit=50&sort=name`,
+    });
     expect(ui.status).toBe(200);
     expect(ui.body.data.submissions).toHaveLength(1);
 

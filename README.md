@@ -106,7 +106,7 @@ Playwright tự khởi động API (DB in-memory, rate limit nới lên 100000, 
 - API: `/api/classes/**` (giáo viên) và `/api/me/classes/**` (học sinh); người ngoài lớp luôn nhận 404; token mời chỉ trả cho giáo viên của lớp, mật khẩu tạm chỉ xuất hiện một lần trong response (`Cache-Control: no-store`).
 - Web: `/teacher/classes`, `/teacher/classes/:id?tab=students|teachers|invite`, `/join`, `/join/:token`, `/classes`, `/classes/:id`.
 - Import học sinh: `.csv` ≤ 256KB hoặc `.xlsx` ≤ 1MB, tối đa 200 dòng; dependency `read-excel-file` (API) và `qrcode` (web).
-- Trạng thái: M2 chưa có test chạy; toàn bộ test (api, web, E2E `e2e/classes.spec.ts`) chạy một lần sau khi xong mọi milestone.
+- Trạng thái: M2 đã có test tích hợp API (`classMembers.test.ts`) và E2E (`e2e/classes.spec.ts`).
 <!-- Haihs: tài liệu M2 (lớp học) - end -->
 
 <!-- Haihs: tài liệu M3-M8 - start -->
@@ -116,5 +116,5 @@ Playwright tự khởi động API (DB in-memory, rate limit nới lên 100000, 
 - Bảo mật: đáp án/giải thích/rubric không bao giờ có trong câu hỏi gửi cho học sinh; điểm tính ở server; nộp trùng bị chặn bằng unique index; route upload dùng cùng kiểm tra `tokenVersion` với các route khác.
 - Biến môi trường tùy chọn: `TEMPLATE_TRASH_DAYS`, `EXAM_CACHE_TTL_MS`, `ESSAY_UPLOAD_*`, `ESSAY_MEDIA_*`, `HTTPS_PROXY` (gọi Gemini qua proxy). Tạo secret: `node scripts/generate-secrets.mjs`.
 - Chạy một instance duy nhất (cache đề, rate limit và semaphore upload nằm trong RAM).
-- Trạng thái: toàn bộ M3–M8 viết xong nhưng CHƯA có test chạy; pha test (api, web, E2E) làm sau.
+- Trạng thái: M3–M8 đã có test tích hợp API và E2E (xem `docs/handoff/2026-11-13-m3-m8.md`).
 <!-- Haihs: tài liệu M3-M8 - end -->
