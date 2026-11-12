@@ -31,6 +31,11 @@ export class ApiClient {
   put<T>(url: string, body?: unknown): Observable<T> {
     return this.wrap(this.http.put<unknown>(url, body));
   }
+  // Haihs: M2 Task 9 - ClassesApi cần PATCH (sửa lớp, đổi tên học sinh, bật/tắt link mời) - start
+  patch<T>(url: string, body?: unknown): Observable<T> {
+    return this.wrap(this.http.patch<unknown>(url, body));
+  }
+  // Haihs: M2 Task 9 - ClassesApi cần PATCH (sửa lớp, đổi tên học sinh, bật/tắt link mời) - end
   delete<T>(url: string): Observable<T> {
     return this.wrap(this.http.delete<unknown>(url));
   }
