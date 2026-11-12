@@ -1,0 +1,193 @@
+// Created by Haihs on 11/11/2026
+// Tests for readJson, HttpError and withErrors (safe error handling).
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { Error as MongooseError, Types } from 'mongoose';
+import { UserModel } from '../src/models/User';
+import { HttpError, readJson, withErrors } from '../src/lib/handler';
+import { call } from './helpers';
+
+afterEach(() => vi.restoreAllMocks());
+
+const post = (body: string) => new Request('http://x/', { method: 'POST', body, headers: { 'content-type': 'application/json' } });
+
+describe('readJson', () => {
+  it('parses valid JSON', async () => {
+    expect(await readJson(post('{"a":1}'))).toEqual({ a: 1 });
+  });
+  it.each(['{bad', ''])('throws HttpError VALIDATION for %j', async (b) => {
+    await expect(readJson(post(b))).rejects.toMatchObject({ name: 'HttpError', code: 'VALIDATION' });
+  });
+});
+
+// Haihs: readJson trần byte và HttpError message tiếng Việt - start
+describe('readJson size cap', () => {
+  it('body 1 MiB + 1 -> 413 PAYLOAD_TOO_LARGE (actual length, no Content-Length)', async () => {
+    const big = JSON.stringify({ a: 'x'.repeat(1_048_576) });
+    await expect(readJson(post(big))).rejects.toMatchObject({ code: 'PAYLOAD_TOO_LARGE' });
+  });
+  it('declared Content-Length over the cap -> 413 without reading', async () => {
+    const req = new Request('http://x/', { method: 'POST', body: '{}', headers: { 'content-length': '2000000' } });
+    await expect(readJson(req)).rejects.toMatchObject({ code: 'PAYLOAD_TOO_LARGE' });
+  });
+  it('custom maxBytes is honoured', async () => {
+    await expect(readJson(post('{"a":"xxxxxxxx"}'), 5)).rejects.toMatchObject({ code: 'PAYLOAD_TOO_LARGE' });
+  });
+  it('413 via withErrors', async () => {
+    const h = withErrors(async (req) => { await readJson(req, 5); return Response.json({}); });
+    const r = await call(h, { method: 'POST', body: '{"a":"xxxxxxxx"}' });
+    expect(r.status).toBe(413);
+    expect(r.body.message).toBe('Dữ liệu gửi lên quá lớn');
+  });
+});
+
+describe('readJson cap edge cases', () => {
+  const enc = (s: string) => new TextEncoder().encode(s);
+  it('exactly maxBytes passes, maxBytes+1 -> 413', async () => {
+    const body = (n: number) => '"' + 'x'.repeat(n - 2) + '"';
+    expect(await readJson(post(body(20)), 20)).toBe('x'.repeat(18));
+    await expect(readJson(post(body(21)), 20)).rejects.toMatchObject({ code: 'PAYLOAD_TOO_LARGE' });
+  });
+  it('counts bytes, not characters (multi-byte UTF-8)', async () => {
+    const s = '"' + 'é'.repeat(9) + '"'; // 11 chars, 20 bytes
+    expect(s.length).toBeLessThanOrEqual(20);
+    await expect(readJson(post(s), 19)).rejects.toMatchObject({ code: 'PAYLOAD_TOO_LARGE' });
+    expect(await readJson(post(s), 20)).toBe('é'.repeat(9));
+  });
+  it('lying small Content-Length with a big body -> 413', async () => {
+    const req = new Request('http://x/', { method: 'POST', body: '"' + 'x'.repeat(50) + '"', headers: { 'content-length': '1' } });
+    await expect(readJson(req, 20)).rejects.toMatchObject({ code: 'PAYLOAD_TOO_LARGE' });
+  });
+  it('chunked stream over the cap -> 413 and the stream is cancelled', async () => {
+    const cancel = vi.fn();
+    const stream = new ReadableStream<Uint8Array>({
+      pull(c) { c.enqueue(enc('xxxxxxxxxx')); },
+      cancel,
+    });
+    const req = new Request('http://x/', { method: 'POST', body: stream, duplex: 'half' } as RequestInit);
+    await expect(readJson(req, 25)).rejects.toMatchObject({ code: 'PAYLOAD_TOO_LARGE' });
+    expect(cancel).toHaveBeenCalled();
+  });
+  it('a failing cancel does not turn 413 into another error', async () => {
+    const stream = new ReadableStream<Uint8Array>({
+      pull(c) { c.enqueue(enc('xxxxxxxxxx')); },
+      cancel() { throw new Error('boom'); },
+    });
+    const req = new Request('http://x/', { method: 'POST', body: stream, duplex: 'half' } as RequestInit);
+    await expect(readJson(req, 15)).rejects.toMatchObject({ code: 'PAYLOAD_TOO_LARGE' });
+  });
+  it('UTF-8 BOM is stripped like req.json()', async () => {
+    const req = new Request('http://x/', { method: 'POST', body: new Uint8Array([0xef, 0xbb, 0xbf, ...enc('{"a":1}')]) });
+    expect(await readJson(req)).toEqual({ a: 1 });
+  });
+});
+
+describe('HttpError message', () => {
+  it('Vietnamese message passes through withErrors', async () => {
+    const h = withErrors(async () => { throw new HttpError('NOT_FOUND', 'Không tìm thấy'); });
+    expect(await call(h)).toEqual({ status: 404, body: { success: false, code: 'NOT_FOUND', message: 'Không tìm thấy' } });
+  });
+});
+// Haihs: readJson trần byte và HttpError message tiếng Việt - end
+
+describe('withErrors', () => {
+  it('passes through the handler response', async () => {
+    const r = await call(withErrors(async () => Response.json({ a: 1 })));
+    expect(r).toEqual({ status: 200, body: { a: 1 } });
+  });
+  it('maps HttpError to fail() with field', async () => {
+    const h = withErrors(async () => { throw new HttpError('NOT_FOUND', 'nope', { field: 'id' }); });
+    expect(await call(h)).toEqual({ status: 404, body: { success: false, code: 'NOT_FOUND', message: 'nope', field: 'id' } });
+  });
+  it('malformed JSON body -> 400 VALIDATION, not 500', async () => {
+    const h = withErrors(async (req) => { await readJson(req); return Response.json({}); });
+    const r = await call(h, { method: 'POST', headers: { 'content-type': 'application/json' } });
+    expect(r.status).toBe(400);
+    expect(r.body.code).toBe('VALIDATION');
+  });
+  it('unexpected error -> 500 INTERNAL, nothing leaked, logged server-side', async () => {
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const res = await withErrors(async () => { throw new Error('secret stack'); })(new Request('http://x/'), {});
+    const text = await res.text();
+    expect(res.status).toBe(500);
+    expect(JSON.parse(text)).toEqual({ success: false, code: 'INTERNAL', message: 'Lỗi máy chủ' });
+    expect(text).not.toMatch(/secret|stack/);
+    expect(spy).toHaveBeenCalled();
+  });
+});
+
+// Haihs: withErrors: ném Response, rethrow digest Next, ánh xạ lỗi Mongoose, ctx generic (nợ M0) - start
+describe('withErrors control flow and Mongoose errors', () => {
+  const quiet = () => vi.spyOn(console, 'error').mockImplementation(() => {});
+  const run = (e: unknown) => withErrors(async () => { throw e; })(new Request('http://x/'));
+
+  it('a thrown Response is returned as-is', async () => {
+    const res = new Response('teapot', { status: 418 });
+    expect(await run(res)).toBe(res);
+  });
+  it('an error with a Next digest (redirect/notFound) is re-thrown, not a 500', async () => {
+    const spy = quiet();
+    const e = Object.assign(new Error('NEXT_REDIRECT'), { digest: 'NEXT_REDIRECT;replace;/x;307;' });
+    await expect(run(e)).rejects.toBe(e);
+    expect(spy).not.toHaveBeenCalled();
+  });
+  it('Mongoose CastError -> 400 VALIDATION fixed message, no value echoed', async () => {
+    quiet();
+    let err: unknown;
+    try { await UserModel.findOne({ _id: 'SECRET-VALUE' }); } catch (e) { err = e; }
+    expect(err).toBeInstanceOf(MongooseError.CastError);
+    const res = await run(err);
+    const text = await res.text();
+    expect(res.status).toBe(400);
+    expect(JSON.parse(text)).toMatchObject({ success: false, code: 'VALIDATION', message: 'Dữ liệu không hợp lệ.' });
+    expect(text).not.toMatch(/SECRET-VALUE/);
+  });
+  it('Mongoose ValidationError -> 400 VALIDATION fixed message, no field values echoed', async () => {
+    quiet();
+    const err = new UserModel({ phoneNumber: 'SECRET-PHONE' }).validateSync();
+    expect(err).toBeInstanceOf(MongooseError.ValidationError);
+    const res = await run(err);
+    const text = await res.text();
+    expect(res.status).toBe(400);
+    expect(JSON.parse(text)).toMatchObject({ code: 'VALIDATION', message: 'Dữ liệu không hợp lệ.' });
+    expect(text).not.toMatch(/SECRET-PHONE|required/);
+  });
+  it('HttpError thrown by a setter and wrapped by Mongoose is unwrapped (code/message/field)', async () => {
+    quiet();
+    const wrapped = new UserModel({ geminiApiKey: 'enc:v1:abc' }).validateSync();
+    expect(wrapped).toBeInstanceOf(MongooseError.ValidationError);
+    const direct = new HttpError('VALIDATION', 'Khóa không hợp lệ', { field: 'geminiApiKey' });
+    const res = await run(wrapped);
+    const body = await res.json();
+    expect(res.status).toBe(400);
+    expect(body).toMatchObject({ code: 'VALIDATION', field: 'geminiApiKey' });
+    expect(body.message).not.toBe('Dữ liệu không hợp lệ.'); // the setter's own message, not the generic one
+    expect(direct.code).toBe(body.code);
+  });
+  it('a CastError whose reason is an HttpError is unwrapped', async () => {
+    const inner = new HttpError('CONFLICT', 'trùng', { field: 'x' });
+    const cast = new MongooseError.CastError('String', 'v', 'x', inner);
+    expect(await (await run(cast)).json()).toMatchObject({ code: 'CONFLICT', message: 'trùng', field: 'x' });
+  });
+  it('other errors (even with an unrelated name) stay 500 INTERNAL', async () => {
+    quiet();
+    const res = await run(Object.assign(new Error('boom'), { name: 'SomethingElse' }));
+    expect(res.status).toBe(500);
+  });
+  it('typed route ctx: withErrors<C> passes ctx through and type-checks params', async () => {
+    const h = withErrors(async (_req: Request, ctx: { params: Promise<{ id: string }> }) =>
+      Response.json({ id: (await ctx.params).id }),
+    );
+    const res = await h(new Request('http://x/'), { params: Promise.resolve({ id: new Types.ObjectId().toString().slice(0, 3) }) });
+    expect((await res.json()).id).toHaveLength(3);
+  });
+});
+// Haihs: withErrors: ném Response, rethrow digest Next, ánh xạ lỗi Mongoose, ctx generic (nợ M0) - end
+
+// Haihs: test call() trả text khi body không phải JSON (nợ M0) - start
+describe('call() helper', () => {
+  it('returns the raw text in body when the response is not JSON, undefined when empty', async () => {
+    expect(await call(async () => new Response('plain text', { status: 502 }))).toEqual({ status: 502, body: 'plain text' });
+    expect(await call(async () => new Response(null, { status: 204 }))).toEqual({ status: 204, body: undefined });
+  });
+});
+// Haihs: test call() trả text khi body không phải JSON (nợ M0) - end

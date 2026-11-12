@@ -1,0 +1,16 @@
+# Created by Haihs on 11/11/2026
+# Files Prettier must not touch: docs, lockfile, JSON, generated and build output.
+docs
+.superpowers
+*.md
+*.json
+package-lock.json
+node_modules
+.next
+dist
+.angular
+coverage
+playwright-report
+test-results
+next-env.d.ts
+apps/api/AGENTS.md

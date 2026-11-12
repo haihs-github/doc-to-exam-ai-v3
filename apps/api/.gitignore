@@ -1,0 +1,4 @@
+# Created by Haihs on 11/11/2026
+# Ignore the Next-generated type reference file.
+next-env.d.ts
+*.tsbuildinfo
