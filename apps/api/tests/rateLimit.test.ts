@@ -199,6 +199,28 @@ describe('limiters buckets', () => {
       LOGIN_PHONE_GLOBAL: [100, 15 * M, 'failures', false],
       CHANGE_PASSWORD: [10, 15 * M, 'failures', false],
       STUDENT_API: [3000, M, 'all', false],
+      // Haihs: M2-M6 thêm bucket lớp/ca thi/upload (khớp backend inventory 1.4) - start
+      CLASS_JOIN_IP: [600, 10 * M, 'all', false],
+      CLASS_JOIN: [20, 10 * M, 'all', false],
+      MEMBER_SEARCH: [60, 10 * M, 'all', false],
+      MEMBER_SEARCH_DAY: [500, 24 * 60 * M, 'all', false],
+      MEMBER_LOOKUP: [200, 10 * M, 'all', false],
+      CSV_IMPORT: [10, 10 * M, 'all', false],
+      RESET_PASSWORD: [100, 10 * M, 'all', true],
+      DUPLICATE: [10, M, 'all', false],
+      TEACHER_UPLOAD: [10, 10 * M, 'all', false],
+      SITTING_RESOLVE: [20, 10 * M, 'failures', false],
+      SITTING_RESOLVE_IP: [300, 10 * M, 'failures', false],
+      SITTING_START: [400, M, 'all', true],
+      SITTING_START_USER: [30, M, 'all', true],
+      SITTING_SUBMIT: [400, M, 'all', true],
+      SITTING_SUBMIT_USER: [10, M, 'all', true],
+      RESULT_VIEW: [400, M, 'all', true],
+      RESULT_VIEW_USER: [30, M, 'all', true],
+      ESSAY_UPLOAD_IP: [1200, M, 'all', true],
+      ESSAY_UPLOAD_BAD: [30, M, 'failures', false],
+      ESSAY_UPLOAD_SESSION: [12, M, 'all', true],
+      // Haihs: M2-M6 thêm bucket - end
     });
   });
   it('REGISTER_PHONE keys by valid phone+IP from the body without consuming it; others by ip: key', async () => {

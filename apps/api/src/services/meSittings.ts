@@ -406,7 +406,7 @@ export async function start(_req: Request, ctx: AuthCtx): Promise<Response> {
       session = await SittingSessionModel.findOneAndUpdate(
         filter,
         { $setOnInsert: insertOnly },
-        { upsert: true, new: true, lean: true },
+        { upsert: true, returnDocument: 'after', lean: true },
       );
     } catch (err) {
       if ((err as { code?: unknown }).code !== 11000) throw err;

@@ -57,7 +57,8 @@ describe('route /teacher/classes', () => {
   it('student -> /', async () => {
     const s = await setup();
     s.user.set(mk({ role: 'student' }));
-    expect(await s.go()).toBe('/');
+    // expect(await s.go()).toBe('/'); // Haihs: đóng code cũ M8 trang chủ theo vai trò (TEACHER_HOME, / chuyển hướng) - start - end
+    expect(await s.go()).toBe('/sittings'); // Haihs: M8 trang chủ theo vai trò (TEACHER_HOME, / chuyển hướng) - start - end
   });
 
   it('teacher sees the page', async () => {

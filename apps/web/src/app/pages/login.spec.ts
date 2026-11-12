@@ -111,7 +111,8 @@ describe('Login', () => {
     await fill(s);
     await s.submit();
     expect(s.login).toHaveBeenCalledWith('teacher', expect.anything());
-    expect(s.router.url).toBe('/');
+    // expect(s.router.url).toBe('/'); // Haihs: đóng code cũ M8 trang chủ theo vai trò (TEACHER_HOME, / chuyển hướng) - start - end
+    expect(s.router.url).toBe('/teacher/templates'); // Haihs: M8 trang chủ theo vai trò (TEACHER_HOME, / chuyển hướng) - start - end
   });
 
   it('mustChangePassword goes to /change-password; state.from is honoured otherwise', async () => {
@@ -199,6 +200,7 @@ describe('Login', () => {
     expect(s.router.url).toBe('/login');
     s.user.set(mk({ role: 'teacher' }));
     await s.harness.fixture.whenStable();
-    expect(s.router.url).toBe('/');
+    // expect(s.router.url).toBe('/'); // Haihs: đóng code cũ M8 trang chủ theo vai trò (TEACHER_HOME, / chuyển hướng) - start - end
+    expect(s.router.url).toBe('/teacher/templates'); // Haihs: M8 trang chủ theo vai trò (TEACHER_HOME, / chuyển hướng) - start - end
   });
 });
