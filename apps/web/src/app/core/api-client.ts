@@ -36,6 +36,11 @@ export class ApiClient {
     return this.wrap(this.http.patch<unknown>(url, body));
   }
   // Haihs: M2 Task 9 - ClassesApi cần PATCH (sửa lớp, đổi tên học sinh, bật/tắt link mời) - end
+  // Haihs: M6 - upload tự luận cần header X-Upload-Token, vẫn đi qua wrap() để lỗi ra ApiFailure - start
+  postWithHeaders<T>(url: string, body: unknown, headers: Record<string, string>): Observable<T> {
+    return this.wrap(this.http.post<unknown>(url, body, { headers }));
+  }
+  // Haihs: M6 - upload tự luận cần header X-Upload-Token - end
   delete<T>(url: string): Observable<T> {
     return this.wrap(this.http.delete<unknown>(url));
   }

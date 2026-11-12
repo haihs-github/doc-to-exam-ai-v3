@@ -11,7 +11,8 @@ import {
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import type { SubmitBody, StartedExam, StudentQuestion, TabViolation } from '@doc-to-exam/contract';
 import { firstValueFrom } from 'rxjs';
-import { ExamTakingApi } from '../core/exam-taking.api';
+import { errorMessage } from '../core/api-errors';
+import { ExamTakingApi, type UploadedEssay } from '../core/exam-taking.api';
 import { AlertService } from '../shared/ui/alert.service';
 import { ConfirmService } from '../shared/ui/confirm-modal';
 import { FormattedText } from '../shared/ui/formatted-text';
@@ -130,6 +131,30 @@ const pad = (n: number) => String(n).padStart(2, '0');
                     [value]="essay()[q.id] ?? ''"
                     (input)="setEssay(q.id, $any($event.target).value)"
                   ></textarea>
+                  @if (token()) {
+                    <div class="flex flex-wrap items-center gap-2 text-sm">
+                      <label class="btn-secondary cursor-pointer">
+                        {{
+                          uploads()[q.id] ? 'Đổi tệp' : 'Tải tệp (.txt .docx .jpg .png .webp .pdf)'
+                        }}
+                        <input
+                          type="file"
+                          class="sr-only"
+                          accept=".txt,.docx,.jpg,.jpeg,.png,.webp,.pdf"
+                          [disabled]="uploading()"
+                          (change)="onFile(q.id, $event)"
+                        />
+                      </label>
+                      @if (uploads()[q.id]; as u) {
+                        <span>Đã tải: {{ u.fileName }}. Tệp sẽ thay cho phần gõ ở trên.</span>
+                      }
+                      @if (uploadError()[q.id]) {
+                        <span role="alert" class="font-medium text-red-700 dark:text-red-300">{{
+                          uploadError()[q.id]
+                        }}</span>
+                      }
+                    </div>
+                  }
                 } @else {
                   <div
                     role="radiogroup"
@@ -203,6 +228,10 @@ export class ExamRoom {
   protected readonly answers = signal<Record<number, string>>({});
   protected readonly essay = signal<Record<number, string>>({});
   protected readonly remaining = signal(0);
+  protected readonly uploads = signal<Record<number, UploadedEssay>>({});
+  protected readonly uploadError = signal<Record<number, string>>({});
+  protected readonly uploading = signal(false);
+  protected readonly token = computed(() => this.exam()?.uploadToken ?? '');
   protected readonly submitting = signal(false);
   protected readonly clock = computed(
     () => `${pad(Math.floor(this.remaining() / 60))}:${pad(this.remaining() % 60)}`,
@@ -313,6 +342,24 @@ export class ExamRoom {
     document.getElementById(`q-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
+  /** One file per essay question; the server decides by MAGIC BYTES, so a renamed file is refused there. */
+  protected async onFile(id: number, e: Event): Promise<void> {
+    const input = e.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file || this.uploading()) return;
+    this.uploading.set(true);
+    this.uploadError.update((m) => ({ ...m, [id]: '' }));
+    try {
+      const up = await firstValueFrom(this.api.uploadEssay(this.token(), id, file));
+      this.uploads.update((m) => ({ ...m, [id]: up }));
+    } catch (err) {
+      this.uploadError.update((m) => ({ ...m, [id]: errorMessage(err) }));
+    } finally {
+      this.uploading.set(false);
+    }
+  }
+
   // ---- anti-cheat
   private readonly listeners: [EventTarget, string, EventListener, boolean?][] = [];
   private on(target: EventTarget, type: string, fn: EventListener, capture = false): void {
@@ -382,9 +429,20 @@ export class ExamRoom {
     const body: SubmitBody = {
       answers: Object.fromEntries(Object.entries(this.answers()).map(([k, v]) => [k, v])),
       essayAnswers: Object.fromEntries(
-        Object.entries(this.essay())
-          .filter(([, v]) => v.trim())
-          .map(([k, v]) => [k, v]),
+        this.questions()
+          .filter((q) => q.type === 'essay')
+          .map((q) => [
+            q.id,
+            {
+              text: this.essay()[q.id] ?? '',
+              ...(this.uploads()[q.id] ? { uploadId: this.uploads()[q.id].uploadId } : {}),
+            },
+          ])
+          .filter(
+            ([, v]) =>
+              (v as { text: string; uploadId?: string }).text.trim() ||
+              (v as { uploadId?: string }).uploadId,
+          ),
       ),
       isAutoSubmit: auto,
       tabViolations: this.violations,
