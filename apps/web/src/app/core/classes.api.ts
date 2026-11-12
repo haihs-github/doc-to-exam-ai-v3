@@ -9,7 +9,6 @@ import type {
   ImportResultRow,
   ImportSummary,
   InviteDto,
-  InviteState,
   TempPasswordResult,
 } from '@doc-to-exam/contract';
 import { ApiClient } from './api-client';
@@ -43,10 +42,7 @@ export interface SearchParams {
   limit?: number;
 }
 /** Student's view of one class: names only for classmates. */
-export type MyClassDetail = ClassDto & {
-  teachers: { fullName: string }[];
-  classmates: { fullName: string }[];
-};
+export type MyClassDetail = ClassDto & { teachers: string[]; classmates: string[] };
 export interface ImportResponse {
   summary: ImportSummary;
   results: ImportResultRow[];
@@ -92,10 +88,10 @@ export class ClassesApi {
   invite(id: string): Observable<InviteDto> {
     return this.api.get(cls(id, '/invite'));
   }
-  rotateInvite(id: string, kind: InviteKind): Observable<InviteState> {
+  rotateInvite(id: string, kind: InviteKind): Observable<InviteDto> {
     return this.api.post(cls(id, `/invite/${enc(kind)}/rotate`));
   }
-  setInviteEnabled(id: string, kind: InviteKind, enabled: boolean): Observable<InviteState> {
+  setInviteEnabled(id: string, kind: InviteKind, enabled: boolean): Observable<InviteDto> {
     return this.api.patch(cls(id, `/invite/${enc(kind)}`), { enabled });
   }
 

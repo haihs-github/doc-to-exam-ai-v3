@@ -12,7 +12,11 @@ import { About } from './pages/about';
 import { HomePlaceholder } from './pages/placeholders';
 import { Register } from './pages/register';
 import { SessionError } from './pages/session-error';
+import { JoinClass } from './pages/join-class'; // Haihs: M2 Task 14 - trang học sinh - start - end
+import { MyClassDetail } from './pages/my-class-detail'; // Haihs: M2 Task 14 - start - end
+import { MyClasses } from './pages/my-classes'; // Haihs: M2 Task 14 - start - end
 import { TeacherClasses } from './pages/teacher-classes';
+import { TeacherClassDetail } from './pages/teacher-class-detail'; // Haihs: M2 Task 12 - chi tiết lớp - start - end
 
 /** Runs `decide` once the startup /me load is over (same wait as authGuard: no flash of the wrong page). */
 const afterLoad = (decide: () => GuardResult) => {
@@ -61,5 +65,12 @@ export const routes: Routes = [
   { path: 'change-password', canActivate: [authGuard()], component: ChangePassword },
   { path: 'session-error', canActivate: [sessionErrorGuard], component: SessionError },
   { path: 'teacher/classes', canActivate: [authGuard(['teacher'], 'teacher')], component: TeacherClasses }, // Haihs: M2 Task 11 - trang danh sách lớp của giáo viên - start - end
+  { path: 'teacher/classes/:id', canActivate: [authGuard(['teacher'], 'teacher')], component: TeacherClassDetail }, // Haihs: M2 Task 12 - chi tiết lớp giáo viên - start - end
+  // Haihs: M2 Task 14 - /join mọi vai trò (khách bị đưa đến đăng nhập, state.from giữ đúng link), /classes cho học sinh - start
+  { path: 'join', canActivate: [authGuard()], component: JoinClass },
+  { path: 'join/:token', canActivate: [authGuard()], component: JoinClass },
+  { path: 'classes', canActivate: [authGuard(['student'], 'student')], component: MyClasses },
+  { path: 'classes/:id', canActivate: [authGuard(['student'], 'student')], component: MyClassDetail },
+  // Haihs: M2 Task 14 - end
   { path: '**', redirectTo: '' },
 ];
