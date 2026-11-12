@@ -55,6 +55,33 @@ export type ErrorCode =
   | 'RESULTS_NOT_PUBLISHED'
   | 'RESULT_UPDATING'
   // Haihs: thêm mã lỗi làm bài M5 (và kết quả/tự luận M6-M7) - end
+  // Haihs: mã lỗi upload tự luận (giữ lý do chi tiết của nguồn làm giá trị code, D10) và chấm tay M6 - start
+  | 'no_session'
+  | 'unauthenticated'
+  | 'session_invalid'
+  | 'wrong_student'
+  | 'invalid_question'
+  | 'no_file'
+  | 'too_many_files'
+  | 'bad_upload'
+  | 'too_large'
+  | 'heic_not_supported'
+  | 'content_mismatch'
+  | 'unsupported_type'
+  | 'docx_too_complex'
+  | 'text_encoding'
+  | 'empty_text'
+  | 'docx_unreadable'
+  | 'extract_timeout'
+  | 'media_storage_full'
+  | 'body_timeout'
+  | 'busy'
+  | 'GRADE_CONFLICT'
+  | 'MEDIA_GONE'
+  | 'VIOLATION_CHANGED'
+  | 'GRADING_INCOMPLETE'
+  | 'EXPORT_TOO_LARGE'
+  // Haihs: mã lỗi upload tự luận và chấm tay M6 - end
   | 'INTERNAL';
 
 export interface ApiError {
@@ -127,6 +154,33 @@ export const HTTP_STATUS: Record<ErrorCode, number> = {
   RESULTS_NOT_PUBLISHED: 403,
   RESULT_UPDATING: 409,
   // Haihs: status mã lỗi làm bài - end
+  // Haihs: status mã lỗi upload tự luận / chấm tay - start
+  no_session: 401, // routes/essayUploadRoutes.js
+  unauthenticated: 401,
+  session_invalid: 403,
+  wrong_student: 403,
+  invalid_question: 400,
+  no_file: 400,
+  too_many_files: 400,
+  bad_upload: 400,
+  too_large: 413,
+  heic_not_supported: 415,
+  content_mismatch: 415,
+  unsupported_type: 415,
+  docx_too_complex: 415,
+  text_encoding: 415,
+  empty_text: 422,
+  docx_unreadable: 422,
+  extract_timeout: 422,
+  media_storage_full: 422,
+  body_timeout: 408,
+  busy: 503,
+  GRADE_CONFLICT: 409, // controllers/sittingResultsController.js
+  MEDIA_GONE: 410,
+  VIOLATION_CHANGED: 409,
+  GRADING_INCOMPLETE: 409, // controllers/sittingPublicationController.js
+  EXPORT_TOO_LARGE: 413, // controllers/sittingResultsController.js
+  // Haihs: status mã lỗi upload tự luận / chấm tay - end
   INTERNAL: 500, // middlewares/authMiddleware.js:69 (source wire code is 'INTERNAL_ERROR')
 };
 

@@ -10,17 +10,22 @@ import {
   hasEssayQuestions,
   isEssayQuestion,
   sanitizeAnswers,
-  sanitizeEssayAnswers,
   type Question,
 } from '../lib/examValidation';
 import { generateShuffledOptionsOrder, generateShuffledQuestionOrder } from '../lib/examShuffle';
+import { loadEssayUploadConfig } from '../lib/essayUploadConfig';
 import { HttpError, readJson } from '../lib/handler';
 import { ClassModel } from '../models/Class';
 import { ClassMemberModel } from '../models/ClassMember';
+import { sendEssayMedia } from '../lib/essayMedia';
+import { EssayMediaModel } from '../models/EssayMedia';
 import { ExamSittingModel } from '../models/ExamSitting';
 import { SittingGrantModel } from '../models/SittingGrant';
 import { SittingSessionModel } from '../models/SittingSession';
 import { SittingSubmissionModel } from '../models/SittingSubmission';
+import { attachUploadsToSubmission, resolveEssayAnswers } from './essayUploads';
+import { classifySubmission, isResultVisible } from './resultPublication';
+import { buildResultPayload, toResultBadge } from './studentResult';
 import {
   findSittingCached,
   getSittingAvailability,
@@ -216,21 +221,30 @@ const canViewInfo = async (
   access.hasGrant ||
   Boolean(await SittingSubmissionModel.exists({ sittingId: sitting._id, studentId }));
 
-// TODO(api): M7 — kèm result {score,maxScore} khi kết quả đã công bố (isResultVisible/toResultBadge)
+const BADGE_SELECT = 'sittingId submittedAt answers optionsOrder essayResults essayStale';
+const RESULT_SELECT = `${BADGE_SELECT} questionOrder essayAnswers`;
+
 async function describeForStudent(sitting: CachedSitting, studentId: Types.ObjectId, now: Date) {
   const [submission, session] = await Promise.all([
     SittingSubmissionModel.findOne({ sittingId: sitting._id, studentId })
-      .select('submittedAt')
+      .select(sitting.resultsPublishedAt ? BADGE_SELECT : 'submittedAt')
       .lean(),
     SittingSessionModel.findOne({ sittingId: sitting._id, studentId }).select('deadlineAt').lean(),
   ]);
   const availability = getSittingAvailability(sitting, now);
-  return toSittingInfo(
-    sitting,
-    availability,
-    computeMyState({ availability, submission, session, now }),
-    submission,
-  );
+  const result =
+    submission && isResultVisible(sitting, submission as never)
+      ? toResultBadge(sitting.questions, submission as never)
+      : null;
+  return {
+    ...toSittingInfo(
+      sitting,
+      availability,
+      computeMyState({ availability, submission, session, now }),
+      submission,
+    ),
+    ...(result ? { result } : {}),
+  };
 }
 
 export async function listMine(req: Request, ctx: AuthCtx): Promise<Response> {
@@ -296,8 +310,30 @@ export async function listMine(req: Request, ctx: AuthCtx): Promise<Response> {
   }
   rows.sort((a, b) => new Date(b.openAt).getTime() - new Date(a.openAt).getTime());
   const paging = parsePage(new URL(req.url).searchParams, { defaultLimit: 20, maxLimit: 100 });
-  // TODO(api): M7 — gắn result cho các ca đã công bố trong trang hiện tại
-  return ok(pageResult(rows.slice(paging.skip, paging.skip + paging.limit), rows.length, paging));
+  const items: (ReturnType<typeof toRow> & { result?: { score: number; maxScore: number } })[] =
+    rows.slice(paging.skip, paging.skip + paging.limit);
+  // result badges: only for submitted sittings that are published, and only when the student may see them
+  const sittingBy = new Map(sittings.map((x) => [String(x._id), x]));
+  const candidates = items.filter(
+    (row) => submissionBy.has(row.id) && sittingBy.get(row.id)?.resultsPublishedAt,
+  );
+  if (candidates.length > 0) {
+    const candidateIds = candidates.map((row) => toObjectId(row.id) as Types.ObjectId);
+    const [fullSittings, fullSubmissions] = await Promise.all([
+      Promise.all(candidateIds.map((id) => findSittingCached(String(id)))),
+      SittingSubmissionModel.find({ studentId, sittingId: { $in: candidateIds } })
+        .select(BADGE_SELECT)
+        .lean(),
+    ]);
+    const fullBy = new Map(fullSubmissions.map((x) => [String(x.sittingId), x]));
+    candidates.forEach((row, i) => {
+      const full = fullSittings[i];
+      const sub = fullBy.get(row.id);
+      if (full && sub && isResultVisible(full, sub as never))
+        row.result = toResultBadge(full.questions, sub as never);
+    });
+  }
+  return ok(pageResult(items, rows.length, paging));
 }
 
 /** POST /api/me/sittings/resolve {code}: code -> sitting info without questions. */
@@ -469,8 +505,26 @@ export async function submit(req: Request, ctx: AuthCtx): Promise<Response> {
   const { correctCount, totalQuestions, score } = gradeSubmission(questions, answers, optionsOrder);
 
   const hasEssay = hasEssayQuestions(questions);
-  // TODO(api): M6 — file/ảnh tự luận qua uploadId (resolveEssayAnswers); M5 chỉ nhận bài gõ trực tiếp
-  const essayAnswers = hasEssay ? sanitizeEssayAnswers(textOnly(body.essayAnswers), questions) : [];
+  // essay answers: typed text and/or uploaded files (uploadId); a bad uploadId is INVALID_UPLOAD (unless the student already submitted)
+  let essayAnswers: Awaited<ReturnType<typeof resolveEssayAnswers>>['essayAnswers'] = [];
+  let attachments: Awaited<ReturnType<typeof resolveEssayAnswers>>['attachments'] = [];
+  let warnings: string[] = [];
+  if (hasEssay) {
+    try {
+      ({ essayAnswers, attachments, warnings } = await resolveEssayAnswers(
+        body.essayAnswers,
+        questions,
+        {
+          sittingId: sitting._id,
+          studentId,
+        },
+      ));
+    } catch (e) {
+      if (e instanceof HttpError && e.code === 'INVALID_UPLOAD')
+        await throwIfAlreadySubmitted(sitting._id, studentId);
+      throw e;
+    }
+  }
 
   const currentClasses = new Set(sitting.classIds.map(String));
   const snapshot = (access.grant?.classIds ?? []).filter((id) => currentClasses.has(String(id)));
@@ -484,7 +538,7 @@ export async function submit(req: Request, ctx: AuthCtx): Promise<Response> {
     mcqScore: score,
     essayScore: 0,
     maxScore: computeScoring(questions).total,
-    essayAnswers,
+    essayAnswers: essayAnswers as never,
     gradingStatus: hasEssay ? 'pending' : 'none',
     correctCount,
     totalQuestions,
@@ -506,22 +560,70 @@ export async function submit(req: Request, ctx: AuthCtx): Promise<Response> {
     }
     throw err;
   }
+  if (hasEssay) {
+    try {
+      await attachUploadsToSubmission(submission._id, attachments, loadEssayUploadConfig());
+    } catch (attachError) {
+      console.error('Cannot attach essay files to the submission:', (attachError as Error).message); // never fails the submit
+    }
+  }
   const res = ok(
-    { submittedAt: submission.submittedAt.toISOString() },
+    {
+      submittedAt: submission.submittedAt.toISOString(),
+      ...(warnings.length > 0 ? { warnings } : {}),
+    },
     { status: 201, message: 'Nộp bài thành công!' },
   );
   cleanupSessionAfterResponse(filter);
   return res;
 }
 
-/** { id: string | {text} } -> { id: text } (M5: typed answers only). */
-function textOnly(raw: unknown): Record<string, string> {
-  const out: Record<string, string> = {};
-  if (raw && typeof raw === 'object')
-    for (const [k, v] of Object.entries(raw as Record<string, unknown>)) {
-      if (typeof v === 'string') out[k] = v;
-      else if (v && typeof v === 'object' && typeof (v as { text?: unknown }).text === 'string')
-        out[k] = (v as { text: string }).text;
-    }
-  return out;
+/**
+ * Order of checks: sitting exists -> has a submission -> published -> THIS submission is ready.
+ */
+async function loadVisibleResult(ctx: AuthCtx, select: string) {
+  const sitting = await loadSitting(ctx);
+  if (!sitting) throw sittingNotFound();
+  const submission = await SittingSubmissionModel.findOne({
+    sittingId: sitting._id,
+    studentId: ctx.user._id,
+  })
+    .select(select)
+    .lean();
+  if (!submission) throw new HttpError('NO_SUBMISSION', 'Bạn không có bài nộp trong ca thi này.');
+  if (!sitting.resultsPublishedAt)
+    throw new HttpError('RESULTS_NOT_PUBLISHED', 'Giáo viên chưa công bố kết quả ca thi này.');
+  if (classifySubmission(sitting.questions, submission).status !== 'ready')
+    throw new HttpError(
+      'RESULT_UPDATING',
+      'Giáo viên đang cập nhật điểm bài của bạn, hãy quay lại sau ít phút.',
+    );
+  return { sitting, submission };
+}
+
+/** GET /api/me/sittings/:sittingId/result: scores recomputed at read time, whitelist payload, never cached. */
+export async function getResult(_req: Request, ctx: AuthCtx): Promise<Response> {
+  const { sitting, submission } = await loadVisibleResult(ctx, RESULT_SELECT);
+  const res = ok(buildResultPayload(sitting, submission as never));
+  res.headers.set('Cache-Control', 'private, no-store');
+  return res;
+}
+
+/** GET /api/me/sittings/:sittingId/result/essay/:questionId/media: my own essay photo/PDF; past its retention -> 410. */
+export async function getResultMedia(_req: Request, ctx: AuthCtx): Promise<Response> {
+  const raw = (await paramsOf(ctx)).questionId;
+  if (!/^[1-9]\d{0,9}$/.test(String(raw)))
+    throw new HttpError('NOT_FOUND', 'Câu này không có tệp ảnh/PDF.');
+  const { sitting, submission } = await loadVisibleResult(ctx, RESULT_SELECT);
+  const questionId = Number(raw);
+  const answer = (submission.essayAnswers ?? []).find((a) => a.questionId === questionId);
+  if (!answer || answer.source !== 'file-media' || !answer.mediaRef)
+    throw new HttpError('NOT_FOUND', 'Câu này không có tệp ảnh/PDF.');
+  const media = await EssayMediaModel.findOne({
+    _id: answer.mediaRef,
+    submissionId: submission._id,
+    sittingId: sitting._id,
+    questionId,
+  }).lean();
+  return sendEssayMedia(media, submission._id, questionId, 'Ảnh đã hết hạn lưu.');
 }
