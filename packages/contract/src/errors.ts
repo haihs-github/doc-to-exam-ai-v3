@@ -26,6 +26,10 @@ export type ErrorCode =
   | 'CSV_INVALID'
   | 'CSV_TOO_MANY_ROWS'
   // Haihs: thêm mã lỗi lớp học M2 - end
+  // Haihs: thêm mã lỗi đề mẫu M3 - start
+  | 'TEMPLATE_TITLE_TAKEN'
+  | 'TEMPLATE_NOT_IN_TRASH'
+  // Haihs: thêm mã lỗi đề mẫu M3 - end
   | 'INTERNAL';
 
 export interface ApiError {
@@ -69,6 +73,10 @@ export const HTTP_STATUS: Record<ErrorCode, number> = {
   CSV_INVALID: 422, // controllers/studentAdminController.js:86 (source also sends 400 for a bad multipart request at :81; one status per code here)
   CSV_TOO_MANY_ROWS: 422, // controllers/studentAdminController.js:115
   // Haihs: status mã lỗi lớp học M2 - end
+  // Haihs: status mã lỗi đề mẫu M3 - start
+  TEMPLATE_TITLE_TAKEN: 409, // controllers/templateController.js:53
+  TEMPLATE_NOT_IN_TRASH: 409, // controllers/templateController.js:~270
+  // Haihs: status mã lỗi đề mẫu M3 - end
   INTERNAL: 500, // middlewares/authMiddleware.js:69 (source wire code is 'INTERNAL_ERROR')
 };
 
