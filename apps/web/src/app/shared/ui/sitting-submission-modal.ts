@@ -39,6 +39,136 @@ interface Draft {
   // Haihs: ô điểm tiêu chí là ScoreCombobox (gõ hoặc chọn) như bản gốc - end
   // Haihs: icon cho nút giống bản gốc - end
   changeDetection: ChangeDetectionStrategy.OnPush,
+  // Haihs: bảng chấm tay có nhãn Giáo viên chấm / Chưa chấm và chữ như EssayManualPanel - start
+  // đóng code cũ
+  //   template: `
+  //     <div class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 p-4">
+  //       <div
+  //         appModalFocus
+  //         (dismissed)="closed.emit()"
+  //         role="dialog"
+  //         aria-modal="true"
+  //         aria-labelledby="sub-title"
+  //         class="my-6 w-full max-w-3xl space-y-5 rounded-lg border border-gray-200 bg-white p-6 shadow-overlay dark:border-gray-700 dark:bg-gray-800 dark:shadow-overlay-dark"
+  //       >
+  //         <header class="flex items-start justify-between gap-3">
+  //           <div>
+  //             <h2 id="sub-title" class="text-lg font-bold">{{ s().studentName || 'Học sinh' }}</h2>
+  //             <p class="text-base text-gray-600 dark:text-gray-400">
+  //               Nộp lúc {{ fmt(s().submittedAt) }}{{ s().isAutoSubmitted ? ' (tự động nộp)' : '' }} ·
+  //               Điểm {{ s().totalScore ?? '—' }}/{{ s().maxScore }}
+  //             </p>
+  //           </div>
+  //           <button type="button" class="btn-secondary" (click)="closed.emit()">Đóng</button>
+  //         </header>
+
+  //         @for (q of essayQuestions(); track q.id) {
+  //           @let a = answerOf(q.id);
+  //           <section
+  //             class="space-y-3 rounded-xl border border-gray-200 p-4 dark:border-gray-700"
+  //             [attr.aria-label]="'Câu tự luận ' + q.id"
+  //           >
+  //             <h3 class="font-bold">Câu {{ numberOf(q.id) }} (tối đa {{ q.maxScore }} điểm)</h3>
+  //             <p class="text-base"><app-formatted-text [text]="q.questionText" /></p>
+  //             @if (a?.source === 'file-media') {
+  //               <div class="flex flex-wrap items-center gap-2">
+  //                 <span class="text-base">Tệp: {{ a?.fileName }}</span>
+  //                 <button
+  //                   type="button"
+  //                   class="btn-secondary"
+  //                   [disabled]="mediaBusy()"
+  //                   (click)="openMedia(q.id)"
+  //                 >
+  //                   Xem tệp gốc
+  //                 </button>
+  //               </div>
+  //             } @else {
+  //               <pre
+  //                 class="max-h-64 overflow-y-auto whitespace-pre-wrap rounded-lg bg-gray-50 p-3 text-base dark:bg-gray-900"
+  //                 >{{ a?.text || '(Học sinh chưa làm câu này)' }}</pre>
+  //             }
+  //             <div class="space-y-2">
+  //               @for (c of q.rubric ?? []; track c.key) {
+  //                 <div class="flex flex-wrap items-center gap-2">
+  //                   <span class="min-w-[10rem] flex-1 text-base"
+  //                     >{{ c.label }} (tối đa {{ c.max }})</span
+  //                   >
+  //                   <!-- Haihs: ô điểm tiêu chí là ScoreCombobox (gõ hoặc chọn) như bản gốc - start -->
+  //                   <!-- đóng code cũ -->
+  //                   <!-- <input -->
+  //                   <!-- type="text" -->
+  //                   <!-- inputmode="decimal" -->
+  //                   <!-- class="input w-24" -->
+  //                   <!-- (input)="setScore(q.id, c.key, $event)" -->
+  //                   <!-- [attr.aria-label]="'Điểm ' + c.label" -->
+  //                   <app-score-combobox
+  //                     class="w-28"
+  //                     [max]="c.max"
+  //                     [label]="'Điểm ' + c.label"
+  //                     [value]="draft(q.id).scores[c.key] ?? ''"
+  //                     (valueChange)="putScore(q.id, c.key, $event)"
+  //                   />
+  //                   <!-- Haihs: ô điểm tiêu chí là ScoreCombobox (gõ hoặc chọn) như bản gốc - end -->
+  //                   <input
+  //                     type="text"
+  //                     class="input w-56"
+  //                     placeholder="Nhận xét"
+  //                     maxlength="400"
+  //                     [value]="draft(q.id).comments[c.key] ?? ''"
+  //                     (input)="setComment(q.id, c.key, $event)"
+  //                     [attr.aria-label]="'Nhận xét ' + c.label"
+  //                   />
+  //                 </div>
+  //               }
+  //               <textarea
+  //                 class="input min-h-[64px] w-full"
+  //                 placeholder="Nhận xét chung"
+  //                 maxlength="1500"
+  //                 [value]="draft(q.id).feedback"
+  //                 (input)="setFeedback(q.id, $event)"
+  //                 [attr.aria-label]="'Nhận xét chung câu ' + q.id"
+  //               ></textarea>
+  //               @if (errors()[q.id]) {
+  //                 <p role="alert" class="text-sm font-medium text-red-700 dark:text-red-300">
+  //                   {{ errors()[q.id] }}
+  //                 </p>
+  //               }
+  //               <button type="button" class="btn-primary" [disabled]="saving()" (click)="save(q)">
+  //                 Lưu điểm câu này
+  //               </button>
+  //             </div>
+  //           </section>
+  //         }
+
+  //         <section aria-label="Log vi phạm">
+  //           <h3 class="font-bold">Vi phạm ({{ violations().length }})</h3>
+  //           @if (violations().length === 0) {
+  //             <p class="text-base text-gray-600 dark:text-gray-400">Không có vi phạm.</p>
+  //           }
+  //           <ul class="space-y-1">
+  //             @for (v of violations(); track $index) {
+  //               <li class="flex items-center justify-between gap-3 text-base">
+  //                 <span>{{ fmt(v.at) }} — {{ v.reason }}</span>
+  //                 <button
+  //                   type="button"
+  //                   class="btn-secondary"
+  //                   [disabled]="saving()"
+  //                   (click)="removeViolation($index, v.at)"
+  //                   [attr.aria-label]="'Xóa vi phạm ' + ($index + 1)"
+  //                 >
+  //                   <!-- Haihs: icon cho nút giống bản gốc - start -->
+  //                   <!-- đóng code cũ -->
+  //                   <!-- Xóa -->
+  //                   <app-icon name="trash-2" svgClass="h-4 w-4" /> Xóa
+  //                   <!-- Haihs: icon cho nút giống bản gốc - end -->
+  //                 </button>
+  //               </li>
+  //             }
+  //           </ul>
+  //         </section>
+  //       </div>
+  //     </div>
+  //   `,
   template: `
     <div class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 p-4">
       <div
@@ -66,7 +196,18 @@ interface Draft {
             class="space-y-3 rounded-xl border border-gray-200 p-4 dark:border-gray-700"
             [attr.aria-label]="'Câu tự luận ' + q.id"
           >
-            <h3 class="font-bold">Câu {{ numberOf(q.id) }} (tối đa {{ q.maxScore }} điểm)</h3>
+            <div class="flex flex-wrap items-center gap-2">
+              <h3 class="font-bold">Câu {{ numberOf(q.id) }} (tối đa {{ q.maxScore }} điểm)</h3>
+              <span
+                class="badge"
+                [class]="
+                  isGraded(q.id)
+                    ? 'border-green-200 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-900/40 dark:text-green-300'
+                    : 'border-gray-200 bg-gray-100 text-gray-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300'
+                "
+                >{{ isGraded(q.id) ? 'Giáo viên chấm' : 'Chưa chấm' }}</span
+              >
+            </div>
             <p class="text-base"><app-formatted-text [text]="q.questionText" /></p>
             @if (a?.source === 'file-media') {
               <div class="flex flex-wrap items-center gap-2">
@@ -81,6 +222,9 @@ interface Draft {
                 </button>
               </div>
             } @else {
+              <div class="text-sm font-bold text-gray-500 dark:text-gray-400">
+                Bài làm gốc của học sinh
+              </div>
               <pre
                 class="max-h-64 overflow-y-auto whitespace-pre-wrap rounded-lg bg-gray-50 p-3 text-base dark:bg-gray-900"
                 >{{ a?.text || '(Học sinh chưa làm câu này)' }}</pre>
@@ -110,7 +254,7 @@ interface Draft {
                   <input
                     type="text"
                     class="input w-56"
-                    placeholder="Nhận xét"
+                    placeholder="Nhận xét (không bắt buộc)"
                     maxlength="400"
                     [value]="draft(q.id).comments[c.key] ?? ''"
                     (input)="setComment(q.id, c.key, $event)"
@@ -120,7 +264,7 @@ interface Draft {
               }
               <textarea
                 class="input min-h-[64px] w-full"
-                placeholder="Nhận xét chung"
+                placeholder="Nhận xét chung cho học sinh (giáo viên tự thông báo, học sinh không xem trong hệ thống)..."
                 maxlength="1500"
                 [value]="draft(q.id).feedback"
                 (input)="setFeedback(q.id, $event)"
@@ -167,6 +311,7 @@ interface Draft {
       </div>
     </div>
   `,
+  // Haihs: bảng chấm tay có nhãn Giáo viên chấm / Chưa chấm và chữ như EssayManualPanel - end
 })
 export class SittingSubmissionModal implements OnDestroy {
   readonly sittingId = input.required<string>();
@@ -232,6 +377,11 @@ export class SittingSubmissionModal implements OnDestroy {
     }));
   }
   // Haihs: ô điểm tiêu chí là ScoreCombobox (gõ hoặc chọn) như bản gốc - start
+  // Haihs: bảng chấm tay có nhãn Giáo viên chấm / Chưa chấm và chữ như EssayManualPanel - start
+  protected isGraded(id: number): boolean {
+    return Boolean(this.s().essayResults?.some((x) => x.questionId === id && x.gradedAt));
+  }
+  // Haihs: bảng chấm tay có nhãn Giáo viên chấm / Chưa chấm và chữ như EssayManualPanel - end
   protected putScore(id: number, key: string, v: string): void {
     this.patch(id, (d) => ({ ...d, scores: { ...d.scores, [key]: v } }));
   }
