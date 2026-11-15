@@ -13,22 +13,22 @@ import { About } from './pages/about';
 import { HomePlaceholder } from './pages/placeholders';
 import { Register } from './pages/register';
 import { SessionError } from './pages/session-error';
-import { JoinClass } from './pages/join-class'; // Haihs: M2 Task 14 - trang học sinh - start - end
-import { MyClassDetail } from './pages/my-class-detail'; // Haihs: M2 Task 14 - start - end
-import { MyClasses } from './pages/my-classes'; // Haihs: M2 Task 14 - start - end
-import { TeacherTemplates } from './pages/teacher-templates'; // Haihs: M3 - trang đề mẫu - start - end
-import { TemplateEditor } from './pages/template-editor'; // Haihs: M3 - start - end
-import { SittingCreate } from './pages/sitting-create'; // Haihs: M4 - ca thi giáo viên - start - end
-import { SittingEditor } from './pages/sitting-editor'; // Haihs: M4 - start - end
-import { TeacherSittingDetail } from './pages/teacher-sitting-detail'; // Haihs: M4 - start - end
-import { TeacherSittings } from './pages/teacher-sittings'; // Haihs: M4 - start - end
-import { ExamRoom } from './pages/exam-room'; // Haihs: M5 - học sinh làm bài - start - end
-import { ExamSuccess } from './pages/exam-success'; // Haihs: M5 - start - end
-import { MySittings } from './pages/my-sittings'; // Haihs: M5 - start - end
-import { SittingEntry } from './pages/sitting-entry'; // Haihs: M5 - start - end
-import { SittingResult } from './pages/sitting-result'; // Haihs: M7 - kết quả của học sinh - start - end
-import { TeacherClasses } from './pages/teacher-classes';
-import { TeacherClassDetail } from './pages/teacher-class-detail'; // Haihs: M2 Task 12 - chi tiết lớp - start - end
+// import { JoinClass } from './pages/join-class'; // Haihs: M2 Task 14 - trang học sinh - start - end // Haihs: đóng code cũ, trang nặng nạp theo yêu cầu (lazy) để giảm kích thước bundle đầu nên bỏ import tĩnh - start - end
+// import { MyClassDetail } from './pages/my-class-detail'; // Haihs: M2 Task 14 - start - end // Haihs: đóng code cũ, trang nặng nạp theo yêu cầu (lazy) để giảm kích thước bundle đầu nên bỏ import tĩnh - start - end
+// import { MyClasses } from './pages/my-classes'; // Haihs: M2 Task 14 - start - end // Haihs: đóng code cũ, trang nặng nạp theo yêu cầu (lazy) để giảm kích thước bundle đầu nên bỏ import tĩnh - start - end
+// import { TeacherTemplates } from './pages/teacher-templates'; // Haihs: M3 - trang đề mẫu - start - end // Haihs: đóng code cũ, trang nặng nạp theo yêu cầu (lazy) để giảm kích thước bundle đầu nên bỏ import tĩnh - start - end
+// import { TemplateEditor } from './pages/template-editor'; // Haihs: M3 - start - end // Haihs: đóng code cũ, trang nặng nạp theo yêu cầu (lazy) để giảm kích thước bundle đầu nên bỏ import tĩnh - start - end
+// import { SittingCreate } from './pages/sitting-create'; // Haihs: M4 - ca thi giáo viên - start - end // Haihs: đóng code cũ, trang nặng nạp theo yêu cầu (lazy) để giảm kích thước bundle đầu nên bỏ import tĩnh - start - end
+// import { SittingEditor } from './pages/sitting-editor'; // Haihs: M4 - start - end // Haihs: đóng code cũ, trang nặng nạp theo yêu cầu (lazy) để giảm kích thước bundle đầu nên bỏ import tĩnh - start - end
+// import { TeacherSittingDetail } from './pages/teacher-sitting-detail'; // Haihs: M4 - start - end // Haihs: đóng code cũ, trang nặng nạp theo yêu cầu (lazy) để giảm kích thước bundle đầu nên bỏ import tĩnh - start - end
+// import { TeacherSittings } from './pages/teacher-sittings'; // Haihs: M4 - start - end // Haihs: đóng code cũ, trang nặng nạp theo yêu cầu (lazy) để giảm kích thước bundle đầu nên bỏ import tĩnh - start - end
+// import { ExamRoom } from './pages/exam-room'; // Haihs: M5 - học sinh làm bài - start - end // Haihs: đóng code cũ, trang nặng nạp theo yêu cầu (lazy) để giảm kích thước bundle đầu nên bỏ import tĩnh - start - end
+// import { ExamSuccess } from './pages/exam-success'; // Haihs: M5 - start - end // Haihs: đóng code cũ, trang nặng nạp theo yêu cầu (lazy) để giảm kích thước bundle đầu nên bỏ import tĩnh - start - end
+// import { MySittings } from './pages/my-sittings'; // Haihs: M5 - start - end // Haihs: đóng code cũ, trang nặng nạp theo yêu cầu (lazy) để giảm kích thước bundle đầu nên bỏ import tĩnh - start - end
+// import { SittingEntry } from './pages/sitting-entry'; // Haihs: M5 - start - end // Haihs: đóng code cũ, trang nặng nạp theo yêu cầu (lazy) để giảm kích thước bundle đầu nên bỏ import tĩnh - start - end
+// import { SittingResult } from './pages/sitting-result'; // Haihs: M7 - kết quả của học sinh - start - end // Haihs: đóng code cũ, trang nặng nạp theo yêu cầu (lazy) để giảm kích thước bundle đầu nên bỏ import tĩnh - start - end
+// import { TeacherClasses } from './pages/teacher-classes'; // Haihs: đóng code cũ, trang nặng nạp theo yêu cầu (lazy) để giảm kích thước bundle đầu nên bỏ import tĩnh - start - end
+// import { TeacherClassDetail } from './pages/teacher-class-detail'; // Haihs: M2 Task 12 - chi tiết lớp - start - end // Haihs: đóng code cũ, trang nặng nạp theo yêu cầu (lazy) để giảm kích thước bundle đầu nên bỏ import tĩnh - start - end
 
 /** Runs `decide` once the startup /me load is over (same wait as authGuard: no flash of the wrong page). */
 const afterLoad = (decide: () => GuardResult) => {
@@ -61,7 +61,9 @@ const rootGuard: CanActivateFn = (route, state) => {
   // );
   return afterLoad(() => {
     if (!auth.user() && !auth.loadError()) return router.parseUrl('/about');
-    const decision = runInInjectionContext(injector, () => authGuard()(route, state)) as GuardResult; // isLoading is false here: synchronous
+    const decision = runInInjectionContext(injector, () =>
+      authGuard()(route, state),
+    ) as GuardResult; // isLoading is false here: synchronous
     const user = auth.user();
     return decision === true && user ? router.parseUrl(homePathForRole(user.role)) : decision;
   });
@@ -85,31 +87,122 @@ export const routes: Routes = [
   // the only page a mustChangePassword user can reach
   { path: 'change-password', canActivate: [authGuard()], component: ChangePassword },
   { path: 'session-error', canActivate: [sessionErrorGuard], component: SessionError },
-  { path: 'teacher/classes', canActivate: [authGuard(['teacher'], 'teacher')], component: TeacherClasses }, // Haihs: M2 Task 11 - trang danh sách lớp của giáo viên - start - end
-  { path: 'teacher/classes/:id', canActivate: [authGuard(['teacher'], 'teacher')], component: TeacherClassDetail }, // Haihs: M2 Task 12 - chi tiết lớp giáo viên - start - end
+  // { path: 'teacher/classes', canActivate: [authGuard(['teacher'], 'teacher')], component: TeacherClasses }, // Haihs: M2 Task 11 - trang danh sách lớp của giáo viên - start - end
+  {
+    path: 'teacher/classes',
+    canActivate: [authGuard(['teacher'], 'teacher')],
+    loadComponent: () => import('./pages/teacher-classes').then((m) => m.TeacherClasses),
+  }, // Haihs: trang nặng nạp theo yêu cầu (lazy) để giảm kích thước bundle đầu - start - end
+  // { path: 'teacher/classes/:id', canActivate: [authGuard(['teacher'], 'teacher')], component: TeacherClassDetail }, // Haihs: M2 Task 12 - chi tiết lớp giáo viên - start - end
+  {
+    path: 'teacher/classes/:id',
+    canActivate: [authGuard(['teacher'], 'teacher')],
+    loadComponent: () => import('./pages/teacher-class-detail').then((m) => m.TeacherClassDetail),
+  }, // Haihs: trang nặng nạp theo yêu cầu (lazy) để giảm kích thước bundle đầu - start - end
   // Haihs: M2 Task 14 - /join mọi vai trò (khách bị đưa đến đăng nhập, state.from giữ đúng link), /classes cho học sinh - start
-  { path: 'join', canActivate: [authGuard()], component: JoinClass },
-  { path: 'join/:token', canActivate: [authGuard()], component: JoinClass },
-  { path: 'classes', canActivate: [authGuard(['student'], 'student')], component: MyClasses },
-  { path: 'classes/:id', canActivate: [authGuard(['student'], 'student')], component: MyClassDetail },
+  // { path: 'join', canActivate: [authGuard()], component: JoinClass },
+  {
+    path: 'join',
+    canActivate: [authGuard()],
+    loadComponent: () => import('./pages/join-class').then((m) => m.JoinClass),
+  }, // Haihs: trang nặng nạp theo yêu cầu (lazy) để giảm kích thước bundle đầu - start - end
+  // { path: 'join/:token', canActivate: [authGuard()], component: JoinClass },
+  {
+    path: 'join/:token',
+    canActivate: [authGuard()],
+    loadComponent: () => import('./pages/join-class').then((m) => m.JoinClass),
+  }, // Haihs: trang nặng nạp theo yêu cầu (lazy) để giảm kích thước bundle đầu - start - end
+  // { path: 'classes', canActivate: [authGuard(['student'], 'student')], component: MyClasses },
+  {
+    path: 'classes',
+    canActivate: [authGuard(['student'], 'student')],
+    loadComponent: () => import('./pages/my-classes').then((m) => m.MyClasses),
+  }, // Haihs: trang nặng nạp theo yêu cầu (lazy) để giảm kích thước bundle đầu - start - end
+  // { path: 'classes/:id', canActivate: [authGuard(['student'], 'student')], component: MyClassDetail },
+  {
+    path: 'classes/:id',
+    canActivate: [authGuard(['student'], 'student')],
+    loadComponent: () => import('./pages/my-class-detail').then((m) => m.MyClassDetail),
+  }, // Haihs: trang nặng nạp theo yêu cầu (lazy) để giảm kích thước bundle đầu - start - end
   // Haihs: M2 Task 14 - end
   // Haihs: M3 - đề mẫu giáo viên: danh sách/thùng rác, soạn mới, sửa - start
-  { path: 'teacher/templates', canActivate: [authGuard(['teacher'], 'teacher')], component: TeacherTemplates },
-  { path: 'teacher/templates/new', canActivate: [authGuard(['teacher'], 'teacher')], component: TemplateEditor },
-  { path: 'teacher/templates/:id/edit', canActivate: [authGuard(['teacher'], 'teacher')], component: TemplateEditor },
+  // { path: 'teacher/templates', canActivate: [authGuard(['teacher'], 'teacher')], component: TeacherTemplates },
+  {
+    path: 'teacher/templates',
+    canActivate: [authGuard(['teacher'], 'teacher')],
+    loadComponent: () => import('./pages/teacher-templates').then((m) => m.TeacherTemplates),
+  }, // Haihs: trang nặng nạp theo yêu cầu (lazy) để giảm kích thước bundle đầu - start - end
+  // { path: 'teacher/templates/new', canActivate: [authGuard(['teacher'], 'teacher')], component: TemplateEditor },
+  {
+    path: 'teacher/templates/new',
+    canActivate: [authGuard(['teacher'], 'teacher')],
+    loadComponent: () => import('./pages/template-editor').then((m) => m.TemplateEditor),
+  }, // Haihs: trang nặng nạp theo yêu cầu (lazy) để giảm kích thước bundle đầu - start - end
+  // { path: 'teacher/templates/:id/edit', canActivate: [authGuard(['teacher'], 'teacher')], component: TemplateEditor },
+  {
+    path: 'teacher/templates/:id/edit',
+    canActivate: [authGuard(['teacher'], 'teacher')],
+    loadComponent: () => import('./pages/template-editor').then((m) => m.TemplateEditor),
+  }, // Haihs: trang nặng nạp theo yêu cầu (lazy) để giảm kích thước bundle đầu - start - end
   // Haihs: M3 - end
   // Haihs: M4 - ca thi giáo viên - start
-  { path: 'teacher/sittings', canActivate: [authGuard(['teacher'], 'teacher')], component: TeacherSittings },
-  { path: 'teacher/sittings/new', canActivate: [authGuard(['teacher'], 'teacher')], component: SittingCreate },
-  { path: 'teacher/sittings/:id', canActivate: [authGuard(['teacher'], 'teacher')], component: TeacherSittingDetail },
-  { path: 'teacher/sittings/:id/edit', canActivate: [authGuard(['teacher'], 'teacher')], component: SittingEditor },
+  // { path: 'teacher/sittings', canActivate: [authGuard(['teacher'], 'teacher')], component: TeacherSittings },
+  {
+    path: 'teacher/sittings',
+    canActivate: [authGuard(['teacher'], 'teacher')],
+    loadComponent: () => import('./pages/teacher-sittings').then((m) => m.TeacherSittings),
+  }, // Haihs: trang nặng nạp theo yêu cầu (lazy) để giảm kích thước bundle đầu - start - end
+  // { path: 'teacher/sittings/new', canActivate: [authGuard(['teacher'], 'teacher')], component: SittingCreate },
+  {
+    path: 'teacher/sittings/new',
+    canActivate: [authGuard(['teacher'], 'teacher')],
+    loadComponent: () => import('./pages/sitting-create').then((m) => m.SittingCreate),
+  }, // Haihs: trang nặng nạp theo yêu cầu (lazy) để giảm kích thước bundle đầu - start - end
+  // { path: 'teacher/sittings/:id', canActivate: [authGuard(['teacher'], 'teacher')], component: TeacherSittingDetail },
+  {
+    path: 'teacher/sittings/:id',
+    canActivate: [authGuard(['teacher'], 'teacher')],
+    loadComponent: () =>
+      import('./pages/teacher-sitting-detail').then((m) => m.TeacherSittingDetail),
+  }, // Haihs: trang nặng nạp theo yêu cầu (lazy) để giảm kích thước bundle đầu - start - end
+  // { path: 'teacher/sittings/:id/edit', canActivate: [authGuard(['teacher'], 'teacher')], component: SittingEditor },
+  {
+    path: 'teacher/sittings/:id/edit',
+    canActivate: [authGuard(['teacher'], 'teacher')],
+    loadComponent: () => import('./pages/sitting-editor').then((m) => m.SittingEditor),
+  }, // Haihs: trang nặng nạp theo yêu cầu (lazy) để giảm kích thước bundle đầu - start - end
   // Haihs: M4 - end
   // Haihs: M5 - ca thi của học sinh (giáo viên chủ ca được thi thử): danh sách, vào ca, phòng thi, xong - start
-  { path: 'sittings', canActivate: [authGuard(['student'], 'student')], component: MySittings },
-  { path: 'ca/:code', canActivate: [authGuard(['student', 'teacher'], 'student')], component: SittingEntry },
-  { path: 'ca/:code/room', canActivate: [authGuard(['student', 'teacher'], 'student')], component: ExamRoom },
-  { path: 'ca/:code/result', canActivate: [authGuard(['student', 'teacher'], 'student')], component: SittingResult }, // Haihs: M7 - start - end
-  { path: 'ca/:code/done', canActivate: [authGuard(['student', 'teacher'], 'student')], component: ExamSuccess },
+  // { path: 'sittings', canActivate: [authGuard(['student'], 'student')], component: MySittings },
+  {
+    path: 'sittings',
+    canActivate: [authGuard(['student'], 'student')],
+    loadComponent: () => import('./pages/my-sittings').then((m) => m.MySittings),
+  }, // Haihs: trang nặng nạp theo yêu cầu (lazy) để giảm kích thước bundle đầu - start - end
+  // { path: 'ca/:code', canActivate: [authGuard(['student', 'teacher'], 'student')], component: SittingEntry },
+  {
+    path: 'ca/:code',
+    canActivate: [authGuard(['student', 'teacher'], 'student')],
+    loadComponent: () => import('./pages/sitting-entry').then((m) => m.SittingEntry),
+  }, // Haihs: trang nặng nạp theo yêu cầu (lazy) để giảm kích thước bundle đầu - start - end
+  // { path: 'ca/:code/room', canActivate: [authGuard(['student', 'teacher'], 'student')], component: ExamRoom },
+  {
+    path: 'ca/:code/room',
+    canActivate: [authGuard(['student', 'teacher'], 'student')],
+    loadComponent: () => import('./pages/exam-room').then((m) => m.ExamRoom),
+  }, // Haihs: trang nặng nạp theo yêu cầu (lazy) để giảm kích thước bundle đầu - start - end
+  // { path: 'ca/:code/result', canActivate: [authGuard(['student', 'teacher'], 'student')], component: SittingResult }, // Haihs: M7 - start - end
+  {
+    path: 'ca/:code/result',
+    canActivate: [authGuard(['student', 'teacher'], 'student')],
+    loadComponent: () => import('./pages/sitting-result').then((m) => m.SittingResult),
+  }, // Haihs: trang nặng nạp theo yêu cầu (lazy) để giảm kích thước bundle đầu - start - end
+  // { path: 'ca/:code/done', canActivate: [authGuard(['student', 'teacher'], 'student')], component: ExamSuccess },
+  {
+    path: 'ca/:code/done',
+    canActivate: [authGuard(['student', 'teacher'], 'student')],
+    loadComponent: () => import('./pages/exam-success').then((m) => m.ExamSuccess),
+  }, // Haihs: trang nặng nạp theo yêu cầu (lazy) để giảm kích thước bundle đầu - start - end
   // Haihs: M5 - end
   { path: '**', redirectTo: '' },
 ];
