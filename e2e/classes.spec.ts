@@ -73,8 +73,12 @@ test('invite link -> student joins (pending) -> teacher approves -> student sees
 
   await page.getByRole('link', { name: className.toUpperCase() }).click();
   await page.getByRole('tab', { name: 'Mời tham gia' }).click();
-  await page.getByRole('button', { name: 'Hiện link' }).first().click();
-  const link = (await page.locator('p.font-mono').first().innerText()).trim();
+  // Haihs: link mời luôn hiện trong ô chỉ-đọc như bản gốc - start
+  // đóng code cũ
+  // await page.getByRole('button', { name: 'Hiện link' }).first().click();
+  // const link = (await page.locator('p.font-mono').first().innerText()).trim();
+  const link = (await page.getByRole('textbox', { name: /Link Mời học sinh/i }).inputValue()).trim();
+  // Haihs: link mời luôn hiện trong ô chỉ-đọc như bản gốc - end
   expect(link).toContain('/join/');
 
   const student = await newDevice(browser, baseURL);
