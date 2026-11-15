@@ -19,6 +19,7 @@ import { AlertService } from './alert.service';
 import { FormattedText } from './formatted-text';
 import { ModalFocus } from './modal-focus';
 import { Icon } from './icon';
+import { ScoreCombobox } from './score-combobox';
 
 interface Draft {
   scores: Record<string, string>;
@@ -31,7 +32,11 @@ interface Draft {
   // Haihs: icon cho nút giống bản gốc - start
   // đóng code cũ
   // imports: [FormattedText, ModalFocus],
-  imports: [FormattedText, ModalFocus, Icon],
+  // Haihs: ô điểm tiêu chí là ScoreCombobox (gõ hoặc chọn) như bản gốc - start
+  // đóng code cũ
+  // imports: [FormattedText, ModalFocus, Icon],
+  imports: [FormattedText, ModalFocus, Icon, ScoreCombobox],
+  // Haihs: ô điểm tiêu chí là ScoreCombobox (gõ hoặc chọn) như bản gốc - end
   // Haihs: icon cho nút giống bản gốc - end
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -86,14 +91,22 @@ interface Draft {
                   <span class="min-w-[10rem] flex-1 text-base"
                     >{{ c.label }} (tối đa {{ c.max }})</span
                   >
-                  <input
-                    type="text"
-                    inputmode="decimal"
-                    class="input w-24"
+                  <!-- Haihs: ô điểm tiêu chí là ScoreCombobox (gõ hoặc chọn) như bản gốc - start -->
+                  <!-- đóng code cũ -->
+                  <!-- <input -->
+                  <!-- type="text" -->
+                  <!-- inputmode="decimal" -->
+                  <!-- class="input w-24" -->
+                  <!-- (input)="setScore(q.id, c.key, $event)" -->
+                  <!-- [attr.aria-label]="'Điểm ' + c.label" -->
+                  <app-score-combobox
+                    class="w-28"
+                    [max]="c.max"
+                    [label]="'Điểm ' + c.label"
                     [value]="draft(q.id).scores[c.key] ?? ''"
-                    (input)="setScore(q.id, c.key, $event)"
-                    [attr.aria-label]="'Điểm ' + c.label"
+                    (valueChange)="putScore(q.id, c.key, $event)"
                   />
+                  <!-- Haihs: ô điểm tiêu chí là ScoreCombobox (gõ hoặc chọn) như bản gốc - end -->
                   <input
                     type="text"
                     class="input w-56"
@@ -218,6 +231,11 @@ export class SittingSubmissionModal implements OnDestroy {
       [id]: fn(all[id] ?? { scores: {}, comments: {}, feedback: '' }),
     }));
   }
+  // Haihs: ô điểm tiêu chí là ScoreCombobox (gõ hoặc chọn) như bản gốc - start
+  protected putScore(id: number, key: string, v: string): void {
+    this.patch(id, (d) => ({ ...d, scores: { ...d.scores, [key]: v } }));
+  }
+  // Haihs: ô điểm tiêu chí là ScoreCombobox (gõ hoặc chọn) như bản gốc - end
   protected setScore(id: number, key: string, e: Event): void {
     const v = (e.target as HTMLInputElement).value.replace(',', '.');
     this.patch(id, (d) => ({ ...d, scores: { ...d.scores, [key]: v } }));

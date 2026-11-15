@@ -23,6 +23,7 @@ import { FormattedText } from '../shared/ui/formatted-text';
 import { Icon } from '../shared/ui/icon';
 import { ThemeToggle } from '../shared/ui/theme-toggle';
 // Haihs: phòng thi giống bản gốc (header, bảng câu hỏi, ô đáp án, ô tự luận) - end
+import { compressImage, isCompressibleImage } from '../shared/utils/image-compress';
 import { decideAntiCheatAction, type AntiCheatAction } from '../shared/utils/anti-cheat-rules';
 import {
   TakeError,
@@ -855,7 +856,12 @@ export class ExamRoom {
     // Haihs: phòng thi giống bản gốc (header, bảng câu hỏi, ô đáp án, ô tự luận) - end
     this.uploadError.update((m) => ({ ...m, [id]: '' }));
     try {
-      const up = await firstValueFrom(this.api.uploadEssay(this.token(), id, file));
+      // Haihs: nén ảnh tự luận ở trình duyệt trước khi tải lên như bản gốc - start
+      // đóng code cũ
+      // const up = await firstValueFrom(this.api.uploadEssay(this.token(), id, file));
+      const toSend = isCompressibleImage(file) ? await compressImage(file) : file; // photos are shrunk in the browser first
+      const up = await firstValueFrom(this.api.uploadEssay(this.token(), id, toSend));
+      // Haihs: nén ảnh tự luận ở trình duyệt trước khi tải lên như bản gốc - end
       this.uploads.update((m) => ({ ...m, [id]: up }));
     } catch (err) {
       this.uploadError.update((m) => ({ ...m, [id]: errorMessage(err) }));
