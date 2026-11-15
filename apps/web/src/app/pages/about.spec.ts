@@ -4,12 +4,18 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { Subject } from 'rxjs';
 import { ApiClient } from '../core/api-client';
+// Haihs: cập nhật test theo About đã khôi phục như bản gốc - start
+// đóng code cũ
+// import { About } from './about';
 import { About, formatStars } from './about';
+// Haihs: cập nhật test theo About đã khôi phục như bản gốc - end
 
 describe('About', () => {
+  // Haihs: cập nhật test theo About đã khôi phục như bản gốc - start
   beforeEach(() => vi.stubGlobal('fetch', () => Promise.reject(new Error('offline'))));
   afterEach(() => vi.unstubAllGlobals());
 
+  // Haihs: cập nhật test theo About đã khôi phục như bản gốc - end
   const setup = async () => {
     TestBed.configureTestingModule({ providers: [provideRouter([])] });
     TestBed.overrideProvider(ApiClient, { useValue: { get: () => new Subject() } });
@@ -56,17 +62,36 @@ describe('About', () => {
     expect(el.querySelector('footer')?.textContent).toContain('Cam kết về Gemini API Key');
   });
 
+  // Haihs: cập nhật test theo About đã khôi phục như bản gốc - start
+  // đóng code cũ
+  // it('self-host block matches the real repo: npm install / npm run dev, no stale old-stack commands or repo name', async () => {
   it('self-host block: clone + npm install / npm run dev, GitHub links go to the repo', async () => {
+    // Haihs: cập nhật test theo About đã khôi phục như bản gốc - end
     const el = await setup();
     const t = el.textContent ?? '';
+    // Haihs: cập nhật test theo About đã khôi phục như bản gốc - start
+    // đóng code cũ
+    // for (const bad of ['install-all', 'generate-secrets', 'server/.env', 'doc-to-exam-v2'])
     for (const bad of ['install-all', 'generate-secrets', 'server/.env'])
+      // Haihs: cập nhật test theo About đã khôi phục như bản gốc - end
       expect(t).not.toContain(bad);
+    // Haihs: cập nhật test theo About đã khôi phục như bản gốc - start
+    // đóng code cũ
+    // expect(el.querySelector('pre')?.textContent).toContain('npm install');
+    // expect(el.querySelector('pre')?.textContent).toContain('npm run dev');
     const code = el.querySelector('pre')?.textContent ?? '';
     expect(code).toContain('git clone https://github.com/haihs-github/doc-to-exam-v2.git');
     expect(code).toContain('npm install');
     expect(code).toContain('npm run dev');
+    // Haihs: cập nhật test theo About đã khôi phục như bản gốc - end
     expect(t).toContain('MONGODB_URI');
+    // Haihs: cập nhật test theo About đã khôi phục như bản gốc - start
+    // đóng code cũ
+    // expect(t).toContain('MongoDB in-memory');
+    // expect(t).toContain('MongoDB là tùy chọn');
+    // Haihs: cập nhật test theo About đã khôi phục như bản gốc - end
     expect(t).toContain('Node.js 22');
+    // Haihs: cập nhật test theo About đã khôi phục như bản gốc - start
     const gh = [...el.querySelectorAll('a[target="_blank"]')].map((a) => a.getAttribute('href'));
     expect(gh.length).toBeGreaterThanOrEqual(3);
     expect(new Set(gh)).toEqual(new Set(['https://github.com/haihs-github/doc-to-exam-v2']));
@@ -92,6 +117,7 @@ describe('About', () => {
       '',
       '',
     ]);
+    // Haihs: cập nhật test theo About đã khôi phục như bản gốc - end
   });
 
   it('flags features still in development', async () => {
