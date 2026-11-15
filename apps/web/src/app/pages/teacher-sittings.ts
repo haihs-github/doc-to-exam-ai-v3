@@ -12,6 +12,8 @@ import { RouterLink } from '@angular/router';
 import type { ClassDto, SittingStatus, SittingSummary } from '@doc-to-exam/contract';
 import { Subscription, finalize } from 'rxjs';
 import { ClassesApi, Paged } from '../core/classes.api';
+import { SearchSelect, type SearchOption } from '../shared/ui/search-select';
+import { Select } from '../shared/ui/select';
 import { SittingsApi } from '../core/sittings.api';
 import { ActionMenu, ActionMenuItem } from '../shared/ui/action-menu';
 import { AlertService } from '../shared/ui/alert.service';
@@ -35,7 +37,11 @@ const STATUSES: SittingStatus[] = ['not_started', 'open', 'ended'];
   // // imports: [RouterLink, ActionMenu, Pager, Skeleton],
   // imports: [RouterLink, ActionMenu, Pager, Skeleton, Icon],
   // Haihs: khung báo lỗi có icon giống bản gốc - end
-  imports: [RouterLink, ActionMenu, Pager, Skeleton, Icon],
+  // Haihs: bộ lọc lớp dùng ô tìm kiếm, bộ lọc trạng thái dùng Select như bản gốc - start
+  // đóng code cũ
+  // imports: [RouterLink, ActionMenu, Pager, Skeleton, Icon],
+  imports: [RouterLink, ActionMenu, Pager, Skeleton, Icon, SearchSelect, Select],
+  // Haihs: bộ lọc lớp dùng ô tìm kiếm, bộ lọc trạng thái dùng Select như bản gốc - end
   // Haihs: icon cho nút giống bản gốc - end
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -51,34 +57,62 @@ const STATUSES: SittingStatus[] = ['not_started', 'open', 'ended'];
         <!-- Haihs: icon cho nút giống bản gốc - end -->
       </div>
       <div class="flex flex-wrap items-center gap-3">
-        <label class="text-base font-medium"
-          >Trạng thái
-          <select
-            class="input ml-2 w-auto"
-            name="status"
-            [value]="status()"
-            (change)="setStatus($any($event.target).value)"
-          >
-            <option value="">Tất cả</option>
-            @for (s of statuses; track s) {
-              <option [value]="s">{{ label[s] }}</option>
-            }
-          </select>
-        </label>
-        <label class="text-base font-medium"
-          >Lớp
-          <select
-            class="input ml-2 w-auto"
-            name="classId"
-            [value]="classId()"
-            (change)="setClass($any($event.target).value)"
-          >
-            <option value="">Tất cả lớp</option>
-            @for (c of classes(); track c.id) {
-              <option [value]="c.id">{{ c.name }}</option>
-            }
-          </select>
-        </label>
+        <!-- Haihs: bộ lọc lớp dùng ô tìm kiếm, bộ lọc trạng thái dùng Select như bản gốc - start -->
+        <!-- đóng code cũ -->
+        <!-- <label class="text-base font-medium" -->
+        <!-- >Trạng thái -->
+        <!-- <select -->
+        <!-- class="input ml-2 w-auto" -->
+        <!-- name="status" -->
+        <!-- [value]="status()" -->
+        <!-- (change)="setStatus($any($event.target).value)" -->
+        <!-- > -->
+        <!-- <option value="">Tất cả</option> -->
+        <!-- @for (s of statuses; track s) { -->
+        <!-- <option [value]="s">{{ label[s] }}</option> -->
+        <!-- } -->
+        <!-- </select> -->
+        <!-- </label> -->
+        <!-- <label class="text-base font-medium" -->
+        <!-- >Lớp -->
+        <!-- <select -->
+        <!-- class="input ml-2 w-auto" -->
+        <!-- name="classId" -->
+        <!-- [value]="classId()" -->
+        <!-- (change)="setClass($any($event.target).value)" -->
+        <!-- > -->
+        <!-- <option value="">Tất cả lớp</option> -->
+        <!-- @for (c of classes(); track c.id) { -->
+        <!-- <option [value]="c.id">{{ c.name }}</option> -->
+        <!-- } -->
+        <!-- </select> -->
+        <!-- </label> -->
+        <div class="w-64 max-w-full">
+          <app-search-select
+            label="Lọc theo lớp"
+            placeholder="Tất cả lớp"
+            emptyText="Không tìm thấy lớp nào"
+            [options]="classOptions()"
+            [selectedKeys]="[classId()]"
+            (picked)="setClass($event)"
+          />
+          @if (classId()) {
+            <p
+              class="mt-1 line-clamp-2 break-words text-sm text-gray-600 dark:text-gray-400"
+              [attr.title]="className()"
+            >
+              Đang lọc lớp: <strong>{{ className() || '...' }}</strong>
+            </p>
+          }
+        </div>
+        <app-select
+          label="Lọc theo trạng thái"
+          class="w-48"
+          [options]="statusOptions"
+          [value]="status()"
+          (valueChange)="setStatus($event)"
+        />
+        <!-- Haihs: bộ lọc lớp dùng ô tìm kiếm, bộ lọc trạng thái dùng Select như bản gốc - end -->
       </div>
       @if (loadError()) {
         <!-- Haihs: khung báo lỗi có icon giống bản gốc - start -->
@@ -168,6 +202,19 @@ export class TeacherSittings implements OnDestroy {
   protected readonly classId = signal('');
   protected readonly page = signal(1);
   protected readonly classes = signal<ClassDto[]>([]);
+  // Haihs: bộ lọc lớp dùng ô tìm kiếm, bộ lọc trạng thái dùng Select như bản gốc - start
+  protected readonly classOptions = computed<SearchOption[]>(() => [
+    { key: '', label: 'Tất cả lớp' },
+    ...this.classes().map((c) => ({ key: c.id, label: c.name, hint: c.code })),
+  ]);
+  protected readonly className = computed(
+    () => this.classes().find((c) => c.id === this.classId())?.name ?? '',
+  );
+  protected readonly statusOptions = [
+    { value: '', label: 'Mọi trạng thái' },
+    ...STATUSES.map((v) => ({ value: v, label: STATUS_LABEL[v] })),
+  ];
+  // Haihs: bộ lọc lớp dùng ô tìm kiếm, bộ lọc trạng thái dùng Select như bản gốc - end
   protected readonly data = signal<Paged<SittingSummary> | null>(null);
   protected readonly loading = signal(true);
   protected readonly loadError = signal('');
