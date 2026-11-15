@@ -79,7 +79,11 @@ test('teacher builds a template and a sitting in the UI', async ({ page, request
   await page.goto('/teacher/templates/new');
   const title = `Đề UI ${uniq()}`;
   await field(page, 'title').fill(title);
-  await page.getByLabel('Nội dung câu hỏi').first().fill('Thủ đô của Việt Nam?');
+  // Haihs: nhãn ô nội dung câu hỏi theo bản gốc - start
+  // đóng code cũ
+  // await page.getByLabel('Nội dung câu hỏi').first().fill('Thủ đô của Việt Nam?');
+  await page.getByLabel('Thân câu hỏi').first().fill('Thủ đô của Việt Nam?');
+  // Haihs: nhãn ô nội dung câu hỏi theo bản gốc - end
   await page.getByLabel('Phương án A của câu 1').fill('Hà Nội');
   await page.getByLabel('Phương án B của câu 1').fill('Huế');
   await page.getByRole('radio', { name: 'Chọn A là đáp án đúng' }).check();
