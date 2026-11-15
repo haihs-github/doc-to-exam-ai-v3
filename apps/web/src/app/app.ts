@@ -15,12 +15,14 @@ import { ApiKeyModal } from './shared/ui/api-key-modal';
 import { ApiProgress } from './shared/ui/api-progress';
 import { ConfirmHost } from './shared/ui/confirm-modal';
 import { Navbar } from './shared/ui/navbar';
+import { ScrollToTop } from './shared/ui/scroll-to-top';
 // Haihs: shell: tách trạng thái health sang pages/api-health.ts, app.ts chỉ còn vỏ ứng dụng (Task 13a) - end
 
 @Component({
   // imports: [], // Haihs: đóng code cũ, component không import gì - start - end
   // imports: [ApiProgress, Navbar, RouterOutlet, AlertHost, ConfirmHost], // Haihs: vỏ ứng dụng cần các thành phần UI chung - start - end
-  imports: [ApiProgress, Navbar, RouterOutlet, AlertHost, ConfirmHost, ApiKeyModal], // Haihs: thêm modal API Key vào vỏ ứng dụng (Task 13b) - start - end
+  // imports: [ApiProgress, Navbar, RouterOutlet, AlertHost, ConfirmHost, ApiKeyModal], // Haihs: thêm modal API Key vào vỏ ứng dụng (Task 13b) - start - end
+  imports: [ApiProgress, Navbar, RouterOutlet, AlertHost, ConfirmHost, ApiKeyModal, ScrollToTop], // Haihs: thêm nút cuộn lên đầu trang - start - end
   selector: 'app-root',
   // styleUrl: './app.css', // Haihs: đóng code cũ, app.css rỗng đã bị xóa khi tối giản scaffold - start - end
   // templateUrl: './app.html', // Haihs: đóng code cũ, app.html là trang placeholder 20KB của CLI - start - end
@@ -42,6 +44,8 @@ import { Navbar } from './shared/ui/navbar';
     <app-alert-host />
     <app-confirm-host />
     <app-api-key-modal />
+    <app-scroll-to-top />
+    <!-- Haihs: nút cuộn lên đầu trang như bản gốc - start - end -->
   `,
   // Haihs: hiển thị tiêu đề + trạng thái API health - end
 })
@@ -53,7 +57,6 @@ export class App {
   // private readonly error = signal('');
   // protected readonly text = computed(() =>
   //   this.state() === 'loading' ? 'Đang kiểm tra API...' : this.state() === 'ok' ? 'API: OK' : this.error());
-
   // constructor() {
   //   inject(ApiClient)
   //     .get<{ status: string; timestamp: string; service: string }>('/api/health')
