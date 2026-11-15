@@ -21,6 +21,7 @@ import { SittingsApi } from '../core/sittings.api';
 import { TemplatesApi } from '../core/templates.api';
 import { AlertService } from '../shared/ui/alert.service';
 import { FormField } from '../shared/ui/form-field';
+import { SearchSelect, type SearchOption } from '../shared/ui/search-select';
 import { Skeleton } from '../shared/ui/skeleton';
 import { fetchAll } from '../shared/utils/fetch-all';
 import { describeSittingError } from '../shared/utils/sitting-ui';
@@ -41,7 +42,11 @@ import { DatetimeField } from '../shared/ui/datetime-field';
   // Haihs: ô giờ có bảng chọn ngày giờ như bản gốc - start
   // đóng code cũ
   // imports: [RouterLink, FormField, Skeleton, Icon],
-  imports: [RouterLink, FormField, Skeleton, Icon, DatetimeField],
+  // Haihs: chọn đề mẫu và lớp bằng ô tìm kiếm, lớp đã chọn là danh sách có nút bỏ như bản gốc - start
+  // đóng code cũ
+  // imports: [RouterLink, FormField, Skeleton, Icon, DatetimeField],
+  imports: [RouterLink, FormField, Skeleton, Icon, DatetimeField, SearchSelect],
+  // Haihs: chọn đề mẫu và lớp bằng ô tìm kiếm, lớp đã chọn là danh sách có nút bỏ như bản gốc - end
   // Haihs: ô giờ có bảng chọn ngày giờ như bản gốc - end
   // Haihs: khung báo lỗi có icon giống bản gốc - end
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -77,17 +82,40 @@ import { DatetimeField } from '../shared/ui/datetime-field';
       } @else {
         <form (submit)="submit($event)" novalidate class="max-w-3xl space-y-5">
           <app-form-field label="Đề mẫu" [required]="true" [error]="errors()['templateId'] ?? ''">
-            <select
-              class="input"
-              name="templateId"
-              [value]="templateId()"
-              (change)="pickTemplate($any($event.target).value)"
-            >
-              <option value="">— Chọn đề mẫu —</option>
-              @for (t of templates(); track t.id) {
-                <option [value]="t.id">{{ t.title }} ({{ t.totalQuestions }} câu)</option>
+            <!-- Haihs: chọn đề mẫu và lớp bằng ô tìm kiếm, lớp đã chọn là danh sách có nút bỏ như bản gốc - start -->
+            <!-- đóng code cũ -->
+            <!-- <select -->
+            <!-- class="input" -->
+            <!-- name="templateId" -->
+            <!-- [value]="templateId()" -->
+            <!-- (change)="pickTemplate($any($event.target).value)" -->
+            <!-- > -->
+            <!-- <option value="">— Chọn đề mẫu —</option> -->
+            <!-- @for (t of templates(); track t.id) { -->
+            <!-- <option [value]="t.id">{{ t.title }} ({{ t.totalQuestions }} câu)</option> -->
+            <div>
+              <app-search-select
+                label="Đề mẫu"
+                placeholder="Tìm đề mẫu theo tên"
+                emptyText="Không tìm thấy đề mẫu"
+                [options]="templateOptions()"
+                [selectedKeys]="templateId() ? [templateId()] : []"
+                (picked)="pickTemplate($event)"
+              />
+              @if (selected(); as t) {
+                <p class="mt-2 text-base text-gray-700 dark:text-gray-200">
+                  Đã chọn:
+                  <span class="line-clamp-2 break-words font-semibold" [attr.title]="t.title">{{
+                    t.title
+                  }}</span>
+                </p>
+                <!-- Haihs: chọn đề mẫu và lớp bằng ô tìm kiếm, lớp đã chọn là danh sách có nút bỏ như bản gốc - end -->
               }
-            </select>
+              <!-- Haihs: chọn đề mẫu và lớp bằng ô tìm kiếm, lớp đã chọn là danh sách có nút bỏ như bản gốc - start -->
+              <!-- đóng code cũ -->
+              <!-- </select> -->
+            </div>
+            <!-- Haihs: chọn đề mẫu và lớp bằng ô tìm kiếm, lớp đã chọn là danh sách có nút bỏ như bản gốc - end -->
           </app-form-field>
           <app-form-field label="Tên ca thi" [required]="true" [error]="errors()['title'] ?? ''">
             <input
@@ -177,20 +205,67 @@ import { DatetimeField } from '../shared/ui/datetime-field';
             Bật giám sát chuyển tab</label
           >
 
-          <fieldset class="space-y-2">
-            <legend class="text-base font-medium">
-              Lớp tham gia <span aria-hidden="true" class="text-red-700"> *</span>
+          <!-- Haihs: chọn đề mẫu và lớp bằng ô tìm kiếm, lớp đã chọn là danh sách có nút bỏ như bản gốc - start -->
+          <!-- đóng code cũ -->
+          <!-- <fieldset class="space-y-2"> -->
+          <!-- <legend class="text-base font-medium"> -->
+          <!-- Lớp tham gia <span aria-hidden="true" class="text-red-700"> *</span> -->
+          <fieldset class="space-y-3">
+            <legend class="text-base font-bold text-gray-900 dark:text-gray-100">
+              3. Lớp tham gia (chỉ lớp đang học)
+              <span class="text-red-700 dark:text-red-300" aria-hidden="true">*</span>
+              <!-- Haihs: chọn đề mẫu và lớp bằng ô tìm kiếm, lớp đã chọn là danh sách có nút bỏ như bản gốc - end -->
             </legend>
-            @for (c of classes(); track c.id) {
-              <label class="flex items-center gap-2 text-base">
-                <input
-                  type="checkbox"
-                  [checked]="classIds().includes(c.id)"
-                  (change)="toggleClass(c.id)"
-                  [attr.aria-label]="'Lớp ' + c.name"
-                />
-                {{ c.name }} ({{ c.code }})
-              </label>
+            <!-- Haihs: chọn đề mẫu và lớp bằng ô tìm kiếm, lớp đã chọn là danh sách có nút bỏ như bản gốc - start -->
+            <!-- đóng code cũ -->
+            <!-- @for (c of classes(); track c.id) { -->
+            <!-- <label class="flex items-center gap-2 text-base"> -->
+            <!-- <input -->
+            <!-- type="checkbox" -->
+            <!-- [checked]="classIds().includes(c.id)" -->
+            <!-- (change)="toggleClass(c.id)" -->
+            <!-- [attr.aria-label]="'Lớp ' + c.name" -->
+            <!-- /> -->
+            <!-- {{ c.name }} ({{ c.code }}) -->
+            <!-- </label> -->
+            <app-search-select
+              label="Tìm lớp theo tên hoặc mã"
+              placeholder="Tìm lớp theo tên hoặc mã"
+              emptyText="Không tìm thấy lớp đang học nào"
+              [multiple]="true"
+              [options]="classOptions()"
+              [selectedKeys]="classIds()"
+              [disabledKeys]="classIds()"
+              (picked)="addClass($event)"
+            />
+            @if (pickedClasses().length > 0) {
+              <ul
+                class="divide-y divide-gray-100 rounded-xl border border-gray-200 dark:divide-gray-700 dark:border-gray-700"
+                aria-label="Lớp đã chọn"
+              >
+                @for (c of pickedClasses(); track c.id) {
+                  <li class="flex items-center justify-between gap-2 px-4 py-2">
+                    <span
+                      class="line-clamp-2 min-w-0 flex-1 break-words text-base text-gray-800 dark:text-gray-100"
+                      [attr.title]="c.name"
+                      >{{ c.name }}
+                      <span class="text-sm text-gray-500 dark:text-gray-400"
+                        >· {{ c.code }}</span
+                      ></span
+                    >
+                    <button
+                      type="button"
+                      (click)="toggleClass(c.id)"
+                      [attr.aria-label]="'Bỏ lớp ' + c.name"
+                      title="Bỏ lớp"
+                      class="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-600 dark:text-gray-500 dark:hover:bg-red-900/40 dark:hover:text-red-400"
+                    >
+                      <app-icon name="x" svgClass="h-4 w-4" />
+                    </button>
+                  </li>
+                }
+              </ul>
+              <!-- Haihs: chọn đề mẫu và lớp bằng ô tìm kiếm, lớp đã chọn là danh sách có nút bỏ như bản gốc - end -->
             }
             @if (classes().length === 0) {
               <p class="text-base text-gray-600 dark:text-gray-400">
@@ -202,6 +277,19 @@ import { DatetimeField } from '../shared/ui/datetime-field';
                 {{ errors()['classIds'] }}
               </p>
             }
+            <!-- Haihs: chọn đề mẫu và lớp bằng ô tìm kiếm, lớp đã chọn là danh sách có nút bỏ như bản gốc - start -->
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+              Chưa có lớp?
+              <a
+                routerLink="/teacher/classes"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-primary-700 underline dark:text-sky-400"
+                >Tạo lớp</a
+              >
+              trước.
+            </p>
+            <!-- Haihs: chọn đề mẫu và lớp bằng ô tìm kiếm, lớp đã chọn là danh sách có nút bỏ như bản gốc - end -->
           </fieldset>
 
           <fieldset class="space-y-2">
@@ -287,7 +375,24 @@ export class SittingCreate implements OnDestroy {
   private sub?: Subscription;
   private candSub?: Subscription;
   private timer?: ReturnType<typeof setTimeout>;
-  private readonly selected = computed(() =>
+  // Haihs: chọn đề mẫu và lớp bằng ô tìm kiếm, lớp đã chọn là danh sách có nút bỏ như bản gốc - start
+  // đóng code cũ
+  // private readonly selected = computed(() =>
+  protected readonly templateOptions = computed<SearchOption[]>(() =>
+    this.templates().map((t) => ({
+      key: t.id,
+      label: t.title,
+      hint: `${t.totalQuestions} câu`,
+    })),
+  );
+  protected readonly classOptions = computed<SearchOption[]>(() =>
+    this.classes().map((c) => ({ key: c.id, label: c.name, hint: c.code })),
+  );
+  protected readonly pickedClasses = computed(() =>
+    this.classes().filter((c) => this.classIds().includes(c.id)),
+  );
+  protected readonly selected = computed(() =>
+    // Haihs: chọn đề mẫu và lớp bằng ô tìm kiếm, lớp đã chọn là danh sách có nút bỏ như bản gốc - end
     this.templates().find((t) => t.id === this.templateId()),
   );
 
@@ -321,6 +426,11 @@ export class SittingCreate implements OnDestroy {
     const t = this.selected();
     if (t && !this.title()) this.title.set(t.title);
     if (t && !this.description()) this.description.set(t.description);
+    // Haihs: chọn đề mẫu và lớp bằng ô tìm kiếm, lớp đã chọn là danh sách có nút bỏ như bản gốc - start
+  }
+  protected addClass(id: string): void {
+    if (!this.classIds().includes(id)) this.toggleClass(id);
+    // Haihs: chọn đề mẫu và lớp bằng ô tìm kiếm, lớp đã chọn là danh sách có nút bỏ như bản gốc - end
   }
   protected toggleClass(id: string): void {
     this.classIds.update((l) => (l.includes(id) ? l.filter((x) => x !== id) : [...l, id]));

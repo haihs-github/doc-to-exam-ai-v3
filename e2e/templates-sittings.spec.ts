@@ -95,17 +95,27 @@ test('teacher builds a template and a sitting in the UI', async ({ page, request
 
   // sitting from that template
   await page.goto('/teacher/sittings/new');
-  await page
-    .getByLabel('Đề mẫu', { exact: false })
-    .first()
-    .selectOption({ label: new RegExp(title) as never })
-    .catch(async () => {
-      await page.locator('select[name="templateId"]').selectOption({ index: 1 });
-    });
+  // Haihs: chọn đề mẫu và lớp qua ô tìm kiếm - start
+  // đóng code cũ
+  // await page
+  // .getByLabel('Đề mẫu', { exact: false })
+  // .first()
+  // .selectOption({ label: new RegExp(title) as never })
+  // .catch(async () => {
+  // await page.locator('select[name="templateId"]').selectOption({ index: 1 });
+  // });
+  await page.getByRole('combobox', { name: 'Đề mẫu' }).fill(title);
+  await page.getByRole('option').filter({ hasText: title }).first().click();
+  // Haihs: chọn đề mẫu và lớp qua ô tìm kiếm - end
   const now = Date.now();
   await field(page, 'openAt').fill(vn(new Date(now - 60_000)).replace(/\D/g, ''));
   await field(page, 'closeAt').fill(vn(new Date(now + 3_600_000)).replace(/\D/g, ''));
-  await page.getByLabel(`Lớp Lop UI`).check();
+  // Haihs: chọn đề mẫu và lớp qua ô tìm kiếm - start
+  // đóng code cũ
+  // await page.getByLabel(`Lớp Lop UI`).check();
+  await page.getByRole('combobox', { name: 'Tìm lớp theo tên hoặc mã' }).fill('Lop UI');
+  await page.getByRole('option').filter({ hasText: 'Lop UI' }).first().click();
+  // Haihs: chọn đề mẫu và lớp qua ô tìm kiếm - end
   await page.getByRole('button', { name: 'Tạo ca thi' }).click();
   await ok(page).click();
   await expect(page.getByText('Mã ca và link')).toBeVisible();
