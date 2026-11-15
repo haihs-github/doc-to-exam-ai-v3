@@ -1,6 +1,10 @@
 // Created by Haihs on 12/11/2026
 // <app-questions-editor>: edit the questions of a template (mcq and essay with rubric). Port of QuestionsEditor/QuestionCard/EssayQuestionEditor.
-import { ChangeDetectionStrategy, Component, computed, input, model } from '@angular/core';
+// Haihs: trình soạn câu hỏi có chế độ Xem như học sinh, Chèn câu và nhãn như bản gốc - start
+// đóng code cũ
+// import { ChangeDetectionStrategy, Component, computed, input, model } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, model, signal } from '@angular/core';
+// Haihs: trình soạn câu hỏi có chế độ Xem như học sinh, Chèn câu và nhãn như bản gốc - end
 import {
   EditorQuestion,
   OptionKey,
@@ -32,12 +36,305 @@ const AREA = 'input min-h-[72px] w-full';
   imports: [FormattedText, Icon],
   // Haihs: icon cho nút giống bản gốc - end
   changeDetection: ChangeDetectionStrategy.OnPush,
+  // Haihs: trình soạn câu hỏi có chế độ Xem như học sinh, Chèn câu và nhãn như bản gốc - start
+  // đóng code cũ
+  //   template: `
+  //     <section class="space-y-4" aria-label="Danh sách câu hỏi">
+  //       <div class="flex flex-wrap items-center justify-between gap-3">
+  //         <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100">
+  //           Câu hỏi ({{ questions().length }})
+  //         </h2>
+  //         <p class="text-base text-gray-700 dark:text-gray-300" role="status">
+  //           Thang điểm: trắc nghiệm {{ scoring().mcqMax }} · tự luận {{ scoring().essayMax }}
+  //           @if (scoring().essayMax > 0) {
+  //             · {{ remaining().label }}
+  //           }
+  //         </p>
+  //       </div>
+  //       @if (errors()['_scoring']) {
+  //         <p role="alert" class="text-sm font-medium text-red-700 dark:text-red-300">
+  //           {{ errors()['_scoring'] }}
+  //         </p>
+  //       }
+  //       @if (errors()['questions']) {
+  //         <p role="alert" class="text-sm font-medium text-red-700 dark:text-red-300">
+  //           {{ errors()['questions'] }}
+  //         </p>
+  //       }
+
+  //       <fieldset [disabled]="readOnly()" class="space-y-4">
+  //         @for (q of questions(); track q.id; let i = $index) {
+  //           @let qe = errorsOf(q.id);
+  //           <article
+  //             class="space-y-3 rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800"
+  //             [attr.aria-label]="'Câu ' + (i + 1)"
+  //           >
+  //             <header class="flex flex-wrap items-center justify-between gap-2">
+  //               <h3 class="font-bold">
+  //                 Câu {{ i + 1 }} · {{ isEssay(q) ? 'Tự luận' : 'Trắc nghiệm' }}
+  //               </h3>
+  //               <div class="flex flex-wrap gap-2">
+  //                 <button
+  //                   type="button"
+  //                   class="btn-secondary"
+  //                   [disabled]="i === 0"
+  //                   (click)="move(i, -1)"
+  //                   [attr.aria-label]="'Đưa câu ' + (i + 1) + ' lên'"
+  //                 >
+  //                   ↑
+  //                 </button>
+  //                 <button
+  //                   type="button"
+  //                   class="btn-secondary"
+  //                   [disabled]="i === questions().length - 1"
+  //                   (click)="move(i, 1)"
+  //                   [attr.aria-label]="'Đưa câu ' + (i + 1) + ' xuống'"
+  //                 >
+  //                   ↓
+  //                 </button>
+  //                 <button type="button" class="btn-secondary" (click)="switchType(q)">
+  //                   Đổi sang {{ isEssay(q) ? 'trắc nghiệm' : 'tự luận' }}
+  //                 </button>
+  //                 <button
+  //                   type="button"
+  //                   class="btn-danger"
+  //                   (click)="remove(q.id)"
+  //                   [attr.aria-label]="'Xóa câu ' + (i + 1)"
+  //                 >
+  //                   <!-- Haihs: icon cho nút giống bản gốc - start -->
+  //                   <!-- đóng code cũ -->
+  //                   <!-- Xóa -->
+  //                   <app-icon name="trash-2" svgClass="h-4 w-4" /> Xóa
+  //                   <!-- Haihs: icon cho nút giống bản gốc - end -->
+  //                 </button>
+  //               </div>
+  //             </header>
+
+  //             @if (q.needsReview) {
+  //               <div
+  //                 role="note"
+  //                 class="rounded-lg bg-amber-50 p-3 text-base text-amber-800 dark:bg-amber-900/30 dark:text-amber-300"
+  //               >
+  //                 {{ q.reviewReason || 'Cần xác nhận loại câu hỏi.' }}
+  //                 <button
+  //                   type="button"
+  //                   class="ml-2 font-semibold underline"
+  //                   (click)="patch(q.id, { needsReview: false, reviewReason: '' })"
+  //                 >
+  //                   Xác nhận
+  //                 </button>
+  //               </div>
+  //               @if (qe['review']) {
+  //                 <p role="alert" class="text-sm font-medium text-red-700 dark:text-red-300">
+  //                   {{ qe['review'] }}
+  //                 </p>
+  //               }
+  //             }
+
+  //             <label class="block text-base font-medium"
+  //               >Chỉ dẫn / bài đọc (dùng chung nhóm câu)
+  //               <textarea
+  //                 [class]="area"
+  //                 [value]="q.context"
+  //                 (input)="text(q.id, 'context', $event)"
+  //               ></textarea>
+  //             </label>
+  //             <label class="block text-base font-medium"
+  //               >{{ isEssay(q) ? 'Đề bài' : 'Nội dung câu hỏi' }}
+  //               <textarea
+  //                 [class]="area"
+  //                 [value]="q.questionText"
+  //                 (input)="text(q.id, 'questionText', $event)"
+  //               ></textarea>
+  //             </label>
+  //             @if (qe['text']) {
+  //               <p role="alert" class="text-sm font-medium text-red-700 dark:text-red-300">
+  //                 {{ qe['text'] }}
+  //               </p>
+  //             }
+
+  //             @if (isEssay(q)) {
+  //               <label class="block text-base font-medium"
+  //                 >Yêu cầu
+  //                 <textarea
+  //                   [class]="area"
+  //                   [value]="q.requirements ?? ''"
+  //                   (input)="text(q.id, 'requirements', $event)"
+  //                 ></textarea>
+  //               </label>
+  //               <div class="space-y-2">
+  //                 <label class="block text-base font-medium"
+  //                   >Điểm của câu (bội số của 0,25)
+  //                   <input
+  //                     type="text"
+  //                     inputmode="decimal"
+  //                     class="input w-32"
+  //                     [value]="q.maxScore ?? ''"
+  //                     (input)="setScore(i, $event)"
+  //                   />
+  //                 </label>
+  //                 @if (scoreError(i); as se) {
+  //                   <p role="alert" class="text-sm font-medium text-red-700 dark:text-red-300">
+  //                     {{ se }}
+  //                   </p>
+  //                 }
+  //                 @if (qe['score']) {
+  //                   <p role="alert" class="text-sm font-medium text-red-700 dark:text-red-300">
+  //                     {{ qe['score'] }}
+  //                   </p>
+  //                 }
+  //                 <h4 class="font-semibold">Tiêu chí chấm (tổng {{ sum(q) }})</h4>
+  //                 @for (c of q.rubric ?? []; track c.key; let ci = $index) {
+  //                   <div class="flex flex-wrap items-center gap-2">
+  //                     <input
+  //                       class="input flex-1"
+  //                       [value]="c.label"
+  //                       (input)="setCriterion(q, ci, 'label', $event)"
+  //                       [attr.aria-label]="'Tên tiêu chí ' + (ci + 1)"
+  //                     />
+  //                     <input
+  //                       type="text"
+  //                       inputmode="decimal"
+  //                       class="input w-24"
+  //                       [value]="c.max"
+  //                       (input)="setCriterion(q, ci, 'max', $event)"
+  //                       [attr.aria-label]="'Điểm tiêu chí ' + (ci + 1)"
+  //                     />
+  //                     <button
+  //                       type="button"
+  //                       class="btn-secondary"
+  //                       (click)="removeCriterion(q, ci)"
+  //                       [attr.aria-label]="'Xóa tiêu chí ' + (ci + 1)"
+  //                     >
+  //                       <!-- Haihs: icon cho nút giống bản gốc - start -->
+  //                       <!-- đóng code cũ -->
+  //                       <!-- Xóa -->
+  //                       <app-icon name="trash-2" svgClass="h-4 w-4" /> Xóa
+  //                       <!-- Haihs: icon cho nút giống bản gốc - end -->
+  //                     </button>
+  //                   </div>
+  //                   @if (qe['criteria:' + ci + ':label']) {
+  //                     <p role="alert" class="text-sm font-medium text-red-700 dark:text-red-300">
+  //                       {{ qe['criteria:' + ci + ':label'] }}
+  //                     </p>
+  //                   }
+  //                   @if (qe['criteria:' + ci + ':max']) {
+  //                     <p role="alert" class="text-sm font-medium text-red-700 dark:text-red-300">
+  //                       {{ qe['criteria:' + ci + ':max'] }}
+  //                     </p>
+  //                   }
+  //                 }
+  //                 @if (qe['criteria']) {
+  //                   <p role="alert" class="text-sm font-medium text-red-700 dark:text-red-300">
+  //                     {{ qe['criteria'] }}
+  //                   </p>
+  //                 }
+  //                 <button type="button" class="btn-secondary" (click)="addCriterion(q)">
+  //                   <!-- Haihs: icon cho nút giống bản gốc - start -->
+  //                   <!-- đóng code cũ -->
+  //                   <!-- Thêm tiêu chí -->
+  //                   <app-icon name="plus" svgClass="h-4 w-4" /> Thêm tiêu chí
+  //                   <!-- Haihs: icon cho nút giống bản gốc - end -->
+  //                 </button>
+  //               </div>
+  //             } @else {
+  //               <div
+  //                 class="space-y-2"
+  //                 role="radiogroup"
+  //                 [attr.aria-label]="'Đáp án đúng của câu ' + (i + 1)"
+  //               >
+  //                 @for (k of opts; track k) {
+  //                   <div class="flex items-center gap-2">
+  //                     <input
+  //                       type="radio"
+  //                       [name]="'correct-' + q.id"
+  //                       [checked]="q.correctAnswer === k"
+  //                       (change)="patch(q.id, { correctAnswer: k })"
+  //                       [attr.aria-label]="'Chọn ' + k + ' là đáp án đúng'"
+  //                     />
+  //                     <span class="w-5 font-bold">{{ k }}</span>
+  //                     <input
+  //                       class="input flex-1"
+  //                       [value]="q.options[k]"
+  //                       (input)="setOption(q.id, k, $event)"
+  //                       [attr.aria-label]="'Phương án ' + k + ' của câu ' + (i + 1)"
+  //                     />
+  //                   </div>
+  //                 }
+  //                 @if (qe['options']) {
+  //                   <p role="alert" class="text-sm font-medium text-red-700 dark:text-red-300">
+  //                     {{ qe['options'] }}
+  //                   </p>
+  //                 }
+  //                 @if (qe['correct']) {
+  //                   <p role="alert" class="text-sm font-medium text-red-700 dark:text-red-300">
+  //                     {{ qe['correct'] }}
+  //                   </p>
+  //                 }
+  //               </div>
+  //             }
+  //             <label class="block text-base font-medium"
+  //               >Giải thích
+  //               <textarea
+  //                 [class]="area"
+  //                 [value]="q.explanation"
+  //                 (input)="text(q.id, 'explanation', $event)"
+  //               ></textarea>
+  //             </label>
+  //             <details class="text-sm text-gray-600 dark:text-gray-400">
+  //               <summary class="cursor-pointer">Xem trước</summary>
+  //               <div class="mt-2 space-y-1">
+  //                 <p><app-formatted-text [text]="q.context" /></p>
+  //                 <p><app-formatted-text [text]="q.questionText" /></p>
+  //                 @if (!isEssay(q)) {
+  //                   @for (k of opts; track k) {
+  //                     <p>{{ k }}. <app-formatted-text [text]="q.options[k]" /></p>
+  //                   }
+  //                 }
+  //               </div>
+  //             </details>
+  //           </article>
+  //         }
+  //       </fieldset>
+
+  //       @if (!readOnly()) {
+  //         <div class="flex flex-wrap gap-2">
+  //           <button type="button" class="btn-secondary" (click)="addMcq()">
+  //             Thêm câu trắc nghiệm
+  //           </button>
+  //           <button type="button" class="btn-secondary" (click)="addEssay()">Thêm câu tự luận</button>
+  //         </div>
+  //       }
+  //     </section>
+  //   `,
   template: `
     <section class="space-y-4" aria-label="Danh sách câu hỏi">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100">
-          Câu hỏi ({{ questions().length }})
+          Nội dung đề ({{ questions().length }} câu hỏi)
         </h2>
+        <div
+          class="flex items-center gap-1 rounded-xl border border-gray-200 bg-gray-100 p-1 text-sm font-bold dark:border-gray-700 dark:bg-gray-800"
+          role="group"
+          aria-label="Chế độ xem"
+        >
+          @for (m of modes; track m[0]) {
+            <button
+              type="button"
+              (click)="viewMode.set(m[0])"
+              [attr.aria-pressed]="viewMode() === m[0]"
+              class="flex items-center gap-1.5 rounded-lg px-3 py-1.5 transition-all"
+              [class]="
+                viewMode() === m[0]
+                  ? 'bg-white text-primary-800 shadow-xs dark:bg-gray-700 dark:text-sky-300'
+                  : 'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
+              "
+            >
+              <app-icon [name]="m[2]" svgClass="h-3.5 w-3.5" />
+              <span>{{ m[1] }}</span>
+            </button>
+          }
+        </div>
         <p class="text-base text-gray-700 dark:text-gray-300" role="status">
           Thang điểm: trắc nghiệm {{ scoring().mcqMax }} · tự luận {{ scoring().essayMax }}
           @if (scoring().essayMax > 0) {
@@ -56,251 +353,326 @@ const AREA = 'input min-h-[72px] w-full';
         </p>
       }
 
-      <fieldset [disabled]="readOnly()" class="space-y-4">
-        @for (q of questions(); track q.id; let i = $index) {
-          @let qe = errorsOf(q.id);
-          <article
-            class="space-y-3 rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800"
-            [attr.aria-label]="'Câu ' + (i + 1)"
-          >
-            <header class="flex flex-wrap items-center justify-between gap-2">
-              <h3 class="font-bold">
-                Câu {{ i + 1 }} · {{ isEssay(q) ? 'Tự luận' : 'Trắc nghiệm' }}
-              </h3>
-              <div class="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  class="btn-secondary"
-                  [disabled]="i === 0"
-                  (click)="move(i, -1)"
-                  [attr.aria-label]="'Đưa câu ' + (i + 1) + ' lên'"
+      @if (viewMode() === 'preview') {
+        <div class="space-y-4" aria-label="Xem như học sinh">
+          @for (q of questions(); track q.id; let i = $index) {
+            @if (
+              i === 0 || (q.context ?? '').trim() !== (questions()[i - 1].context ?? '').trim()
+            ) {
+              @if (q.context) {
+                <div
+                  class="rounded-xl border border-primary-200/70 bg-primary-50/50 p-4 text-base leading-relaxed text-gray-800 dark:border-sky-800 dark:bg-sky-900/30 dark:text-gray-100"
                 >
-                  ↑
-                </button>
-                <button
-                  type="button"
-                  class="btn-secondary"
-                  [disabled]="i === questions().length - 1"
-                  (click)="move(i, 1)"
-                  [attr.aria-label]="'Đưa câu ' + (i + 1) + ' xuống'"
-                >
-                  ↓
-                </button>
-                <button type="button" class="btn-secondary" (click)="switchType(q)">
-                  Đổi sang {{ isEssay(q) ? 'trắc nghiệm' : 'tự luận' }}
-                </button>
-                <button
-                  type="button"
-                  class="btn-danger"
-                  (click)="remove(q.id)"
-                  [attr.aria-label]="'Xóa câu ' + (i + 1)"
-                >
-                  <!-- Haihs: icon cho nút giống bản gốc - start -->
-                  <!-- đóng code cũ -->
-                  <!-- Xóa -->
-                  <app-icon name="trash-2" svgClass="h-4 w-4" /> Xóa
-                  <!-- Haihs: icon cho nút giống bản gốc - end -->
-                </button>
-              </div>
-            </header>
-
-            @if (q.needsReview) {
-              <div
-                role="note"
-                class="rounded-lg bg-amber-50 p-3 text-base text-amber-800 dark:bg-amber-900/30 dark:text-amber-300"
-              >
-                {{ q.reviewReason || 'Cần xác nhận loại câu hỏi.' }}
-                <button
-                  type="button"
-                  class="ml-2 font-semibold underline"
-                  (click)="patch(q.id, { needsReview: false, reviewReason: '' })"
-                >
-                  Xác nhận
-                </button>
-              </div>
-              @if (qe['review']) {
-                <p role="alert" class="text-sm font-medium text-red-700 dark:text-red-300">
-                  {{ qe['review'] }}
-                </p>
+                  <app-formatted-text [text]="q.context" />
+                </div>
               }
             }
+            <div
+              class="space-y-3 rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-800"
+            >
+              <span
+                class="inline-flex rounded-lg bg-primary-700 px-2.5 py-1 text-sm font-bold text-white dark:bg-sky-400 dark:text-gray-900"
+                >Câu {{ i + 1 }}</span
+              >
+              @if (q.questionText) {
+                <div class="text-lg leading-relaxed text-gray-800 dark:text-gray-100">
+                  <app-formatted-text [text]="q.questionText" />
+                </div>
+              }
+              @if (isEssay(q)) {
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                  (Học sinh sẽ thấy ô nhập bài và nút tải lên 1 tệp ở đây)
+                </p>
+              } @else {
+                <div class="grid grid-cols-1 gap-2.5">
+                  @for (k of opts; track k) {
+                    @if (q.options[k]) {
+                      <div
+                        class="flex min-h-[56px] items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 text-lg dark:border-gray-700 dark:bg-gray-800"
+                      >
+                        <span
+                          class="flex h-9 w-9 flex-none items-center justify-center rounded border border-gray-300 bg-gray-100 text-base font-bold text-gray-600 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400"
+                          >{{ k }}</span
+                        >
+                        <span class="flex-1 break-words"
+                          ><app-formatted-text [text]="q.options[k]"
+                        /></span>
+                      </div>
+                    }
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+      } @else {
+        <fieldset [disabled]="readOnly()" class="space-y-4">
+          @for (q of questions(); track q.id; let i = $index) {
+            @let qe = errorsOf(q.id);
+            <article
+              class="space-y-3 rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800"
+              [attr.aria-label]="'Câu ' + (i + 1)"
+            >
+              <header class="flex flex-wrap items-center justify-between gap-2">
+                <h3 class="font-bold">
+                  Câu {{ i + 1 }} · {{ isEssay(q) ? 'Tự luận' : 'Trắc nghiệm' }}
+                </h3>
+                <div class="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    class="btn-secondary"
+                    [disabled]="i === 0"
+                    (click)="move(i, -1)"
+                    [attr.aria-label]="'Đưa câu ' + (i + 1) + ' lên'"
+                  >
+                    ↑
+                  </button>
+                  <button
+                    type="button"
+                    class="btn-secondary"
+                    [disabled]="i === questions().length - 1"
+                    (click)="move(i, 1)"
+                    [attr.aria-label]="'Đưa câu ' + (i + 1) + ' xuống'"
+                  >
+                    ↓
+                  </button>
+                  <button
+                    type="button"
+                    class="btn-secondary"
+                    (click)="insertAfter(i)"
+                    title="Chèn thêm câu hỏi phía dưới"
+                  >
+                    <app-icon name="plus" svgClass="h-3.5 w-3.5" /> Chèn câu
+                  </button>
+                  <button type="button" class="btn-secondary" (click)="switchType(q)">
+                    Đổi sang {{ isEssay(q) ? 'trắc nghiệm' : 'tự luận' }}
+                  </button>
+                  <button
+                    type="button"
+                    class="btn-danger"
+                    (click)="remove(q.id)"
+                    [attr.aria-label]="'Xóa câu ' + (i + 1)"
+                  >
+                    <!-- Haihs: icon cho nút giống bản gốc - start -->
+                    <!-- đóng code cũ -->
+                    <!-- Xóa -->
+                    <app-icon name="trash-2" svgClass="h-4 w-4" /> Xóa
+                    <!-- Haihs: icon cho nút giống bản gốc - end -->
+                  </button>
+                </div>
+              </header>
 
-            <label class="block text-base font-medium"
-              >Chỉ dẫn / bài đọc (dùng chung nhóm câu)
-              <textarea
-                [class]="area"
-                [value]="q.context"
-                (input)="text(q.id, 'context', $event)"
-              ></textarea>
-            </label>
-            <label class="block text-base font-medium"
-              >{{ isEssay(q) ? 'Đề bài' : 'Nội dung câu hỏi' }}
-              <textarea
-                [class]="area"
-                [value]="q.questionText"
-                (input)="text(q.id, 'questionText', $event)"
-              ></textarea>
-            </label>
-            @if (qe['text']) {
-              <p role="alert" class="text-sm font-medium text-red-700 dark:text-red-300">
-                {{ qe['text'] }}
-              </p>
-            }
+              @if (q.needsReview) {
+                <div
+                  role="note"
+                  class="rounded-lg bg-amber-50 p-3 text-base text-amber-800 dark:bg-amber-900/30 dark:text-amber-300"
+                >
+                  {{ q.reviewReason || 'Cần xác nhận loại câu hỏi.' }}
+                  <button
+                    type="button"
+                    class="ml-2 font-semibold underline"
+                    (click)="patch(q.id, { needsReview: false, reviewReason: '' })"
+                  >
+                    Xác nhận
+                  </button>
+                </div>
+                @if (qe['review']) {
+                  <p role="alert" class="text-sm font-medium text-red-700 dark:text-red-300">
+                    {{ qe['review'] }}
+                  </p>
+                }
+              }
 
-            @if (isEssay(q)) {
               <label class="block text-base font-medium"
-                >Yêu cầu
+                ><span
+                  class="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-amber-900 dark:text-amber-300"
+                  ><app-icon name="book-open" svgClass="h-3.5 w-3.5" />Dạng bài và ngữ cảnh bài
+                  đọc</span
+                >
                 <textarea
+                  placeholder="Nhập chỉ dẫn dạng bài / đoạn văn đọc hiểu dùng chung..."
                   [class]="area"
-                  [value]="q.requirements ?? ''"
-                  (input)="text(q.id, 'requirements', $event)"
+                  [value]="q.context"
+                  (input)="text(q.id, 'context', $event)"
                 ></textarea>
               </label>
-              <div class="space-y-2">
+              <label class="block text-base font-medium"
+                >{{ isEssay(q) ? 'Đề bài' : 'Thân câu hỏi (để rỗng nếu là câu điền từ/phát âm):' }}
+                <textarea
+                  [placeholder]="
+                    isEssay(q)
+                      ? 'Ví dụ: Write an email (80-100 words) to your friend about...'
+                      : 'Ví dụ: When the church <u>was</u> first <u>establish</u> in 1973...'
+                  "
+                  [class]="area"
+                  [value]="q.questionText"
+                  (input)="text(q.id, 'questionText', $event)"
+                ></textarea>
+              </label>
+              @if (qe['text']) {
+                <p role="alert" class="text-sm font-medium text-red-700 dark:text-red-300">
+                  {{ qe['text'] }}
+                </p>
+              }
+
+              @if (isEssay(q)) {
                 <label class="block text-base font-medium"
-                  >Điểm của câu (bội số của 0,25)
-                  <input
-                    type="text"
-                    inputmode="decimal"
-                    class="input w-32"
-                    [value]="q.maxScore ?? ''"
-                    (input)="setScore(i, $event)"
-                  />
+                  >Yêu cầu
+                  <textarea
+                    [class]="area"
+                    [value]="q.requirements ?? ''"
+                    (input)="text(q.id, 'requirements', $event)"
+                  ></textarea>
                 </label>
-                @if (scoreError(i); as se) {
-                  <p role="alert" class="text-sm font-medium text-red-700 dark:text-red-300">
-                    {{ se }}
-                  </p>
-                }
-                @if (qe['score']) {
-                  <p role="alert" class="text-sm font-medium text-red-700 dark:text-red-300">
-                    {{ qe['score'] }}
-                  </p>
-                }
-                <h4 class="font-semibold">Tiêu chí chấm (tổng {{ sum(q) }})</h4>
-                @for (c of q.rubric ?? []; track c.key; let ci = $index) {
-                  <div class="flex flex-wrap items-center gap-2">
-                    <input
-                      class="input flex-1"
-                      [value]="c.label"
-                      (input)="setCriterion(q, ci, 'label', $event)"
-                      [attr.aria-label]="'Tên tiêu chí ' + (ci + 1)"
-                    />
+                <div class="space-y-2">
+                  <label class="block text-base font-medium"
+                    >Điểm của câu (bội số của 0,25)
                     <input
                       type="text"
                       inputmode="decimal"
-                      class="input w-24"
-                      [value]="c.max"
-                      (input)="setCriterion(q, ci, 'max', $event)"
-                      [attr.aria-label]="'Điểm tiêu chí ' + (ci + 1)"
+                      class="input w-32"
+                      [value]="q.maxScore ?? ''"
+                      (input)="setScore(i, $event)"
                     />
-                    <button
-                      type="button"
-                      class="btn-secondary"
-                      (click)="removeCriterion(q, ci)"
-                      [attr.aria-label]="'Xóa tiêu chí ' + (ci + 1)"
-                    >
-                      <!-- Haihs: icon cho nút giống bản gốc - start -->
-                      <!-- đóng code cũ -->
-                      <!-- Xóa -->
-                      <app-icon name="trash-2" svgClass="h-4 w-4" /> Xóa
-                      <!-- Haihs: icon cho nút giống bản gốc - end -->
-                    </button>
-                  </div>
-                  @if (qe['criteria:' + ci + ':label']) {
+                  </label>
+                  @if (scoreError(i); as se) {
                     <p role="alert" class="text-sm font-medium text-red-700 dark:text-red-300">
-                      {{ qe['criteria:' + ci + ':label'] }}
+                      {{ se }}
                     </p>
                   }
-                  @if (qe['criteria:' + ci + ':max']) {
+                  @if (qe['score']) {
                     <p role="alert" class="text-sm font-medium text-red-700 dark:text-red-300">
-                      {{ qe['criteria:' + ci + ':max'] }}
+                      {{ qe['score'] }}
                     </p>
                   }
-                }
-                @if (qe['criteria']) {
-                  <p role="alert" class="text-sm font-medium text-red-700 dark:text-red-300">
-                    {{ qe['criteria'] }}
-                  </p>
-                }
-                <button type="button" class="btn-secondary" (click)="addCriterion(q)">
-                  <!-- Haihs: icon cho nút giống bản gốc - start -->
-                  <!-- đóng code cũ -->
-                  <!-- Thêm tiêu chí -->
-                  <app-icon name="plus" svgClass="h-4 w-4" /> Thêm tiêu chí
-                  <!-- Haihs: icon cho nút giống bản gốc - end -->
-                </button>
-              </div>
-            } @else {
-              <div
-                class="space-y-2"
-                role="radiogroup"
-                [attr.aria-label]="'Đáp án đúng của câu ' + (i + 1)"
-              >
-                @for (k of opts; track k) {
-                  <div class="flex items-center gap-2">
-                    <input
-                      type="radio"
-                      [name]="'correct-' + q.id"
-                      [checked]="q.correctAnswer === k"
-                      (change)="patch(q.id, { correctAnswer: k })"
-                      [attr.aria-label]="'Chọn ' + k + ' là đáp án đúng'"
-                    />
-                    <span class="w-5 font-bold">{{ k }}</span>
-                    <input
-                      class="input flex-1"
-                      [value]="q.options[k]"
-                      (input)="setOption(q.id, k, $event)"
-                      [attr.aria-label]="'Phương án ' + k + ' của câu ' + (i + 1)"
-                    />
-                  </div>
-                }
-                @if (qe['options']) {
-                  <p role="alert" class="text-sm font-medium text-red-700 dark:text-red-300">
-                    {{ qe['options'] }}
-                  </p>
-                }
-                @if (qe['correct']) {
-                  <p role="alert" class="text-sm font-medium text-red-700 dark:text-red-300">
-                    {{ qe['correct'] }}
-                  </p>
-                }
-              </div>
-            }
-            <label class="block text-base font-medium"
-              >Giải thích
-              <textarea
-                [class]="area"
-                [value]="q.explanation"
-                (input)="text(q.id, 'explanation', $event)"
-              ></textarea>
-            </label>
-            <details class="text-sm text-gray-600 dark:text-gray-400">
-              <summary class="cursor-pointer">Xem trước</summary>
-              <div class="mt-2 space-y-1">
-                <p><app-formatted-text [text]="q.context" /></p>
-                <p><app-formatted-text [text]="q.questionText" /></p>
-                @if (!isEssay(q)) {
+                  <h4 class="font-semibold">Tiêu chí chấm (tổng {{ sum(q) }})</h4>
+                  @for (c of q.rubric ?? []; track c.key; let ci = $index) {
+                    <div class="flex flex-wrap items-center gap-2">
+                      <input
+                        class="input flex-1"
+                        [value]="c.label"
+                        (input)="setCriterion(q, ci, 'label', $event)"
+                        [attr.aria-label]="'Tên tiêu chí ' + (ci + 1)"
+                      />
+                      <input
+                        type="text"
+                        inputmode="decimal"
+                        class="input w-24"
+                        [value]="c.max"
+                        (input)="setCriterion(q, ci, 'max', $event)"
+                        [attr.aria-label]="'Điểm tiêu chí ' + (ci + 1)"
+                      />
+                      <button
+                        type="button"
+                        class="btn-secondary"
+                        (click)="removeCriterion(q, ci)"
+                        [attr.aria-label]="'Xóa tiêu chí ' + (ci + 1)"
+                      >
+                        <!-- Haihs: icon cho nút giống bản gốc - start -->
+                        <!-- đóng code cũ -->
+                        <!-- Xóa -->
+                        <app-icon name="trash-2" svgClass="h-4 w-4" /> Xóa
+                        <!-- Haihs: icon cho nút giống bản gốc - end -->
+                      </button>
+                    </div>
+                    @if (qe['criteria:' + ci + ':label']) {
+                      <p role="alert" class="text-sm font-medium text-red-700 dark:text-red-300">
+                        {{ qe['criteria:' + ci + ':label'] }}
+                      </p>
+                    }
+                    @if (qe['criteria:' + ci + ':max']) {
+                      <p role="alert" class="text-sm font-medium text-red-700 dark:text-red-300">
+                        {{ qe['criteria:' + ci + ':max'] }}
+                      </p>
+                    }
+                  }
+                  @if (qe['criteria']) {
+                    <p role="alert" class="text-sm font-medium text-red-700 dark:text-red-300">
+                      {{ qe['criteria'] }}
+                    </p>
+                  }
+                  <button type="button" class="btn-secondary" (click)="addCriterion(q)">
+                    <!-- Haihs: icon cho nút giống bản gốc - start -->
+                    <!-- đóng code cũ -->
+                    <!-- Thêm tiêu chí -->
+                    <app-icon name="plus" svgClass="h-4 w-4" /> Thêm tiêu chí
+                    <!-- Haihs: icon cho nút giống bản gốc - end -->
+                  </button>
+                </div>
+              } @else {
+                <div
+                  class="space-y-2"
+                  role="radiogroup"
+                  [attr.aria-label]="'Đáp án đúng của câu ' + (i + 1)"
+                >
                   @for (k of opts; track k) {
-                    <p>{{ k }}. <app-formatted-text [text]="q.options[k]" /></p>
+                    <div class="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        [name]="'correct-' + q.id"
+                        [checked]="q.correctAnswer === k"
+                        (change)="patch(q.id, { correctAnswer: k })"
+                        [attr.aria-label]="'Chọn ' + k + ' là đáp án đúng'"
+                        title="Đặt làm đáp án đúng"
+                      />
+                      <span class="w-5 font-bold">{{ k }}</span>
+                      <input
+                        class="input flex-1"
+                        [value]="q.options[k]"
+                        (input)="setOption(q.id, k, $event)"
+                        [attr.aria-label]="'Phương án ' + k + ' của câu ' + (i + 1)"
+                      />
+                    </div>
                   }
-                }
-              </div>
-            </details>
-          </article>
-        }
-      </fieldset>
+                  @if (qe['options']) {
+                    <p role="alert" class="text-sm font-medium text-red-700 dark:text-red-300">
+                      {{ qe['options'] }}
+                    </p>
+                  }
+                  @if (qe['correct']) {
+                    <p role="alert" class="text-sm font-medium text-red-700 dark:text-red-300">
+                      {{ qe['correct'] }}
+                    </p>
+                  }
+                </div>
+              }
+              <label class="block text-base font-medium"
+                >Giải thích
+                <textarea
+                  placeholder="Lời giải thích / Lý do chọn đáp án này..."
+                  [class]="area"
+                  [value]="q.explanation"
+                  (input)="text(q.id, 'explanation', $event)"
+                ></textarea>
+              </label>
+              <details class="text-sm text-gray-600 dark:text-gray-400">
+                <summary class="cursor-pointer">Xem trước</summary>
+                <div class="mt-2 space-y-1">
+                  <p><app-formatted-text [text]="q.context" /></p>
+                  <p><app-formatted-text [text]="q.questionText" /></p>
+                  @if (!isEssay(q)) {
+                    @for (k of opts; track k) {
+                      <p>{{ k }}. <app-formatted-text [text]="q.options[k]" /></p>
+                    }
+                  }
+                </div>
+              </details>
+            </article>
+          }
+        </fieldset>
+      }
 
-      @if (!readOnly()) {
+      @if (!readOnly() && viewMode() === 'edit') {
         <div class="flex flex-wrap gap-2">
           <button type="button" class="btn-secondary" (click)="addMcq()">
-            Thêm câu trắc nghiệm
+            <app-icon name="plus" svgClass="h-3.5 w-3.5" /> Thêm câu hỏi cuối đề
           </button>
           <button type="button" class="btn-secondary" (click)="addEssay()">Thêm câu tự luận</button>
         </div>
       }
     </section>
   `,
+  // Haihs: trình soạn câu hỏi có chế độ Xem như học sinh, Chèn câu và nhãn như bản gốc - end
 })
 export class QuestionsEditor {
   /** Two-way: the parent owns the list. */
@@ -348,6 +720,20 @@ export class QuestionsEditor {
   protected addMcq(): void {
     this.update((l) => [...l, createMcqQuestion(this.nextId(), l.at(-1)?.context ?? '')]);
   }
+  // Haihs: trình soạn câu hỏi có chế độ Xem như học sinh, Chèn câu và nhãn như bản gốc - start
+  protected readonly viewMode = signal<'edit' | 'preview'>('edit');
+  protected readonly modes: ['edit' | 'preview', string, string][] = [
+    ['edit', 'Sửa trực tiếp', 'edit-3'],
+    ['preview', 'Xem như học sinh', 'eye'],
+  ];
+  protected insertAfter(i: number): void {
+    this.update((l) => {
+      const next = [...l];
+      next.splice(i + 1, 0, createMcqQuestion(this.nextId(), l[i]?.context ?? ''));
+      return next;
+    });
+  }
+  // Haihs: trình soạn câu hỏi có chế độ Xem như học sinh, Chèn câu và nhãn như bản gốc - end
   protected addEssay(): void {
     this.update((l) => [...l, createEssayQuestion(this.nextId())]);
   }
