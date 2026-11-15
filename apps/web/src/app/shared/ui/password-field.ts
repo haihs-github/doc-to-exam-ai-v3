@@ -1,13 +1,29 @@
 // Created by Haihs on 11/11/2026
 // <app-password-field>: password input with a show/hide button (port of PasswordField.jsx + passwordVisibility.js).
 import { ChangeDetectionStrategy, Component, input, model, output, signal } from '@angular/core';
+import { Icon } from './icon';
 
 @Component({
   selector: 'app-password-field',
+  // Haihs: icon và kiểu ô nhập giống bản gốc cho trang tài khoản - start
+  imports: [Icon],
+  // Haihs: icon và kiểu ô nhập giống bản gốc cho trang tài khoản - end
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
+    <!-- Haihs: icon và kiểu ô nhập giống bản gốc cho trang tài khoản - start -->
+    @if (leadingIcon()) {
+      <app-icon
+        [name]="leadingIcon()"
+        class="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2"
+        svgClass="h-4 w-4 text-gray-500 dark:text-gray-400"
+      />
+    }
+    <!-- Haihs: icon và kiểu ô nhập giống bản gốc cho trang tài khoản - end -->
+    <!-- Haihs: icon và kiểu ô nhập giống bản gốc cho trang tài khoản - start -->
+    <!-- đóng code cũ -->
+    <!-- class="input pr-12" -->
     <input
-      class="input pr-12"
+      [class]="'input pr-12 ' + inputClass()"
       [type]="visible() ? 'text' : 'password'"
       [value]="value()"
       (input)="onInput($event)"
@@ -20,6 +36,7 @@ import { ChangeDetectionStrategy, Component, input, model, output, signal } from
       [attr.id]="inputId() || null"
       [disabled]="disabled()"
     />
+    <!-- Haihs: icon và kiểu ô nhập giống bản gốc cho trang tài khoản - end -->
     <button
       type="button"
       (click)="visible.set(!visible())"
@@ -53,6 +70,12 @@ export class PasswordField {
   /** Stable id for the inner input (form-field keeps an author id). */
   readonly inputId = input('');
   readonly disabled = input(false);
+  // Haihs: icon và kiểu ô nhập giống bản gốc cho trang tài khoản - start
+  /** Optional lucide icon shown at the left edge (the original auth forms show a lock). */
+  readonly leadingIcon = input('');
+  /** Extra classes for the inner input (e.g. left padding when there is a leading icon). */
+  readonly inputClass = input('');
+  // Haihs: icon và kiểu ô nhập giống bản gốc cho trang tài khoản - end
   /** Fires when the input loses focus (validate on blur). */
   readonly blurred = output<void>();
   protected readonly visible = signal(false);

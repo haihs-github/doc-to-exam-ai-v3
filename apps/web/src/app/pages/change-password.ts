@@ -8,6 +8,7 @@ import { errorMessage } from '../core/api-errors';
 import { AlertService } from '../shared/ui/alert.service';
 import { ConfirmService } from '../shared/ui/confirm-modal';
 import { FormField } from '../shared/ui/form-field';
+import { Icon } from '../shared/ui/icon';
 import { PasswordField } from '../shared/ui/password-field';
 import {
   CHANGE_PASSWORD_ORDER,
@@ -22,7 +23,11 @@ type Values = { currentPassword: string; newPassword: string; confirmPassword: s
 
 @Component({
   selector: 'app-change-password',
-  imports: [FormField, PasswordField],
+  // Haihs: icon và kiểu ô nhập giống bản gốc cho trang tài khoản - start
+  // đóng code cũ
+  // imports: [FormField, PasswordField],
+  imports: [FormField, PasswordField, Icon],
+  // Haihs: icon và kiểu ô nhập giống bản gốc cho trang tài khoản - end
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="max-w-md mx-auto px-4 py-10">
@@ -44,38 +49,58 @@ type Values = { currentPassword: string; newPassword: string; confirmPassword: s
           [required]="true"
           [error]="errors()['currentPassword'] ?? ''"
         >
+          <!-- Haihs: icon và kiểu ô nhập giống bản gốc cho trang tài khoản - start -->
           <app-password-field
             name="currentPassword"
             autocomplete="current-password"
+            leadingIcon="lock"
+            [inputClass]="pwCls"
             [value]="v().currentPassword"
             (valueChange)="set('currentPassword', $event)"
           />
+          <!-- Haihs: icon và kiểu ô nhập giống bản gốc cho trang tài khoản - end -->
         </app-form-field>
         <app-form-field
           label="Mật khẩu mới (tối thiểu 8 ký tự)"
           [required]="true"
           [error]="errors()['newPassword'] ?? ''"
         >
+          <!-- Haihs: icon và kiểu ô nhập giống bản gốc cho trang tài khoản - start -->
           <app-password-field
             name="newPassword"
             autocomplete="new-password"
+            leadingIcon="lock"
+            [inputClass]="pwCls"
             [value]="v().newPassword"
             (valueChange)="set('newPassword', $event)"
           />
+          <!-- Haihs: icon và kiểu ô nhập giống bản gốc cho trang tài khoản - end -->
         </app-form-field>
         <app-form-field
           label="Nhập lại mật khẩu mới"
           [required]="true"
           [error]="errors()['confirmPassword'] ?? ''"
         >
+          <!-- Haihs: icon và kiểu ô nhập giống bản gốc cho trang tài khoản - start -->
           <app-password-field
             name="confirmPassword"
             autocomplete="new-password"
+            leadingIcon="lock"
+            [inputClass]="pwCls"
             [value]="v().confirmPassword"
             (valueChange)="set('confirmPassword', $event)"
           />
+          <!-- Haihs: icon và kiểu ô nhập giống bản gốc cho trang tài khoản - end -->
         </app-form-field>
-        <button type="submit" class="btn-primary w-full" [disabled]="busy()">
+        <!-- Haihs: icon và kiểu ô nhập giống bản gốc cho trang tài khoản - start -->
+        <!-- đóng code cũ -->
+        <!-- <button type="submit" class="btn-primary w-full" [disabled]="busy()"> -->
+        <button
+          type="submit"
+          [disabled]="busy()"
+          class="w-full rounded-xl bg-primary-700 py-3 text-base font-bold text-white hover:bg-primary-800 disabled:opacity-50 dark:bg-sky-400 dark:text-gray-900 dark:hover:bg-sky-300"
+        >
+          <!-- Haihs: icon và kiểu ô nhập giống bản gốc cho trang tài khoản - end -->
           {{ busy() ? 'Đang xử lý...' : 'Đổi mật khẩu' }}
         </button>
         <div class="pt-4 border-t border-gray-100 dark:border-gray-700">
@@ -85,7 +110,11 @@ type Values = { currentPassword: string; newPassword: string; confirmPassword: s
             [disabled]="busy()"
             class="flex items-center gap-2 text-base font-semibold text-red-600 hover:bg-red-50 rounded-lg px-3 py-2 disabled:opacity-50 dark:text-red-400 dark:hover:bg-red-900/40"
           >
-            Đăng xuất mọi thiết bị
+            <!-- Haihs: icon và kiểu ô nhập giống bản gốc cho trang tài khoản - start -->
+            <!-- đóng code cũ -->
+            <!-- Đăng xuất mọi thiết bị -->
+            <app-icon name="log-out" svgClass="h-4 w-4" /> Đăng xuất mọi thiết bị
+            <!-- Haihs: icon và kiểu ô nhập giống bản gốc cho trang tài khoản - end -->
           </button>
         </div>
       </form>
@@ -107,6 +136,10 @@ export class ChangePassword {
   });
   protected readonly errors = signal<FormErrors>({});
   protected readonly busy = signal(false);
+  // Haihs: icon và kiểu ô nhập giống bản gốc cho trang tài khoản - start
+  protected readonly pwCls =
+    '!rounded-xl !border-gray-200 !bg-gray-50 !py-3 pl-11 font-medium dark:!border-gray-700 dark:!bg-gray-700/50';
+  // Haihs: icon và kiểu ô nhập giống bản gốc cho trang tài khoản - end
 
   protected set(key: keyof Values, value: string): void {
     this.v.update((x) => ({ ...x, [key]: value }));
