@@ -78,7 +78,11 @@ const ITEM =
   host: {
     '(document:keydown)': 'onKey($event)',
     '(document:pointerdown)': 'onDown($event)',
-    '(window:scroll)': 'close()',
+    // Haihs: scroll chỉ đóng menu khi trang thực sự cuộn sau lúc mở - start
+    // đóng code cũ
+    // '(window:scroll)': 'close()',
+    '(window:scroll)': 'onScroll()',
+    // Haihs: scroll chỉ đóng menu khi trang thực sự cuộn sau lúc mở - end
     '(window:resize)': 'close()',
   },
 })
@@ -101,6 +105,9 @@ export class ActionMenu {
 
   protected toggle(btn: HTMLElement): void {
     if (this.pos()) return this.close();
+    // Haihs: scroll chỉ đóng menu khi trang thực sự cuộn sau lúc mở - start
+    this.openScrollY = window.scrollY;
+    // Haihs: scroll chỉ đóng menu khi trang thực sự cuộn sau lúc mở - end
     const r = btn.getBoundingClientRect();
     this.pos.set({ top: r.bottom + 4, right: window.innerWidth - r.right });
     // Haihs: menu thao tác mở lên trên khi sát đáy cửa sổ và focus không cuộn trang - start
@@ -122,6 +129,14 @@ export class ActionMenu {
 
   protected focusTrigger(): void {
     this.host.querySelector<HTMLElement>('button[aria-haspopup]')!.focus();
+    // Haihs: scroll chỉ đóng menu khi trang thực sự cuộn sau lúc mở - start
+  }
+
+  private openScrollY = 0;
+  /** A scroll event queued from before the menu opened must not close it: only a real scroll since opening does. */
+  protected onScroll(): void {
+    if (Math.abs(window.scrollY - this.openScrollY) > 2) this.close();
+    // Haihs: scroll chỉ đóng menu khi trang thực sự cuộn sau lúc mở - end
   }
 
   protected close(): void {
