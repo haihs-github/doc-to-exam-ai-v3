@@ -6,6 +6,7 @@ import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/ro
 import { filter } from 'rxjs';
 import { AuthService } from '../../core/auth.service';
 import { ConfirmService } from './confirm-modal';
+import { Icon } from './icon';
 import { ThemeToggle } from './theme-toggle';
 
 /** Student exam pages (/ca/*) hide the navbar, except the result page (source Navbar.jsx Pha 4G). */
@@ -20,7 +21,8 @@ const ACTIVE = 'bg-primary-100 !text-primary-900 dark:bg-sky-900/50 dark:!text-s
 
 @Component({
   selector: 'app-navbar',
-  imports: [RouterLink, RouterLinkActive, ThemeToggle],
+  // imports: [RouterLink, RouterLinkActive, ThemeToggle], // Haihs: đóng code cũ, thêm Icon cho nút Đăng Nhập/Đăng Ký - start - end
+  imports: [RouterLink, RouterLinkActive, ThemeToggle, Icon], // Haihs: thêm Icon cho nút Đăng Nhập/Đăng Ký - start - end
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (visible()) {
@@ -42,35 +44,47 @@ const ACTIVE = 'bg-primary-100 !text-primary-900 dark:bg-sky-900/50 dark:!text-s
             @if (!auth.isAuthenticated()) {
               <!-- TODO(web): M4 — route /about chưa tồn tại -->
               <!-- Haihs: đã xử lý, route /about đã có ở app.routes.ts - start - end -->
-              <a
-                routerLink="/about"
-                [class]="link"
-                [routerLinkActive]="active"
-                ariaCurrentWhenActive="page"
-                >Giới thiệu</a
-              >
+              <!-- Haihs: header khách giống bản cũ: bỏ Giới thiệu/Giáo viên, nút Đăng Nhập + Đăng Ký có icon - start -->
+              <!-- đóng code cũ -->
+              <!-- <a -->
+              <!-- routerLink="/about" -->
+              <!-- [class]="link" -->
+              <!-- [routerLinkActive]="active" -->
+              <!-- ariaCurrentWhenActive="page" -->
+              <!-- >Giới thiệu</a -->
+              <!-- > -->
+              <!-- <app-theme-toggle /> -->
+              <!-- <a -->
+              <!-- routerLink="/login" -->
+              <!-- [class]="link" -->
+              <!-- [routerLinkActive]="active" -->
+              <!-- ariaCurrentWhenActive="page" -->
+              <!-- >Đăng nhập</a -->
+              <!-- > -->
+              <!-- <a -->
+              <!-- routerLink="/register" -->
+              <!-- [class]="link" -->
+              <!-- [routerLinkActive]="active" -->
+              <!-- ariaCurrentWhenActive="page" -->
+              <!-- >Đăng ký</a -->
+              <!-- > -->
+              <!-- <a -->
+              <!-- routerLink="/teacher/login" -->
+              <!-- [class]="link" -->
+              <!-- [routerLinkActive]="active" -->
+              <!-- ariaCurrentWhenActive="page" -->
+              <!-- >Giáo viên</a -->
+              <!-- > -->
               <app-theme-toggle />
-              <a
-                routerLink="/login"
-                [class]="link"
-                [routerLinkActive]="active"
-                ariaCurrentWhenActive="page"
-                >Đăng nhập</a
-              >
-              <a
-                routerLink="/register"
-                [class]="link"
-                [routerLinkActive]="active"
-                ariaCurrentWhenActive="page"
-                >Đăng ký</a
-              >
-              <a
-                routerLink="/teacher/login"
-                [class]="link"
-                [routerLinkActive]="active"
-                ariaCurrentWhenActive="page"
-                >Giáo viên</a
-              >
+              <a routerLink="/teacher/login" class="btn-ghost">
+                <app-icon name="login" svgClass="h-5 w-5" />
+                <span>Đăng Nhập</span>
+              </a>
+              <a routerLink="/teacher/register" class="btn-primary">
+                <app-icon name="userplus" svgClass="h-5 w-5" />
+                <span>Đăng Ký</span>
+              </a>
+              <!-- Haihs: header khách giống bản cũ: bỏ Giới thiệu/Giáo viên, nút Đăng Nhập + Đăng Ký có icon - end -->
             } @else {
               @if (!auth.user()?.mustChangePassword) {
                 @if (auth.isStudent()) {

@@ -67,16 +67,29 @@ describe('Navbar', () => {
     return { f, host, confirmBtn, el, auth, router, hrefs, btn };
   };
 
-  it('guest: About, Đăng nhập, Đăng ký, Giáo viên; no logout', async () => {
+  // Haihs: header khách giống bản cũ - start
+  // đóng code cũ
+  //   it('guest: About, Đăng nhập, Đăng ký, Giáo viên; no logout', async () => {
+  //     const { el, hrefs, btn } = await setup(null);
+  //     expect(hrefs()).toEqual(
+  //       expect.arrayContaining(['/about', '/login', '/register', '/teacher/login']),
+  //     );
+  //     expect(el.textContent).toContain('Đăng nhập');
+  //     expect(el.textContent).toContain('Giáo viên');
+  //     expect(btn('Đăng xuất')).toBeUndefined();
+  //     expect(hrefs()).not.toContain('/sittings');
+  //   });
+  it('guest: only theme toggle + Đăng Nhập/Đăng Ký (teacher routes), like the original; no logout', async () => {
     const { el, hrefs, btn } = await setup(null);
-    expect(hrefs()).toEqual(
-      expect.arrayContaining(['/about', '/login', '/register', '/teacher/login']),
-    );
-    expect(el.textContent).toContain('Đăng nhập');
-    expect(el.textContent).toContain('Giáo viên');
+    expect(hrefs()).toEqual(['/', '/teacher/login', '/teacher/register']);
+    expect(el.textContent).toContain('Đăng Nhập');
+    expect(el.textContent).toContain('Đăng Ký');
+    expect(el.textContent).not.toContain('Giới thiệu');
+    expect(el.textContent).not.toContain('Giáo viên');
     expect(btn('Đăng xuất')).toBeUndefined();
-    expect(hrefs()).not.toContain('/sittings');
   });
+
+  // Haihs: header khách giống bản cũ - end
 
   it('student: student links + change password, no teacher links, no API-key button', async () => {
     const { hrefs, btn } = await setup(student);

@@ -9,8 +9,8 @@ import { NgTemplateOutlet } from '@angular/common';
 // Haihs: khôi phục ảnh minh hoạ, icon, mũi tên, nút GitHub như bản gốc - end
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { Icon, type IconName } from '../shared/ui/icon';
-import { ApiHealth } from './api-health';
+import { Icon, type IconName } from '../shared/ui/icon'; // Haihs: import icon dùng cho About - start - end
+// import { ApiHealth } from './api-health'; // Haihs: đóng code cũ, mục Trạng thái hệ thống đã bỏ nên import không còn dùng (lint) - start - end
 
 // Haihs: khôi phục ảnh minh hoạ, icon, mũi tên, nút GitHub như bản gốc - start
 // đóng code cũ
@@ -105,7 +105,8 @@ const ICON_OK = 'mt-1 h-5 w-5 flex-none text-primary-700 dark:text-sky-400';
   // Haihs: khôi phục ảnh minh hoạ, icon, mũi tên, nút GitHub như bản gốc - start
   // đóng code cũ
   // imports: [RouterLink, ApiHealth],
-  imports: [RouterLink, NgTemplateOutlet, ApiHealth, Icon],
+  // imports: [RouterLink, NgTemplateOutlet, ApiHealth, Icon], // Haihs: đóng code cũ, bỏ ApiHealth cùng mục Trạng thái hệ thống - start - end
+  imports: [RouterLink, NgTemplateOutlet, Icon], // Haihs: bỏ ApiHealth cùng mục Trạng thái hệ thống - start - end
   // Haihs: khôi phục ảnh minh hoạ, icon, mũi tên, nút GitHub như bản gốc - end
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -171,7 +172,8 @@ const ICON_OK = 'mt-1 h-5 w-5 flex-none text-primary-700 dark:text-sky-400';
               <p class="mt-2.5 font-medium">She ___ to school by bike every day.</p>
               <div class="mt-3 grid gap-2">
                 @for (o of heroOpts; track o[0]) {
-                  <div [class]="opt" [class]="o[0] === 'B' ? optOn : ''">
+                  <!-- <div [class]="opt" [class]="o[0] === 'B' ? optOn : ''"> -->
+                  <div [class]="opt + ' ' + (o[0] === 'B' ? optOn : '')">
                     <span class="w-5 font-semibold text-gray-500 dark:text-gray-400">{{
                       o[0]
                     }}</span
@@ -547,14 +549,17 @@ const ICON_OK = 'mt-1 h-5 w-5 flex-none text-primary-700 dark:text-sky-400';
         </div>
       </section>
 
-      <section class="py-10" aria-labelledby="about-health">
-        <div [class]="wrap">
-          <h2 id="about-health" class="text-xl font-semibold text-gray-900 dark:text-gray-100">
-            Trạng thái hệ thống
-          </h2>
-          <div class="mt-2"><app-api-health /></div>
-        </div>
-      </section>
+      <!-- Haihs: bỏ mục Trạng thái hệ thống, bản gốc không có - start -->
+      <!-- đóng code cũ -->
+      <!-- <section class="py-10" aria-labelledby="about-health"> -->
+      <!-- <div [class]="wrap"> -->
+      <!-- <h2 id="about-health" class="text-xl font-semibold text-gray-900 dark:text-gray-100"> -->
+      <!-- Trạng thái hệ thống -->
+      <!-- </h2> -->
+      <!-- <div class="mt-2"><app-api-health /></div> -->
+      <!-- </div> -->
+      <!-- </section> -->
+      <!-- Haihs: bỏ mục Trạng thái hệ thống, bản gốc không có - end -->
 
       <footer class="border-t border-gray-200 py-8 dark:border-gray-700" [class]="muted">
         <div [class]="wrap" class="grid gap-5">
