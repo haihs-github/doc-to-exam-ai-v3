@@ -1,6 +1,9 @@
 // Created by Haihs on 12/11/2026
 // Student modals: rename and add (search by name/phone or add by exact phone). Port of StudentModals.jsx.
 import {
+  // Haihs: ô thêm học sinh dùng SearchSelect như bản gốc - start
+  computed,
+  // Haihs: ô thêm học sinh dùng SearchSelect như bản gốc - end
   ChangeDetectionStrategy,
   Component,
   ElementRef,
@@ -18,6 +21,7 @@ import { describeClassError } from '../utils/class-ui';
 import { AlertService } from './alert.service';
 import { FormField } from './form-field';
 import { ModalFocus } from './modal-focus';
+import { SearchSelect } from './search-select';
 
 const MODAL =
   'w-full max-w-md space-y-3 rounded-lg border border-gray-200 bg-white p-6 shadow-overlay dark:border-gray-700 dark:bg-gray-800 dark:shadow-overlay-dark';
@@ -113,8 +117,80 @@ type Found = ClassMemberDto & { alreadyMember?: boolean };
 
 @Component({
   selector: 'app-student-add-modal',
-  imports: [ModalFocus],
+  // Haihs: ô thêm học sinh dùng SearchSelect như bản gốc - start
+  // đóng code cũ
+  // imports: [ModalFocus],
+  imports: [ModalFocus, SearchSelect],
+  // Haihs: ô thêm học sinh dùng SearchSelect như bản gốc - end
   changeDetection: ChangeDetectionStrategy.OnPush,
+  // Haihs: ô thêm học sinh dùng SearchSelect như bản gốc - start
+  // đóng code cũ
+  //   template: `
+  //     <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+  //       <div
+  //         appModalFocus
+  //         (dismissed)="cancel()"
+  //         role="dialog"
+  //         aria-modal="true"
+  //         aria-labelledby="add-student-title"
+  //         [class]="modal"
+  //       >
+  //         <h2 id="add-student-title" class="text-lg font-bold text-gray-900 dark:text-gray-100">
+  //           Thêm học sinh
+  //         </h2>
+  //         <label
+  //           for="student-search"
+  //           class="block text-base font-medium text-gray-800 dark:text-gray-200"
+  //           >Tên hoặc số điện thoại (ít nhất 3 ký tự)</label
+  //         >
+  //         <input
+  //           id="student-search"
+  //           type="search"
+  //           name="studentSearch"
+  //           class="input"
+  //           maxlength="50"
+  //           autocomplete="off"
+  //           [value]="q()"
+  //           (input)="onSearch($event)"
+  //         />
+  //         @if (searchError()) {
+  //           <p role="alert" class="text-sm font-medium text-red-700 dark:text-red-300">
+  //             {{ searchError() }}
+  //           </p>
+  //         }
+  //         @if (found(); as f) {
+  //           @if (f.items.length === 0) {
+  //             <p class="text-base text-gray-600 dark:text-gray-400">
+  //               Không tìm thấy học sinh phù hợp.
+  //             </p>
+  //           }
+  //           <ul class="max-h-64 space-y-2 overflow-y-auto">
+  //             @for (u of f.items; track u.userId) {
+  //               <li
+  //                 class="flex items-center justify-between gap-3 rounded-lg border border-gray-200 p-3 dark:border-gray-700"
+  //               >
+  //                 <span class="min-w-0"
+  //                   ><span class="font-semibold">{{ u.fullName }}</span>
+  //                   <span class="text-gray-600 dark:text-gray-400"> · {{ u.phoneNumber }}</span></span
+  //                 >
+  //                 <button
+  //                   type="button"
+  //                   class="btn-secondary"
+  //                   [disabled]="busy() || u.alreadyMember"
+  //                   (click)="add(u)"
+  //                 >
+  //                   {{ u.alreadyMember ? 'Đã trong lớp' : 'Thêm' }}
+  //                 </button>
+  //               </li>
+  //             }
+  //           </ul>
+  //         }
+  //         <div class="flex justify-end pt-1">
+  //           <button type="button" class="btn-secondary" (click)="cancel()">Đóng</button>
+  //         </div>
+  //       </div>
+  //     </div>
+  //   `,
   template: `
     <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div
@@ -131,56 +207,27 @@ type Found = ClassMemberDto & { alreadyMember?: boolean };
         <label
           for="student-search"
           class="block text-base font-medium text-gray-800 dark:text-gray-200"
-          >Tên hoặc số điện thoại (ít nhất 3 ký tự)</label
+          >Tìm học sinh theo số điện thoại hoặc họ tên</label
         >
-        <input
-          id="student-search"
-          type="search"
-          name="studentSearch"
-          class="input"
-          maxlength="50"
-          autocomplete="off"
-          [value]="q()"
-          (input)="onSearch($event)"
+        <app-search-select
+          label="Số điện thoại hoặc họ tên"
+          placeholder="Số điện thoại hoặc họ tên"
+          emptyText="Không tìm thấy học sinh phù hợp"
+          [remote]="true"
+          [minChars]="3"
+          [error]="searchError()"
+          [options]="studentOptions()"
+          [disabledKeys]="memberKeys()"
+          (queryChange)="search($event)"
+          (picked)="addById($event)"
         />
-        @if (searchError()) {
-          <p role="alert" class="text-sm font-medium text-red-700 dark:text-red-300">
-            {{ searchError() }}
-          </p>
-        }
-        @if (found(); as f) {
-          @if (f.items.length === 0) {
-            <p class="text-base text-gray-600 dark:text-gray-400">
-              Không tìm thấy học sinh phù hợp.
-            </p>
-          }
-          <ul class="max-h-64 space-y-2 overflow-y-auto">
-            @for (u of f.items; track u.userId) {
-              <li
-                class="flex items-center justify-between gap-3 rounded-lg border border-gray-200 p-3 dark:border-gray-700"
-              >
-                <span class="min-w-0"
-                  ><span class="font-semibold">{{ u.fullName }}</span>
-                  <span class="text-gray-600 dark:text-gray-400"> · {{ u.phoneNumber }}</span></span
-                >
-                <button
-                  type="button"
-                  class="btn-secondary"
-                  [disabled]="busy() || u.alreadyMember"
-                  (click)="add(u)"
-                >
-                  {{ u.alreadyMember ? 'Đã trong lớp' : 'Thêm' }}
-                </button>
-              </li>
-            }
-          </ul>
-        }
         <div class="flex justify-end pt-1">
           <button type="button" class="btn-secondary" (click)="cancel()">Đóng</button>
         </div>
       </div>
     </div>
   `,
+  // Haihs: ô thêm học sinh dùng SearchSelect như bản gốc - end
 })
 export class StudentAddModal implements OnDestroy {
   readonly classId = input.required<string>();
@@ -206,7 +253,13 @@ export class StudentAddModal implements OnDestroy {
   }
 
   protected onSearch(e: Event): void {
-    const v = (e.target as HTMLInputElement).value;
+    // Haihs: ô thêm học sinh dùng SearchSelect như bản gốc - start
+    // đóng code cũ
+    // const v = (e.target as HTMLInputElement).value;
+    this.search((e.target as HTMLInputElement).value);
+  }
+  protected search(v: string): void {
+    // Haihs: ô thêm học sinh dùng SearchSelect như bản gốc - end
     this.q.set(v);
     clearTimeout(this.timer);
     this.sub?.unsubscribe(); // latest wins
@@ -226,6 +279,22 @@ export class StudentAddModal implements OnDestroy {
     }, 300);
   }
 
+  // Haihs: ô thêm học sinh dùng SearchSelect như bản gốc - start
+  protected readonly studentOptions = computed(() =>
+    (this.found()?.items ?? []).map((u) => ({
+      key: u.userId,
+      label: u.fullName,
+      hint: u.phoneNumber,
+    })),
+  );
+  protected readonly memberKeys = computed(() =>
+    (this.found()?.items ?? []).filter((u) => u.alreadyMember).map((u) => u.userId),
+  );
+  protected addById(id: string): void {
+    const u = this.found()?.items.find((x) => x.userId === id);
+    if (u) this.add(u);
+  }
+  // Haihs: ô thêm học sinh dùng SearchSelect như bản gốc - end
   protected add(u: Found): void {
     if (this.busy()) return;
     this.busy.set(true);
