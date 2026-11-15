@@ -156,7 +156,11 @@ test('student writes an essay, teacher grades it', async ({ page, browser, baseU
   await page.goto(`/ca/${code}`);
   await page.getByRole('link', { name: 'Bắt đầu làm bài' }).click();
   await page.getByLabel('Bài làm câu 1').fill('Mua he la mua cua bien xanh va tieng ve.');
-  await page.getByRole('button', { name: 'Nộp bài', exact: true }).click();
+  // Haihs: nút nộp bài của phòng thi theo bản gốc là 'Nộp Bài Thi' - start
+  // đóng code cũ
+  // await page.getByRole('button', { name: 'Nộp bài', exact: true }).click();
+  await page.getByRole('button', { name: 'Nộp Bài Thi', exact: true }).click();
+  // Haihs: nút nộp bài của phòng thi theo bản gốc là 'Nộp Bài Thi' - end
   await dialog(page).getByRole('button', { name: 'Nộp bài' }).click();
   await expect(page.getByRole('heading', { name: 'Nộp bài thành công!' })).toBeVisible();
 
