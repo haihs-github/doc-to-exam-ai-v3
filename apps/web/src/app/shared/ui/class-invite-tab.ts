@@ -36,15 +36,31 @@ const KINDS: { kind: InviteKind; title: string; hint: string }[] = [
   selector: 'app-class-invite-tab',
   // Haihs: icon cho nút giống bản gốc - start
   // đóng code cũ
-  // imports: [QrCode, Skeleton],
+  // Haihs: khung báo lỗi có icon giống bản gốc - start
+  // đóng code cũ
+  // // imports: [QrCode, Skeleton],
+  // imports: [QrCode, Skeleton, Icon],
+  // Haihs: khung báo lỗi có icon giống bản gốc - end
   imports: [QrCode, Skeleton, Icon],
   // Haihs: icon cho nút giống bản gốc - end
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (loadError()) {
-      <div role="alert" class="text-base text-red-700 dark:text-red-400">
-        {{ loadError() }}
-        <button type="button" class="ml-2 font-semibold underline" (click)="load()">Thử lại</button>
+      <!-- Haihs: khung báo lỗi có icon giống bản gốc - start -->
+      <!-- đóng code cũ -->
+      <!-- <div role="alert" class="text-base text-red-700 dark:text-red-400"> -->
+      <!-- {{ loadError() }} -->
+      <!-- <button type="button" class="ml-2 font-semibold underline" (click)="load()">Thử lại</button> -->
+      <div
+        role="alert"
+        class="flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 p-4 text-base text-red-700 dark:border-red-800 dark:bg-red-900/40 dark:text-red-300"
+      >
+        <app-icon name="alert-circle" class="mt-0.5 flex-none" svgClass="h-4 w-4" />
+        <span>{{ loadError() }}</span>
+        <button type="button" class="ml-auto font-semibold underline" (click)="load()">
+          Thử lại
+        </button>
+        <!-- Haihs: khung báo lỗi có icon giống bản gốc - end -->
       </div>
     }
     @if (loading()) {

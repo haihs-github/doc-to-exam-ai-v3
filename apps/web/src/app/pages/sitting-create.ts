@@ -26,10 +26,15 @@ import { fetchAll } from '../shared/utils/fetch-all';
 import { describeSittingError } from '../shared/utils/sitting-ui';
 import { validateSittingForm } from '../shared/utils/sitting-form';
 import { maskVnDateTime, parseVnDateTime } from '../shared/utils/vn-datetime';
+import { Icon } from '../shared/ui/icon';
 
 @Component({
   selector: 'app-sitting-create',
-  imports: [RouterLink, FormField, Skeleton],
+  // Haihs: khung báo lỗi có icon giống bản gốc - start
+  // đóng code cũ
+  // imports: [RouterLink, FormField, Skeleton],
+  imports: [RouterLink, FormField, Skeleton, Icon],
+  // Haihs: khung báo lỗi có icon giống bản gốc - end
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="container-fluid space-y-6 py-8">
@@ -42,7 +47,18 @@ import { maskVnDateTime, parseVnDateTime } from '../shared/utils/vn-datetime';
       @if (loading()) {
         <app-skeleton variant="list" />
       } @else if (loadError()) {
-        <div role="alert" class="text-base text-red-700 dark:text-red-400">{{ loadError() }}</div>
+        <!-- Haihs: khung báo lỗi có icon giống bản gốc - start -->
+        <!-- đóng code cũ -->
+        <!-- <div role="alert" class="text-base text-red-700 dark:text-red-400">{{ loadError() }}</div> -->
+        <div
+          role="alert"
+          class="flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 p-4 text-base text-red-700 dark:border-red-800 dark:bg-red-900/40 dark:text-red-300"
+        >
+          <app-icon name="alert-circle" class="mt-0.5 flex-none" svgClass="h-4 w-4" /><span>{{
+            loadError()
+          }}</span>
+        </div>
+        <!-- Haihs: khung báo lỗi có icon giống bản gốc - end -->
       } @else {
         <form (submit)="submit($event)" novalidate class="max-w-3xl space-y-5">
           <app-form-field label="Đề mẫu" [required]="true" [error]="errors()['templateId'] ?? ''">

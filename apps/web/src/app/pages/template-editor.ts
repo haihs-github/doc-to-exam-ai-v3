@@ -28,6 +28,7 @@ import {
   isTitleTaken,
   validateTemplateForm,
 } from '../shared/utils/template-form';
+import { Icon } from '../shared/ui/icon';
 
 type Draft = { title?: string; description?: string; questions?: Record<string, unknown>[] };
 
@@ -50,7 +51,11 @@ function readDraft(): Draft | null {
 
 @Component({
   selector: 'app-template-editor',
-  imports: [RouterLink, FormField, QuestionsEditor, Skeleton],
+  // Haihs: khung báo lỗi có icon giống bản gốc - start
+  // đóng code cũ
+  // imports: [RouterLink, FormField, QuestionsEditor, Skeleton],
+  imports: [RouterLink, FormField, QuestionsEditor, Skeleton, Icon],
+  // Haihs: khung báo lỗi có icon giống bản gốc - end
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="container-fluid space-y-6 py-8">
@@ -62,8 +67,17 @@ function readDraft(): Draft | null {
       @if (loading()) {
         <app-skeleton variant="list" />
       } @else if (loadError()) {
-        <div role="alert" class="text-base text-red-700 dark:text-red-400">
-          {{ loadError() }}
+        <!-- Haihs: khung báo lỗi có icon giống bản gốc - start -->
+        <!-- đóng code cũ -->
+        <!-- <div role="alert" class="text-base text-red-700 dark:text-red-400"> -->
+        <!-- {{ loadError() }} -->
+        <div
+          role="alert"
+          class="flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 p-4 text-base text-red-700 dark:border-red-800 dark:bg-red-900/40 dark:text-red-300"
+        >
+          <app-icon name="alert-circle" class="mt-0.5 flex-none" svgClass="h-4 w-4" />
+          <span>{{ loadError() }}</span>
+          <!-- Haihs: khung báo lỗi có icon giống bản gốc - end -->
           @if (!notFound()) {
             <button type="button" class="ml-2 font-semibold underline" (click)="load()">
               Thử lại
