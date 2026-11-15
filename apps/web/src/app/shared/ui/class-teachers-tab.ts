@@ -217,6 +217,11 @@ const SEARCH_MIN = 3;
             >
               <span class="min-w-0"
                 ><span class="font-bold">{{ t.fullName }}</span>
+                <!-- Haihs: chữ xác nhận lớp học và nút Rời lớp của giáo viên giống bản gốc - start -->
+                @if (t.userId === me()) {
+                  <span class="text-gray-500 dark:text-gray-400"> (bạn)</span>
+                }
+                <!-- Haihs: chữ xác nhận lớp học và nút Rời lớp của giáo viên giống bản gốc - end -->
                 <span class="text-gray-600 dark:text-gray-400"> · {{ t.phoneNumber }}</span></span
               >
               <span class="flex items-center gap-2">
@@ -236,6 +241,13 @@ const SEARCH_MIN = 3;
                     <!-- Duyệt -->
                     <app-icon name="check" svgClass="h-4 w-4" /> Duyệt
                     <!-- Haihs: icon cho nút giống bản gốc - end -->
+                    <!-- Haihs: chữ xác nhận lớp học và nút Rời lớp của giáo viên giống bản gốc - start -->
+                  </button>
+                }
+                @if (t.userId === me()) {
+                  <button type="button" class="btn-secondary" [disabled]="busy()" (click)="leave()">
+                    <app-icon name="log-out" svgClass="h-4 w-4" /> Rời lớp
+                    <!-- Haihs: chữ xác nhận lớp học và nút Rời lớp của giáo viên giống bản gốc - end -->
                   </button>
                 }
                 @if (t.userId !== me()) {
@@ -384,8 +396,32 @@ export class ClassTeachersTab implements OnDestroy {
     );
   }
 
+  // Haihs: chữ xác nhận lớp học và nút Rời lớp của giáo viên giống bản gốc - start
+  readonly left = output<void>();
+  /** The signed-in teacher leaves this class; the page then goes back to the class list. */
+  protected async leave(): Promise<void> {
+    const ok = await this.confirm.confirm(
+      'Bạn sẽ không còn quản lý lớp này. Nếu bạn là giáo viên cuối cùng, hãy thêm giáo viên khác hoặc xóa lớp trước.',
+      { title: 'Rời lớp?', confirmText: 'Rời lớp', cancelText: 'Hủy', danger: true },
+    );
+    if (!ok || this.busy()) return;
+    this.busy.set(true);
+    this.api
+      .leaveMyClass(this.classId())
+      .pipe(finalize(() => this.busy.set(false)))
+      .subscribe({
+        next: () => this.left.emit(),
+        error: (e: unknown) => void this.alert.error(describeClassError(e, 'Không rời được lớp.')),
+      });
+  }
+
+  // Haihs: chữ xác nhận lớp học và nút Rời lớp của giáo viên giống bản gốc - end
   protected async remove(t: ClassMemberDto): Promise<void> {
-    const ok = await this.confirm.confirm(`Gỡ giáo viên "${t.fullName}" khỏi lớp?`, {
+    // Haihs: chữ xác nhận lớp học và nút Rời lớp của giáo viên giống bản gốc - start
+    // đóng code cũ
+    // const ok = await this.confirm.confirm(`Gỡ giáo viên "${t.fullName}" khỏi lớp?`, {
+    const ok = await this.confirm.confirm(`Gỡ ${t.fullName} khỏi lớp?`, {
+      // Haihs: chữ xác nhận lớp học và nút Rời lớp của giáo viên giống bản gốc - end
       title: 'Gỡ giáo viên?',
       confirmText: 'Gỡ',
       cancelText: 'Hủy',
