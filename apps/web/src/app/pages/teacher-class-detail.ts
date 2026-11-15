@@ -22,6 +22,7 @@ import { ClassTeachersTab } from '../shared/ui/class-teachers-tab';
 import { ConfirmService } from '../shared/ui/confirm-modal';
 import { Skeleton } from '../shared/ui/skeleton';
 import { describeClassError, formatSchoolYear, isClassCodeTaken } from '../shared/utils/class-ui';
+import { Icon } from '../shared/ui/icon';
 
 type Tab = 'students' | 'teachers' | 'invite';
 const TABS: [Tab, string][] = [
@@ -42,6 +43,9 @@ const isTab = (v: unknown): v is Tab => TABS.some((t) => t[0] === v);
     ClassStudentsTab,
     ClassTeachersTab,
     Skeleton,
+    // Haihs: icon cho nút giống bản gốc - start
+    Icon,
+    // Haihs: icon cho nút giống bản gốc - end
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -81,7 +85,11 @@ const isTab = (v: unknown): v is Tab => TABS.some((t) => t[0] === v);
           <div class="flex flex-wrap gap-2">
             @if (deleted()) {
               <button type="button" class="btn-primary" [disabled]="busy()" (click)="restore()">
-                Khôi phục
+                <!-- Haihs: icon cho nút giống bản gốc - start -->
+                <!-- đóng code cũ -->
+                <!-- Khôi phục -->
+                <app-icon name="rotate-ccw" svgClass="h-4 w-4" /> Khôi phục
+                <!-- Haihs: icon cho nút giống bản gốc - end -->
               </button>
             } @else {
               <button type="button" class="btn-secondary" (click)="editing.set(true)">

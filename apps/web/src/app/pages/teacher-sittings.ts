@@ -21,19 +21,30 @@ import { Skeleton } from '../shared/ui/skeleton';
 import { formatDateTime } from '../shared/utils/date-format';
 import { fetchAll } from '../shared/utils/fetch-all';
 import { STATUS_LABEL, describeSittingError } from '../shared/utils/sitting-ui';
+import { Icon } from '../shared/ui/icon';
 
 const PAGE_SIZE = 20;
 const STATUSES: SittingStatus[] = ['not_started', 'open', 'ended'];
 
 @Component({
   selector: 'app-teacher-sittings',
-  imports: [RouterLink, ActionMenu, Pager, Skeleton],
+  // Haihs: icon cho nút giống bản gốc - start
+  // đóng code cũ
+  // imports: [RouterLink, ActionMenu, Pager, Skeleton],
+  imports: [RouterLink, ActionMenu, Pager, Skeleton, Icon],
+  // Haihs: icon cho nút giống bản gốc - end
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="container-fluid space-y-6 py-8">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <h1 class="text-2xl font-extrabold text-gray-900 dark:text-gray-100">Ca thi</h1>
-        <a routerLink="/teacher/sittings/new" class="btn-primary">Tạo ca thi</a>
+        <!-- Haihs: icon cho nút giống bản gốc - start -->
+        <!-- đóng code cũ -->
+        <!-- <a routerLink="/teacher/sittings/new" class="btn-primary">Tạo ca thi</a> -->
+        <a routerLink="/teacher/sittings/new" class="btn-primary"
+          ><app-icon name="plus" svgClass="h-4 w-4" /> Tạo ca thi</a
+        >
+        <!-- Haihs: icon cho nút giống bản gốc - end -->
       </div>
       <div class="flex flex-wrap items-center gap-3">
         <label class="text-base font-medium"
@@ -92,9 +103,13 @@ const STATUSES: SittingStatus[] = ['not_started', 'open', 'ended'];
                 >
                 <p class="text-base text-gray-600 dark:text-gray-400">
                   Mã {{ r.s.code }} · {{ fmt(r.s.openAt) }} → {{ fmt(r.s.closeAt) }} ·
-                  {{ r.s.durationMinutes }} phút · {{ r.s.submittedCount }}/{{
-                    r.s.grantedCount
-                  }}
+                  <!-- Haihs: icon cho nút giống bản gốc - start -->
+                  <!-- đóng code cũ -->
+                  <!-- {{ r.s.durationMinutes }} phút · {{ r.s.submittedCount }}/{{ -->
+                  <!-- r.s.grantedCount -->
+                  <!-- }} -->
+                  {{ r.s.durationMinutes }} phút · {{ r.s.submittedCount }}/{{ r.s.grantedCount }}
+                  <!-- Haihs: icon cho nút giống bản gốc - end -->
                   đã nộp
                 </p>
               </div>

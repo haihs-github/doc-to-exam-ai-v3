@@ -27,12 +27,17 @@ import { ConfirmService } from './confirm-modal';
 import { Pager } from './pager';
 import { SittingSubmissionModal } from './sitting-submission-modal';
 import { Skeleton } from './skeleton';
+import { Icon } from './icon';
 
 const PAGE_SIZE = 50;
 
 @Component({
   selector: 'app-sitting-results-panel',
-  imports: [Pager, SittingSubmissionModal, Skeleton],
+  // Haihs: icon cho nút giống bản gốc - start
+  // đóng code cũ
+  // imports: [Pager, SittingSubmissionModal, Skeleton],
+  imports: [Pager, SittingSubmissionModal, Skeleton, Icon],
+  // Haihs: icon cho nút giống bản gốc - end
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="space-y-5" aria-label="Kết quả ca thi">
@@ -70,7 +75,11 @@ const PAGE_SIZE = 50;
               [disabled]="busy() || !p.canPublish"
               (click)="publish()"
             >
-              Công bố kết quả
+              <!-- Haihs: icon cho nút giống bản gốc - start -->
+              <!-- đóng code cũ -->
+              <!-- Công bố kết quả -->
+              <app-icon name="megaphone" svgClass="h-4 w-4" /> Công bố kết quả
+              <!-- Haihs: icon cho nút giống bản gốc - end -->
             </button>
             @if (!p.canPublish) {
               <p class="text-sm text-gray-600 dark:text-gray-400">

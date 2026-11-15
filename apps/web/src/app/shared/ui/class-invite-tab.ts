@@ -17,6 +17,7 @@ import { AlertService } from './alert.service';
 import { ConfirmService } from './confirm-modal';
 import { QrCode } from './qr-code';
 import { Skeleton } from './skeleton';
+import { Icon } from './icon';
 
 const KINDS: { kind: InviteKind; title: string; hint: string }[] = [
   {
@@ -33,7 +34,11 @@ const KINDS: { kind: InviteKind; title: string; hint: string }[] = [
 
 @Component({
   selector: 'app-class-invite-tab',
-  imports: [QrCode, Skeleton],
+  // Haihs: icon cho nút giống bản gốc - start
+  // đóng code cũ
+  // imports: [QrCode, Skeleton],
+  imports: [QrCode, Skeleton, Icon],
+  // Haihs: icon cho nút giống bản gốc - end
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (loadError()) {
@@ -85,7 +90,11 @@ const KINDS: { kind: InviteKind; title: string; hint: string }[] = [
                 {{ st.enabled ? 'Tắt link' : 'Bật link' }}
               </button>
               <button type="button" class="btn-danger" [disabled]="busy()" (click)="rotate(k.kind)">
-                Tạo link mới
+                <!-- Haihs: icon cho nút giống bản gốc - start -->
+                <!-- đóng code cũ -->
+                <!-- Tạo link mới -->
+                <app-icon name="refresh-cw" svgClass="h-4 w-4" /> Tạo link mới
+                <!-- Haihs: icon cho nút giống bản gốc - end -->
               </button>
             </div>
           </section>

@@ -5,6 +5,7 @@ import { copyToClipboard } from '../utils/browser';
 import { AlertService } from './alert.service';
 import { ModalFocus } from './modal-focus';
 import { inject } from '@angular/core';
+import { Icon } from './icon';
 
 export interface TempPasswordEntry {
   fullName: string;
@@ -14,7 +15,11 @@ export interface TempPasswordEntry {
 
 @Component({
   selector: 'app-temp-password-modal',
-  imports: [ModalFocus],
+  // Haihs: icon cho nút giống bản gốc - start
+  // đóng code cũ
+  // imports: [ModalFocus],
+  imports: [ModalFocus, Icon],
+  // Haihs: icon cho nút giống bản gốc - end
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
@@ -43,7 +48,13 @@ export interface TempPasswordEntry {
           Mật khẩu này chỉ hiện một lần. Hãy sao chép hoặc ghi lại ngay trước khi đóng.
         </p>
         <div class="flex gap-3 pt-1">
-          <button type="button" class="btn-secondary flex-1" (click)="copy()">Sao chép</button>
+          <!-- Haihs: icon cho nút giống bản gốc - start -->
+          <!-- đóng code cũ -->
+          <!-- <button type="button" class="btn-secondary flex-1" (click)="copy()">Sao chép</button> -->
+          <button type="button" class="btn-secondary flex-1" (click)="copy()">
+            <app-icon name="copy" svgClass="h-4 w-4" /> Sao chép
+          </button>
+          <!-- Haihs: icon cho nút giống bản gốc - end -->
           <button type="button" class="btn-primary flex-1" (click)="closed.emit()">
             Đã lưu, đóng
           </button>

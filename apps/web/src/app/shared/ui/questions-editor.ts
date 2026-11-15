@@ -19,13 +19,18 @@ import {
   sumRubric,
 } from '../utils/exam-questions';
 import { FormattedText } from './formatted-text';
+import { Icon } from './icon';
 
 const OPTS: OptionKey[] = ['A', 'B', 'C', 'D'];
 const AREA = 'input min-h-[72px] w-full';
 
 @Component({
   selector: 'app-questions-editor',
-  imports: [FormattedText],
+  // Haihs: icon cho nút giống bản gốc - start
+  // đóng code cũ
+  // imports: [FormattedText],
+  imports: [FormattedText, Icon],
+  // Haihs: icon cho nút giống bản gốc - end
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="space-y-4" aria-label="Danh sách câu hỏi">
@@ -90,7 +95,11 @@ const AREA = 'input min-h-[72px] w-full';
                   (click)="remove(q.id)"
                   [attr.aria-label]="'Xóa câu ' + (i + 1)"
                 >
-                  Xóa
+                  <!-- Haihs: icon cho nút giống bản gốc - start -->
+                  <!-- đóng code cũ -->
+                  <!-- Xóa -->
+                  <app-icon name="trash-2" svgClass="h-4 w-4" /> Xóa
+                  <!-- Haihs: icon cho nút giống bản gốc - end -->
                 </button>
               </div>
             </header>
@@ -191,7 +200,11 @@ const AREA = 'input min-h-[72px] w-full';
                       (click)="removeCriterion(q, ci)"
                       [attr.aria-label]="'Xóa tiêu chí ' + (ci + 1)"
                     >
-                      Xóa
+                      <!-- Haihs: icon cho nút giống bản gốc - start -->
+                      <!-- đóng code cũ -->
+                      <!-- Xóa -->
+                      <app-icon name="trash-2" svgClass="h-4 w-4" /> Xóa
+                      <!-- Haihs: icon cho nút giống bản gốc - end -->
                     </button>
                   </div>
                   @if (qe['criteria:' + ci + ':label']) {
@@ -211,7 +224,11 @@ const AREA = 'input min-h-[72px] w-full';
                   </p>
                 }
                 <button type="button" class="btn-secondary" (click)="addCriterion(q)">
-                  Thêm tiêu chí
+                  <!-- Haihs: icon cho nút giống bản gốc - start -->
+                  <!-- đóng code cũ -->
+                  <!-- Thêm tiêu chí -->
+                  <app-icon name="plus" svgClass="h-4 w-4" /> Thêm tiêu chí
+                  <!-- Haihs: icon cho nút giống bản gốc - end -->
                 </button>
               </div>
             } @else {

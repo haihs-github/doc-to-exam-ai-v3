@@ -18,6 +18,7 @@ import { describeClassError } from '../utils/class-ui';
 import { AlertService } from './alert.service';
 import { ConfirmService } from './confirm-modal';
 import { Skeleton } from './skeleton';
+import { Icon } from './icon';
 
 type Found = ClassMemberDto & { alreadyMember?: boolean };
 const SEARCH_DEBOUNCE_MS = 300;
@@ -25,7 +26,11 @@ const SEARCH_MIN = 3;
 
 @Component({
   selector: 'app-class-teachers-tab',
-  imports: [Skeleton],
+  // Haihs: icon cho nút giống bản gốc - start
+  // đóng code cũ
+  // imports: [Skeleton],
+  imports: [Skeleton, Icon],
+  // Haihs: icon cho nút giống bản gốc - end
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="space-y-6" aria-label="Giáo viên của lớp">
@@ -111,7 +116,11 @@ const SEARCH_MIN = 3;
                     [disabled]="busy()"
                     (click)="approve(t)"
                   >
-                    Duyệt
+                    <!-- Haihs: icon cho nút giống bản gốc - start -->
+                    <!-- đóng code cũ -->
+                    <!-- Duyệt -->
+                    <app-icon name="check" svgClass="h-4 w-4" /> Duyệt
+                    <!-- Haihs: icon cho nút giống bản gốc - end -->
                   </button>
                 }
                 @if (t.userId !== me()) {
@@ -122,7 +131,11 @@ const SEARCH_MIN = 3;
                     [attr.aria-label]="'Gỡ giáo viên ' + t.fullName"
                     (click)="remove(t)"
                   >
-                    Gỡ
+                    <!-- Haihs: icon cho nút giống bản gốc - start -->
+                    <!-- đóng code cũ -->
+                    <!-- Gỡ -->
+                    <app-icon name="user-minus" svgClass="h-4 w-4" /> Gỡ
+                    <!-- Haihs: icon cho nút giống bản gốc - end -->
                   </button>
                 }
               </span>
