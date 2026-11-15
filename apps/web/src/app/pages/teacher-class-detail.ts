@@ -260,7 +260,11 @@ export class TeacherClassDetail implements OnDestroy {
     const c = this.cls();
     if (!c || this.busy()) return;
     const ok = await this.confirm.confirm(
-      `Lớp "${c.name}" sẽ chuyển sang Thùng rác và có thể khôi phục. Mã lớp được nhả ra.`,
+      // Haihs: chữ thông báo/xác nhận lớp học và mật khẩu tạm giống bản gốc - start
+      // đóng code cũ
+      // `Lớp "${c.name}" sẽ chuyển sang Thùng rác và có thể khôi phục. Mã lớp được nhả ra.`,
+      `Lớp "${c.name}" sẽ chuyển sang mục Đã xoá và có thể khôi phục. Mã lớp được nhả ra; nếu bị lớp khác dùng, bạn sẽ phải đặt mã mới khi khôi phục.`,
+      // Haihs: chữ thông báo/xác nhận lớp học và mật khẩu tạm giống bản gốc - end
       { title: 'Xóa lớp?', confirmText: 'Xóa lớp', cancelText: 'Hủy', danger: true },
     );
     if (!ok) return;

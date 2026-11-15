@@ -45,7 +45,12 @@ export interface TempPasswordEntry {
           {{ entry().temporaryPassword }}
         </p>
         <p role="note" class="text-base font-semibold text-amber-800 dark:text-amber-300">
-          Mật khẩu này chỉ hiện một lần. Hãy sao chép hoặc ghi lại ngay trước khi đóng.
+          <!-- Haihs: chữ thông báo/xác nhận lớp học và mật khẩu tạm giống bản gốc - start -->
+          <!-- đóng code cũ -->
+          <!-- Mật khẩu này chỉ hiện một lần. Hãy sao chép hoặc ghi lại ngay trước khi đóng. -->
+          Mật khẩu chỉ hiển thị một lần, hãy lưu lại trước khi đóng. Học sinh phải đổi mật khẩu ở
+          lần đăng nhập đầu tiên.
+          <!-- Haihs: chữ thông báo/xác nhận lớp học và mật khẩu tạm giống bản gốc - end -->
         </p>
         <div class="flex gap-3 pt-1">
           <!-- Haihs: icon cho nút giống bản gốc - start -->
@@ -71,7 +76,12 @@ export class TempPasswordModal {
   protected async copy(): Promise<void> {
     const ok = await copyToClipboard(this.entry().temporaryPassword);
     void (ok
-      ? this.alert.success('Đã sao chép mật khẩu tạm.')
-      : this.alert.error('Không sao chép được, hãy ghi lại mật khẩu thủ công.'));
+      ? // Haihs: chữ thông báo/xác nhận lớp học và mật khẩu tạm giống bản gốc - start
+        // đóng code cũ
+        // ? this.alert.success('Đã sao chép mật khẩu tạm.')
+        // : this.alert.error('Không sao chép được, hãy ghi lại mật khẩu thủ công.'));
+        this.alert.success('Đã sao chép.')
+      : this.alert.error('Trình duyệt chặn sao chép: hãy chọn và chép thủ công hoặc tải CSV.'));
+    // Haihs: chữ thông báo/xác nhận lớp học và mật khẩu tạm giống bản gốc - end
   }
 }
