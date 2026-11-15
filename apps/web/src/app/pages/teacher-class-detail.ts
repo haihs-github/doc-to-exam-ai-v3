@@ -54,10 +54,12 @@ const isTab = (v: unknown): v is Tab => TABS.some((t) => t[0] === v);
       <!-- đóng code cũ -->
       <!-- class="text-base font-semibold text-primary-800 hover:underline dark:text-sky-400" -->
       <!-- >← Danh sách lớp</a -->
+      <!-- ><app-icon name="arrow-left" svgClass="h-4 w-4" /> Lớp học</a> -->
       <a
         routerLink="/teacher/classes"
         class="inline-flex items-center gap-1 text-base text-gray-600 hover:text-primary-700 dark:text-gray-400 dark:hover:text-sky-300"
-        ><app-icon name="arrow-left" svgClass="h-4 w-4" /> Lớp học</a>
+        ><app-icon name="arrow-left" svgClass="h-4 w-4" /> Lớp học</a
+      >
       <!-- Haihs: mũi tên quay lại và tiêu đề có icon giống bản gốc - end -->
       @if (loading()) {
         <app-skeleton variant="list" />
@@ -145,7 +147,11 @@ const isTab = (v: unknown): v is Tab => TABS.some((t) => t[0] === v);
                 <app-class-students-tab [classId]="c.id" [accepting]="c.status === 'active'" />
               }
               @case ('teachers') {
-                <app-class-teachers-tab [classId]="c.id" />
+                <!-- Haihs: chữ xác nhận lớp học và nút Rời lớp của giáo viên giống bản gốc - start -->
+                <!-- đóng code cũ -->
+                <!-- <app-class-teachers-tab [classId]="c.id" /> -->
+                <app-class-teachers-tab [classId]="c.id" (left)="onLeft()" />
+                <!-- Haihs: chữ xác nhận lớp học và nút Rời lớp của giáo viên giống bản gốc - end -->
               }
               @case ('invite') {
                 <app-class-invite-tab [classId]="c.id" />
@@ -235,6 +241,12 @@ export class TeacherClassDetail implements OnDestroy {
   }
 
   /** ?tab= is read and written through the router; replaceUrl keeps the back button usable. */
+  // Haihs: chữ xác nhận lớp học và nút Rời lớp của giáo viên giống bản gốc - start
+  protected onLeft(): void {
+    void this.router.navigate(['/teacher/classes'], { replaceUrl: true });
+  }
+
+  // Haihs: chữ xác nhận lớp học và nút Rời lớp của giáo viên giống bản gốc - end
   protected setTab(t: Tab): void {
     void this.router.navigate([], {
       relativeTo: this.route,

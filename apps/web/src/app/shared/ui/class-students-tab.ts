@@ -427,7 +427,11 @@ export class ClassStudentsTab implements OnDestroy {
                 onClick: () => void this.reset(s),
               },
               {
-                label: 'Xóa khỏi lớp',
+                // Haihs: chữ xác nhận lớp học và nút Rời lớp của giáo viên giống bản gốc - start
+                // đóng code cũ
+                // label: 'Xóa khỏi lớp',
+                label: 'Gỡ khỏi lớp',
+                // Haihs: chữ xác nhận lớp học và nút Rời lớp của giáo viên giống bản gốc - end
                 danger: true,
                 disabled: this.busy(),
                 onClick: () => void this.remove(s, false),
@@ -557,11 +561,22 @@ export class ClassStudentsTab implements OnDestroy {
   }
 
   protected async approveAll(): Promise<void> {
-    const ok = await this.confirm.confirm('Duyệt tất cả học sinh đang chờ?', {
-      title: 'Duyệt tất cả?',
-      confirmText: 'Duyệt tất cả',
-      cancelText: 'Hủy',
-    });
+    // Haihs: chữ xác nhận lớp học và nút Rời lớp của giáo viên giống bản gốc - start
+    // đóng code cũ
+    // const ok = await this.confirm.confirm('Duyệt tất cả học sinh đang chờ?', {
+    // title: 'Duyệt tất cả?',
+    // confirmText: 'Duyệt tất cả',
+    // cancelText: 'Hủy',
+    // });
+    const ok = await this.confirm.confirm(
+      `Duyệt toàn bộ ${this.data()?.total ?? ''} học sinh đang chờ vào lớp?`,
+      {
+        title: 'Duyệt tất cả?',
+        confirmText: 'Duyệt tất cả',
+        cancelText: 'Hủy',
+      },
+    );
+    // Haihs: chữ xác nhận lớp học và nút Rời lớp của giáo viên giống bản gốc - end
     if (ok)
       this.act(
         this.api.approveAllStudents(this.classId()),
@@ -572,7 +587,11 @@ export class ClassStudentsTab implements OnDestroy {
 
   protected async rejectAll(): Promise<void> {
     const ok = await this.confirm.confirm(
-      'Từ chối tất cả yêu cầu đang chờ? Học sinh có thể xin vào lại bằng link mời.',
+      // Haihs: chữ xác nhận lớp học và nút Rời lớp của giáo viên giống bản gốc - start
+      // đóng code cũ
+      // 'Từ chối tất cả yêu cầu đang chờ? Học sinh có thể xin vào lại bằng link mời.',
+      `Từ chối toàn bộ ${this.data()?.total ?? ''} học sinh đang chờ? Họ có thể xin vào lại bằng link mời.`,
+      // Haihs: chữ xác nhận lớp học và nút Rời lớp của giáo viên giống bản gốc - end
       {
         title: 'Từ chối tất cả?',
         confirmText: 'Từ chối tất cả',
@@ -592,10 +611,19 @@ export class ClassStudentsTab implements OnDestroy {
     const ok = await this.confirm.confirm(
       reject
         ? `Từ chối yêu cầu của "${s.fullName}"?`
-        : `Xóa "${s.fullName}" khỏi lớp? Tài khoản học sinh vẫn còn.`,
+        : // Haihs: chữ xác nhận lớp học và nút Rời lớp của giáo viên giống bản gốc - start
+          // đóng code cũ
+          // : `Xóa "${s.fullName}" khỏi lớp? Tài khoản học sinh vẫn còn.`,
+          `Gỡ ${s.fullName} khỏi lớp? Tài khoản của học sinh vẫn được giữ.`,
+      // Haihs: chữ xác nhận lớp học và nút Rời lớp của giáo viên giống bản gốc - end
       {
-        title: reject ? 'Từ chối?' : 'Xóa khỏi lớp?',
-        confirmText: reject ? 'Từ chối' : 'Xóa',
+        // Haihs: chữ xác nhận lớp học và nút Rời lớp của giáo viên giống bản gốc - start
+        // đóng code cũ
+        // title: reject ? 'Từ chối?' : 'Xóa khỏi lớp?',
+        // confirmText: reject ? 'Từ chối' : 'Xóa',
+        title: reject ? 'Từ chối?' : 'Gỡ học sinh?',
+        confirmText: reject ? 'Từ chối' : 'Gỡ',
+        // Haihs: chữ xác nhận lớp học và nút Rời lớp của giáo viên giống bản gốc - end
         cancelText: 'Hủy',
         danger: true,
       },
@@ -610,7 +638,11 @@ export class ClassStudentsTab implements OnDestroy {
 
   protected async reset(s: ClassMemberDto): Promise<void> {
     const ok = await this.confirm.confirm(
-      `Đặt lại mật khẩu cho "${s.fullName}"? Mật khẩu cũ và mọi phiên đăng nhập hiện tại sẽ bị vô hiệu.`,
+      // Haihs: chữ xác nhận lớp học và nút Rời lớp của giáo viên giống bản gốc - start
+      // đóng code cũ
+      // `Đặt lại mật khẩu cho "${s.fullName}"? Mật khẩu cũ và mọi phiên đăng nhập hiện tại sẽ bị vô hiệu.`,
+      `Đặt mật khẩu tạm mới cho ${s.fullName}? Học sinh sẽ bị đăng xuất khỏi mọi thiết bị và phải đổi mật khẩu khi đăng nhập lại.`,
+      // Haihs: chữ xác nhận lớp học và nút Rời lớp của giáo viên giống bản gốc - end
       { title: 'Đặt lại mật khẩu?', confirmText: 'Đặt lại', cancelText: 'Hủy', danger: true },
     );
     if (!ok || this.busy()) return;
