@@ -32,6 +32,7 @@ import {
   validateRestoreTitle,
 } from '../shared/utils/template-form';
 import { Icon } from '../shared/ui/icon';
+import { formatDateTime } from '../shared/utils/date-format';
 
 const PAGE_SIZE = 20;
 const SEARCH_DEBOUNCE_MS = 300;
@@ -50,6 +51,175 @@ type View = 'active' | 'deleted';
   imports: [RouterLink, ActionMenu, FormField, ModalFocus, Pager, Skeleton, Icon],
   // Haihs: icon cho nút giống bản gốc - end
   changeDetection: ChangeDetectionStrategy.OnPush,
+  // Haihs: mục Đã xoá của đề mẫu giống bản gốc (tiêu đề, mô tả, xóa lúc, hạn giữ, câu xác nhận) - start
+  // đóng code cũ
+  //   template: `
+  //     <div class="container-fluid space-y-6 py-8">
+  //       <div class="flex flex-wrap items-center justify-between gap-3">
+  //         <h1 class="text-2xl font-extrabold text-gray-900 dark:text-gray-100">Đề mẫu</h1>
+  //         <div class="flex flex-wrap gap-2">
+  //           <input
+  //             #file
+  //             type="file"
+  //             class="sr-only"
+  //             tabindex="-1"
+  //             aria-hidden="true"
+  //             accept=".pdf,.doc,.docx,.txt"
+  //             (change)="onFile($event)"
+  //           />
+  //           <button type="button" class="btn-secondary" [disabled]="parsing()" (click)="file.click()">
+  //             {{ parsing() ? 'Đang phân tích đề...' : 'Tạo đề từ file (AI)' }}
+  //           </button>
+  //           <a routerLink="/teacher/templates/new" class="btn-primary">Tạo đề mẫu</a>
+  //         </div>
+  //       </div>
+
+  //       <div class="flex flex-wrap items-center justify-between gap-3">
+  //         <div class="flex gap-2 border-b border-gray-200 dark:border-gray-700">
+  //           @for (t of tabs; track t[0]) {
+  //             <button
+  //               type="button"
+  //               [attr.aria-pressed]="view() === t[0]"
+  //               (click)="switchView(t[0])"
+  //               class="-mb-px border-b-2 px-4 py-2 text-base font-semibold"
+  //               [class]="
+  //                 view() === t[0]
+  //                   ? 'border-primary-700 text-primary-700 dark:border-sky-400 dark:text-sky-400'
+  //                   : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100'
+  //               "
+  //             >
+  //               {{ t[1] }}
+  //             </button>
+  //           }
+  //         </div>
+  //         <input
+  //           type="search"
+  //           name="q"
+  //           aria-label="Tìm đề mẫu theo tên"
+  //           placeholder="Tìm đề mẫu..."
+  //           maxlength="100"
+  //           class="input sm:max-w-xs"
+  //           [value]="q()"
+  //           (input)="onSearch($event)"
+  //         />
+  //       </div>
+  //       @if (view() === 'deleted') {
+  //         <p class="text-base text-gray-600 dark:text-gray-400">
+  //           Đề trong mục này tự xóa vĩnh viễn sau {{ retention }} ngày. Các ca thi đã tạo từ đề không
+  //           bị ảnh hưởng.
+  //         </p>
+  //       }
+
+  //       @if (loadError()) {
+  //         <!-- Haihs: khung báo lỗi có icon giống bản gốc - start -->
+  //         <!-- đóng code cũ -->
+  //         <!-- <div role="alert" class="text-base text-red-700 dark:text-red-400"> -->
+  //         <!-- {{ loadError() }} -->
+  //         <!-- <button type="button" class="ml-2 font-semibold underline" (click)="load()"> -->
+  //         <div
+  //           role="alert"
+  //           class="flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 p-4 text-base text-red-700 dark:border-red-800 dark:bg-red-900/40 dark:text-red-300"
+  //         >
+  //           <app-icon name="alert-circle" class="mt-0.5 flex-none" svgClass="h-4 w-4" />
+  //           <span>{{ loadError() }}</span>
+  //           <button type="button" class="ml-auto font-semibold underline" (click)="load()">
+  //             <!-- Haihs: khung báo lỗi có icon giống bản gốc - end -->
+  //             Thử lại
+  //           </button>
+  //         </div>
+  //       }
+  //       @if (loading()) {
+  //         <app-skeleton variant="list" />
+  //       } @else if (data(); as d) {
+  //         @if (rows().length === 0) {
+  //           <p class="text-base text-gray-600 dark:text-gray-400">
+  //             {{
+  //               view() === 'deleted'
+  //                 ? 'Mục Đã xoá đang trống.'
+  //                 : applied
+  //                   ? 'Không tìm thấy đề mẫu phù hợp.'
+  //                   : 'Chưa có đề mẫu nào.'
+  //             }}
+  //           </p>
+  //         }
+  //         <ul class="space-y-3">
+  //           @for (r of rows(); track r.t.id) {
+  //             <li
+  //               class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800"
+  //             >
+  //               <div class="min-w-0 flex-1">
+  //                 @if (view() === 'active') {
+  //                   <a
+  //                     [routerLink]="['/teacher/templates', r.t.id, 'edit']"
+  //                     [title]="r.t.title"
+  //                     class="line-clamp-2 font-bold text-primary-800 hover:underline dark:text-sky-400"
+  //                     >{{ r.t.title }}</a
+  //                   >
+  //                 } @else {
+  //                   <span [title]="r.t.title" class="line-clamp-2 font-bold">{{ r.t.title }}</span>
+  //                 }
+  //                 <p class="text-base text-gray-600 dark:text-gray-400">
+  //                   {{ r.t.totalQuestions }} câu · {{ r.t.sittingCount }} ca thi
+  //                   @if (view() === 'deleted') {
+  //                     · {{ daysLeft(r.t.daysLeft) }}
+  //                   }
+  //                 </p>
+  //               </div>
+  //               <app-action-menu [items]="r.menu" [label]="'Thao tác với đề ' + r.t.title" />
+  //             </li>
+  //           }
+  //         </ul>
+  //         <app-pager
+  //           [page]="d.page"
+  //           [totalPages]="d.totalPages"
+  //           [total]="d.total"
+  //           unit="đề"
+  //           (pageChange)="goPage($event)"
+  //         />
+  //       }
+  //     </div>
+
+  //     @if (restoring(); as t) {
+  //       <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+  //         <form
+  //           appModalFocus
+  //           (dismissed)="restoring.set(null)"
+  //           (submit)="submitRestore($event)"
+  //           novalidate
+  //           role="dialog"
+  //           aria-modal="true"
+  //           aria-labelledby="restore-title"
+  //           class="w-full max-w-md space-y-3 rounded-lg border border-gray-200 bg-white p-6 shadow-overlay dark:border-gray-700 dark:bg-gray-800 dark:shadow-overlay-dark"
+  //         >
+  //           <h2 id="restore-title" class="text-lg font-bold">Đặt tên mới để khôi phục</h2>
+  //           <p class="text-base text-gray-600 dark:text-gray-400">
+  //             Tên "{{ t.title }}" đã được đề khác dùng. Nhập tên mới cho đề này.
+  //           </p>
+  //           <app-form-field label="Tên đề mẫu mới" [required]="true" [error]="restoreError()">
+  //             <input
+  //               class="input"
+  //               name="title"
+  //               maxlength="255"
+  //               [value]="restoreTitle()"
+  //               (input)="restoreTitle.set($any($event.target).value); restoreError.set('')"
+  //             />
+  //           </app-form-field>
+  //           <div class="flex gap-3 pt-1">
+  //             <button type="button" class="btn-secondary flex-1" (click)="restoring.set(null)">
+  //               Hủy
+  //             </button>
+  //             <!-- Haihs: icon cho nút giống bản gốc - start -->
+  //             <!-- đóng code cũ -->
+  //             <!-- <button type="submit" class="btn-primary flex-1" [disabled]="busy()">Khôi phục</button> -->
+  //             <button type="submit" class="btn-primary flex-1" [disabled]="busy()">
+  //               <app-icon name="rotate-ccw" svgClass="h-4 w-4" /> Khôi phục
+  //             </button>
+  //             <!-- Haihs: icon cho nút giống bản gốc - end -->
+  //           </div>
+  //         </form>
+  //       </div>
+  //     }
+  //   `,
   template: `
     <div class="container-fluid space-y-6 py-8">
       <div class="flex flex-wrap items-center justify-between gap-3">
@@ -128,16 +298,24 @@ type View = 'active' | 'deleted';
       @if (loading()) {
         <app-skeleton variant="list" />
       } @else if (data(); as d) {
-        @if (rows().length === 0) {
-          <p class="text-base text-gray-600 dark:text-gray-400">
-            {{
-              view() === 'deleted'
-                ? 'Mục Đã xoá đang trống.'
-                : applied
-                  ? 'Không tìm thấy đề mẫu phù hợp.'
-                  : 'Chưa có đề mẫu nào.'
-            }}
+        @if (view() === 'deleted') {
+          <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">Đã xoá ({{ d.total }})</h2>
+          <p class="text-base text-gray-500 dark:text-gray-400">
+            Đề mẫu ở đây tự xóa vĩnh viễn khi hết hạn. Ca thi đã tạo từ đề không bị ảnh hưởng.
           </p>
+        }
+        @if (rows().length === 0) {
+          @if (view() === 'deleted') {
+            <p
+              class="flex items-center justify-center gap-2 py-8 text-center text-gray-400 dark:text-gray-500"
+            >
+              <app-icon name="archive" svgClass="h-4 w-4" />Mục Đã xoá đang trống.
+            </p>
+          } @else {
+            <p class="text-base text-gray-600 dark:text-gray-400">
+              {{ applied ? 'Không tìm thấy đề mẫu phù hợp.' : 'Chưa có đề mẫu nào.' }}
+            </p>
+          }
         }
         <ul class="space-y-3">
           @for (r of rows(); track r.t.id) {
@@ -158,7 +336,8 @@ type View = 'active' | 'deleted';
                 <p class="text-base text-gray-600 dark:text-gray-400">
                   {{ r.t.totalQuestions }} câu · {{ r.t.sittingCount }} ca thi
                   @if (view() === 'deleted') {
-                    · {{ daysLeft(r.t.daysLeft) }}
+                    · Xóa lúc {{ r.t.deletedAt ? fmt(r.t.deletedAt) : '—' }} · Hạn giữ:
+                    {{ daysLeft(r.t.daysLeft) }}
                   }
                 </p>
               </div>
@@ -217,6 +396,7 @@ type View = 'active' | 'deleted';
       </div>
     }
   `,
+  // Haihs: mục Đã xoá của đề mẫu giống bản gốc (tiêu đề, mô tả, xóa lúc, hạn giữ, câu xác nhận) - end
 })
 export class TeacherTemplates implements OnDestroy {
   private readonly api = inject(TemplatesApi);
@@ -243,6 +423,9 @@ export class TeacherTemplates implements OnDestroy {
   protected readonly restoreTitle = signal('');
   protected readonly restoreError = signal('');
   protected readonly daysLeft = daysLeftLabel;
+  // Haihs: mục Đã xoá của đề mẫu giống bản gốc (tiêu đề, mô tả, xóa lúc, hạn giữ, câu xác nhận) - start
+  protected readonly fmt = formatDateTime;
+  // Haihs: mục Đã xoá của đề mẫu giống bản gốc (tiêu đề, mô tả, xóa lúc, hạn giữ, câu xác nhận) - end
   private sub?: Subscription;
   private parseSub?: Subscription;
   private timer?: ReturnType<typeof setTimeout>;
@@ -411,12 +594,24 @@ export class TeacherTemplates implements OnDestroy {
   }
 
   protected async purge(t: TemplateSummary): Promise<void> {
-    const ok = await this.confirm.confirm(`Xóa vĩnh viễn đề "${t.title}"? Không thể hoàn tác.`, {
-      title: 'Xóa vĩnh viễn?',
-      confirmText: 'Xóa vĩnh viễn',
-      cancelText: 'Hủy',
-      danger: true,
-    });
+    // Haihs: mục Đã xoá của đề mẫu giống bản gốc (tiêu đề, mô tả, xóa lúc, hạn giữ, câu xác nhận) - start
+    // đóng code cũ
+    // const ok = await this.confirm.confirm(`Xóa vĩnh viễn đề "${t.title}"? Không thể hoàn tác.`, {
+    // title: 'Xóa vĩnh viễn?',
+    // confirmText: 'Xóa vĩnh viễn',
+    // cancelText: 'Hủy',
+    // danger: true,
+    // });
+    const ok = await this.confirm.confirm(
+      `Đề mẫu "${t.title}" sẽ bị xóa vĩnh viễn và KHÔNG hoàn tác được. Ca thi đã tạo từ đề vẫn giữ nguyên câu hỏi và kết quả.`,
+      {
+        title: 'Xóa vĩnh viễn đề mẫu?',
+        confirmText: 'Xóa vĩnh viễn',
+        cancelText: 'Hủy',
+        danger: true,
+      },
+    );
+    // Haihs: mục Đã xoá của đề mẫu giống bản gốc (tiêu đề, mô tả, xóa lúc, hạn giữ, câu xác nhận) - end
     if (ok)
       this.act(this.api.purge(t.id), () => this.reloadAfterRemove(), 'Không xóa được đề mẫu.');
   }
