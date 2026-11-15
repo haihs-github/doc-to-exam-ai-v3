@@ -20,6 +20,7 @@ import { ConfirmService } from '../shared/ui/confirm-modal';
 import { Pager } from '../shared/ui/pager';
 import { Skeleton } from '../shared/ui/skeleton';
 import { describeClassError, formatSchoolYear, isClassCodeTaken } from '../shared/utils/class-ui';
+import { Icon } from '../shared/ui/icon';
 
 const PAGE_SIZE = 10; // server default 10, max 50
 const SEARCH_DEBOUNCE_MS = 300;
@@ -32,16 +33,30 @@ const TABS: [View, string][] = [
 
 @Component({
   selector: 'app-teacher-classes',
-  imports: [RouterLink, ActionMenu, ClassForm, ClassRestoreCodeModal, Pager, Skeleton],
+  // Haihs: icon cho nút giống bản gốc - start
+  // đóng code cũ
+  // imports: [RouterLink, ActionMenu, ClassForm, ClassRestoreCodeModal, Pager, Skeleton],
+  imports: [RouterLink, ActionMenu, ClassForm, ClassRestoreCodeModal, Pager, Skeleton, Icon],
+  // Haihs: icon cho nút giống bản gốc - end
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="container-fluid space-y-6 py-8">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <h1 class="text-2xl font-extrabold text-gray-900 dark:text-gray-100">Lớp học</h1>
         <div class="flex gap-2">
-          <a routerLink="/join" class="btn-secondary">Tham gia lớp bằng link</a>
+          <!-- Haihs: icon cho nút giống bản gốc - start -->
+          <!-- đóng code cũ -->
+          <!-- <a routerLink="/join" class="btn-secondary">Tham gia lớp bằng link</a> -->
+          <a routerLink="/join" class="btn-secondary"
+            ><app-icon name="user-plus" svgClass="h-4 w-4" /> Tham gia lớp bằng link</a
+          >
+          <!-- Haihs: icon cho nút giống bản gốc - end -->
           <button type="button" class="btn-primary" (click)="form.set({ cls: null })">
-            Tạo lớp
+            <!-- Haihs: icon cho nút giống bản gốc - start -->
+            <!-- đóng code cũ -->
+            <!-- Tạo lớp -->
+            <app-icon name="plus" svgClass="h-4 w-4" /> Tạo lớp
+            <!-- Haihs: icon cho nút giống bản gốc - end -->
           </button>
         </div>
       </div>

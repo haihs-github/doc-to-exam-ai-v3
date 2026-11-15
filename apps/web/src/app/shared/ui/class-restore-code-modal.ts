@@ -19,10 +19,15 @@ import { LIMITS } from '../utils/limits';
 import { AlertService } from './alert.service';
 import { FormField } from './form-field';
 import { ModalFocus } from './modal-focus';
+import { Icon } from './icon';
 
 @Component({
   selector: 'app-class-restore-code-modal',
-  imports: [FormField, ModalFocus],
+  // Haihs: icon cho nút giống bản gốc - start
+  // đóng code cũ
+  // imports: [FormField, ModalFocus],
+  imports: [FormField, ModalFocus, Icon],
+  // Haihs: icon cho nút giống bản gốc - end
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
@@ -55,7 +60,13 @@ import { ModalFocus } from './modal-focus';
           <button type="button" class="btn-secondary flex-1" [disabled]="busy()" (click)="cancel()">
             Hủy
           </button>
-          <button type="submit" class="btn-primary flex-1" [disabled]="busy()">Khôi phục</button>
+          <!-- Haihs: icon cho nút giống bản gốc - start -->
+          <!-- đóng code cũ -->
+          <!-- <button type="submit" class="btn-primary flex-1" [disabled]="busy()">Khôi phục</button> -->
+          <button type="submit" class="btn-primary flex-1" [disabled]="busy()">
+            <app-icon name="rotate-ccw" svgClass="h-4 w-4" /> Khôi phục
+          </button>
+          <!-- Haihs: icon cho nút giống bản gốc - end -->
         </div>
       </form>
     </div>

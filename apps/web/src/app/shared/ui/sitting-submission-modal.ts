@@ -18,6 +18,7 @@ import { describeSittingError } from '../utils/sitting-ui';
 import { AlertService } from './alert.service';
 import { FormattedText } from './formatted-text';
 import { ModalFocus } from './modal-focus';
+import { Icon } from './icon';
 
 interface Draft {
   scores: Record<string, string>;
@@ -27,7 +28,11 @@ interface Draft {
 
 @Component({
   selector: 'app-sitting-submission-modal',
-  imports: [FormattedText, ModalFocus],
+  // Haihs: icon cho nút giống bản gốc - start
+  // đóng code cũ
+  // imports: [FormattedText, ModalFocus],
+  imports: [FormattedText, ModalFocus, Icon],
+  // Haihs: icon cho nút giống bản gốc - end
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 p-4">
@@ -136,7 +141,11 @@ interface Draft {
                   (click)="removeViolation($index, v.at)"
                   [attr.aria-label]="'Xóa vi phạm ' + ($index + 1)"
                 >
-                  Xóa
+                  <!-- Haihs: icon cho nút giống bản gốc - start -->
+                  <!-- đóng code cũ -->
+                  <!-- Xóa -->
+                  <app-icon name="trash-2" svgClass="h-4 w-4" /> Xóa
+                  <!-- Haihs: icon cho nút giống bản gốc - end -->
                 </button>
               </li>
             }

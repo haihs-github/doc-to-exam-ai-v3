@@ -22,6 +22,7 @@ import { Pager } from './pager';
 import { Skeleton } from './skeleton';
 import { StudentAddModal, StudentRenameModal } from './student-modals';
 import { TempPasswordEntry, TempPasswordModal } from './temp-password-modal';
+import { Icon } from './icon';
 
 type Status = 'approved' | 'pending';
 const PAGE_SIZE = 50;
@@ -36,6 +37,9 @@ const PAGE_SIZE = 50;
     StudentAddModal,
     StudentRenameModal,
     TempPasswordModal,
+    // Haihs: icon cho nút giống bản gốc - start
+    Icon,
+    // Haihs: icon cho nút giống bản gốc - end
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -110,7 +114,11 @@ const PAGE_SIZE = 50;
             [disabled]="busy() || !accepting()"
             (click)="approveAll()"
           >
-            Duyệt tất cả
+            <!-- Haihs: icon cho nút giống bản gốc - start -->
+            <!-- đóng code cũ -->
+            <!-- Duyệt tất cả -->
+            <app-icon name="check" svgClass="h-4 w-4" /> Duyệt tất cả
+            <!-- Haihs: icon cho nút giống bản gốc - end -->
           </button>
           <button type="button" class="btn-danger" [disabled]="busy()" (click)="rejectAll()">
             Từ chối tất cả

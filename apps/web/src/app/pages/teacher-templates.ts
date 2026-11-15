@@ -31,6 +31,7 @@ import {
   isTitleTaken,
   validateRestoreTitle,
 } from '../shared/utils/template-form';
+import { Icon } from '../shared/ui/icon';
 
 const PAGE_SIZE = 20;
 const SEARCH_DEBOUNCE_MS = 300;
@@ -39,7 +40,11 @@ type View = 'active' | 'deleted';
 
 @Component({
   selector: 'app-teacher-templates',
-  imports: [RouterLink, ActionMenu, FormField, ModalFocus, Pager, Skeleton],
+  // Haihs: icon cho nút giống bản gốc - start
+  // đóng code cũ
+  // imports: [RouterLink, ActionMenu, FormField, ModalFocus, Pager, Skeleton],
+  imports: [RouterLink, ActionMenu, FormField, ModalFocus, Pager, Skeleton, Icon],
+  // Haihs: icon cho nút giống bản gốc - end
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="container-fluid space-y-6 py-8">
@@ -186,7 +191,13 @@ type View = 'active' | 'deleted';
             <button type="button" class="btn-secondary flex-1" (click)="restoring.set(null)">
               Hủy
             </button>
-            <button type="submit" class="btn-primary flex-1" [disabled]="busy()">Khôi phục</button>
+            <!-- Haihs: icon cho nút giống bản gốc - start -->
+            <!-- đóng code cũ -->
+            <!-- <button type="submit" class="btn-primary flex-1" [disabled]="busy()">Khôi phục</button> -->
+            <button type="submit" class="btn-primary flex-1" [disabled]="busy()">
+              <app-icon name="rotate-ccw" svgClass="h-4 w-4" /> Khôi phục
+            </button>
+            <!-- Haihs: icon cho nút giống bản gốc - end -->
           </div>
         </form>
       </div>
