@@ -43,55 +43,328 @@ const PAGE_SIZE = 50;
   imports: [Pager, SittingSubmissionModal, Skeleton, Icon],
   // Haihs: icon cho nút giống bản gốc - end
   changeDetection: ChangeDetectionStrategy.OnPush,
+  // Haihs: thẻ công bố kết quả giống ResultsPublishCard của bản gốc - start
+  // đóng code cũ
+  //   template: `
+  //     <section class="space-y-5" aria-label="Kết quả ca thi">
+  //       @if (pub(); as p) {
+  //         <div
+  //           class="space-y-2 rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800"
+  //           role="region"
+  //           aria-label="Công bố kết quả"
+  //         >
+  //           <h2 class="text-lg font-bold">Công bố kết quả</h2>
+  //           <p class="text-base">
+  //             {{ p.submittedCount }} bài nộp · {{ p.readyCount }} sẵn sàng ·
+  //             {{ p.ungradedCount }} chưa chấm xong · {{ p.notSubmittedCount }} chưa nộp
+  //             @if (p.staleCount > 0) {
+  //               · {{ p.staleCount }} cần chấm lại
+  //             }
+  //           </p>
+  //           @if (p.leak.otherOpenSittings > 0) {
+  //             <p role="note" class="text-base text-amber-800 dark:text-amber-300">
+  //               Còn {{ p.leak.otherOpenSittings }} ca khác dùng cùng đề mẫu chưa đóng: công bố có thể
+  //               làm lộ đáp án ({{ leakTitles(p) }}).
+  //             </p>
+  //           }
+  //           @if (p.publishedAt) {
+  //             <p class="text-base font-semibold text-green-700 dark:text-green-300">
+  //               Đã công bố lúc {{ fmt(p.publishedAt) }}.
+  //             </p>
+  //             <button type="button" class="btn-danger" [disabled]="busy()" (click)="unpublish()">
+  //               Thu hồi công bố
+  //             </button>
+  //           } @else {
+  //             <button
+  //               type="button"
+  //               class="btn-primary"
+  //               [disabled]="busy() || !p.canPublish"
+  //               (click)="publish()"
+  //             >
+  //               <!-- Haihs: icon cho nút giống bản gốc - start -->
+  //               <!-- đóng code cũ -->
+  //               <!-- Công bố kết quả -->
+  //               <app-icon name="megaphone" svgClass="h-4 w-4" /> Công bố kết quả
+  //               <!-- Haihs: icon cho nút giống bản gốc - end -->
+  //             </button>
+  //             @if (!p.canPublish) {
+  //               <p class="text-sm text-gray-600 dark:text-gray-400">
+  //                 Chưa công bố được: còn bài tự luận chưa chấm xong.
+  //               </p>
+  //             }
+  //           }
+  //         </div>
+  //       }
+  //       @if (progress(); as g) {
+  //         <p class="text-base text-gray-700 dark:text-gray-300">
+  //           Tự luận: đã chấm {{ g.finished }}/{{ g.essaySubmissions }} bài{{
+  //             g.staleCount > 0 ? ', ' + g.staleCount + ' bài cần chấm lại' : ''
+  //           }}.
+  //         </p>
+  //       }
+
+  //       <div class="flex flex-wrap items-center gap-3">
+  //         <label class="text-base font-medium"
+  //           >Lớp
+  //           <select
+  //             class="input ml-2 w-auto"
+  //             [value]="classId()"
+  //             (change)="setFilter('classId', $any($event.target).value)"
+  //           >
+  //             <option value="">Tất cả</option>
+  //             @for (c of data()?.classes ?? []; track c.id) {
+  //               <option [value]="c.id">{{ c.name }}</option>
+  //             }
+  //           </select>
+  //         </label>
+  //         <label class="text-base font-medium"
+  //           >Trạng thái
+  //           <select
+  //             class="input ml-2 w-auto"
+  //             [value]="status()"
+  //             (change)="setFilter('status', $any($event.target).value)"
+  //           >
+  //             <option value="">Tất cả</option>
+  //             <option value="pending">Chờ chấm</option>
+  //             <option value="done">Đã chấm</option>
+  //             <option value="stale">Cần chấm lại</option>
+  //             <option value="cheat">Có vi phạm</option>
+  //             <option value="auto">Tự động nộp</option>
+  //             <option value="not_submitted">Chưa nộp</option>
+  //           </select>
+  //         </label>
+  //         <label class="text-base font-medium"
+  //           >Sắp theo
+  //           <select
+  //             class="input ml-2 w-auto"
+  //             [value]="sort()"
+  //             (change)="setFilter('sort', $any($event.target).value)"
+  //           >
+  //             <option value="name">Tên</option>
+  //             <option value="correct">Số câu đúng</option>
+  //             <option value="wrong">Số câu sai</option>
+  //           </select>
+  //         </label>
+  //         <input
+  //           type="search"
+  //           class="input sm:max-w-xs"
+  //           aria-label="Tìm học sinh"
+  //           placeholder="Tìm học sinh..."
+  //           [value]="search()"
+  //           (input)="onSearch($event)"
+  //         />
+  //         <label class="flex items-center gap-2 text-base"
+  //           ><input
+  //             type="checkbox"
+  //             [checked]="includeTeacher()"
+  //             (change)="setFilter('includeTeacher', $any($event.target).checked ? '1' : '')"
+  //           />
+  //           Gồm bài làm thử của giáo viên</label
+  //         >
+  //       </div>
+  //       <div class="flex flex-wrap gap-2">
+  //         <button type="button" class="btn-secondary" [disabled]="busy()" (click)="exportCsv()">
+  //           Xuất CSV
+  //         </button>
+  //         <button type="button" class="btn-secondary" [disabled]="busy()" (click)="exportXlsx()">
+  //           Xuất Excel
+  //         </button>
+  //       </div>
+
+  //       @if (loadError()) {
+  //         <!-- Haihs: khung báo lỗi có icon giống bản gốc - start -->
+  //         <!-- đóng code cũ -->
+  //         <!-- <div role="alert" class="text-base text-red-700 dark:text-red-400"> -->
+  //         <!-- {{ loadError() }} -->
+  //         <!-- <button type="button" class="ml-2 font-semibold underline" (click)="load()"> -->
+  //         <div
+  //           role="alert"
+  //           class="flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 p-4 text-base text-red-700 dark:border-red-800 dark:bg-red-900/40 dark:text-red-300"
+  //         >
+  //           <app-icon name="alert-circle" class="mt-0.5 flex-none" svgClass="h-4 w-4" />
+  //           <span>{{ loadError() }}</span>
+  //           <button type="button" class="ml-auto font-semibold underline" (click)="load()">
+  //             <!-- Haihs: khung báo lỗi có icon giống bản gốc - end -->
+  //             Thử lại
+  //           </button>
+  //         </div>
+  //       }
+  //       @if (loading()) {
+  //         <app-skeleton variant="list" />
+  //       } @else if (data(); as d) {
+  //         <p class="text-base" role="status">
+  //           {{ d.stats.totalSubmissions }} bài nộp · trung bình {{ d.stats.avgScore }} · cao nhất
+  //           {{ d.stats.maxScore }} · thấp nhất {{ d.stats.minScore }}
+  //         </p>
+  //         <div class="overflow-x-auto">
+  //           <table class="w-full text-left text-base">
+  //             <caption class="sr-only">
+  //               Bài nộp của ca thi
+  //             </caption>
+  //             <thead>
+  //               <tr>
+  //                 <th scope="col" class="p-2">Họ và tên</th>
+  //                 <th scope="col" class="p-2">Lớp</th>
+  //                 <th scope="col" class="p-2">Đúng/Tổng</th>
+  //                 <th scope="col" class="p-2">Điểm</th>
+  //                 <th scope="col" class="p-2">Vi phạm</th>
+  //                 <th scope="col" class="p-2">Nộp lúc</th>
+  //                 <th scope="col" class="p-2"><span class="sr-only">Thao tác</span></th>
+  //               </tr>
+  //             </thead>
+  //             <tbody>
+  //               @for (s of d.submissions; track s._id) {
+  //                 <tr class="border-t border-gray-200 dark:border-gray-700">
+  //                   <td class="p-2 font-semibold">
+  //                     {{ s.studentName || '(tài khoản đã xóa)' }}{{ s.byTeacher ? ' (thi thử)' : '' }}
+  //                   </td>
+  //                   <td class="p-2">{{ s.classNames.join(', ') }}</td>
+  //                   <td class="p-2">{{ s.correctCount }}/{{ s.totalQuestions }}</td>
+  //                   <td class="p-2">
+  //                     {{ s.totalScore === null ? s.gradingLabel : s.totalScore + '/' + s.maxScore
+  //                     }}{{ s.essayStale ? ' · cần chấm lại' : '' }}
+  //                   </td>
+  //                   <td class="p-2">{{ s.violationCount }}</td>
+  //                   <td class="p-2">
+  //                     {{ fmt(s.submittedAt) }}{{ s.isAutoSubmitted ? ' (tự động)' : '' }}
+  //                   </td>
+  //                   <td class="p-2">
+  //                     <button
+  //                       type="button"
+  //                       class="btn-secondary"
+  //                       (click)="open.set(s)"
+  //                       [attr.aria-label]="'Xem bài của ' + s.studentName"
+  //                     >
+  //                       Xem / Chấm
+  //                     </button>
+  //                   </td>
+  //                 </tr>
+  //               }
+  //             </tbody>
+  //           </table>
+  //         </div>
+  //         @if (d.submissions.length === 0) {
+  //           <p class="text-base text-gray-600 dark:text-gray-400">Chưa có bài nộp phù hợp.</p>
+  //         }
+  //         <app-pager
+  //           [page]="d.pagination.page"
+  //           [totalPages]="d.pagination.totalPages"
+  //           [total]="d.pagination.total"
+  //           unit="bài"
+  //           (pageChange)="goPage($event)"
+  //         />
+  //         @if (d.notSubmitted.length > 0) {
+  //           <section aria-label="Chưa nộp bài">
+  //             <h3 class="font-bold">Chưa nộp ({{ d.notSubmittedPagination.total }})</h3>
+  //             <ul class="space-y-1 text-base">
+  //               @for (n of d.notSubmitted; track n.studentId) {
+  //                 <li>
+  //                   {{ n.studentName }}{{ n.phoneNumber ? ' · ' + n.phoneNumber : ''
+  //                   }}{{ n.hasSession ? ' · đã vào chưa nộp' : ''
+  //                   }}{{ n.inClass ? '' : ' · không còn trong lớp' }}
+  //                 </li>
+  //               }
+  //             </ul>
+  //           </section>
+  //         }
+  //       }
+  //     </section>
+  //     @if (open(); as s) {
+  //       <app-sitting-submission-modal
+  //         [sittingId]="sittingId()"
+  //         [s]="s"
+  //         [questions]="questions()"
+  //         (closed)="open.set(null)"
+  //         (changed)="reload()"
+  //       />
+  //     }
+  //   `,
   template: `
     <section class="space-y-5" aria-label="Kết quả ca thi">
       @if (pub(); as p) {
-        <div
-          class="space-y-2 rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800"
-          role="region"
+        <section
+          id="publication-card"
+          class="space-y-3 rounded-xl border border-gray-200 bg-white p-5 shadow-raised dark:border-gray-700 dark:bg-gray-800 dark:shadow-raised-dark"
           aria-label="Công bố kết quả"
         >
-          <h2 class="text-lg font-bold">Công bố kết quả</h2>
-          <p class="text-base">
-            {{ p.submittedCount }} bài nộp · {{ p.readyCount }} sẵn sàng ·
-            {{ p.ungradedCount }} chưa chấm xong · {{ p.notSubmittedCount }} chưa nộp
-            @if (p.staleCount > 0) {
-              · {{ p.staleCount }} cần chấm lại
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <h2 class="flex items-center gap-2 font-bold text-gray-900 dark:text-gray-100">
+              <app-icon name="megaphone" svgClass="h-4 w-4" /> Công bố kết quả
+            </h2>
+            @if (p.publishedAt) {
+              <button
+                type="button"
+                [disabled]="busy()"
+                aria-label="Thu hồi công bố kết quả"
+                (click)="unpublish()"
+                class="rounded-xl border border-red-300 px-4 py-2 text-base font-semibold text-red-700 hover:bg-red-50 disabled:opacity-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/40"
+              >
+                Thu hồi công bố
+              </button>
+            } @else {
+              <button
+                type="button"
+                [disabled]="busy() || !p.canPublish"
+                aria-label="Công bố kết quả cho học sinh"
+                (click)="publish()"
+                class="rounded-xl bg-primary-700 px-4 py-2 text-base font-semibold text-white hover:bg-primary-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-sky-400 dark:text-gray-900 dark:hover:bg-sky-300"
+              >
+                Công bố kết quả
+              </button>
             }
+          </div>
+          @if (p.publishedAt) {
+            <div
+              role="status"
+              class="space-y-1 rounded-xl border border-green-200 bg-green-50 p-3 text-base text-green-800 dark:border-green-800 dark:bg-green-900/40 dark:text-green-300"
+            >
+              <div class="flex items-center gap-1.5 font-semibold">
+                <app-icon name="check-circle-2" svgClass="h-4 w-4" /> Đã công bố lúc
+                {{ fmt(p.publishedAt) }}
+              </div>
+              <div>Học sinh đã thấy điểm; sửa điểm/đáp án sẽ đổi điểm học sinh thấy.</div>
+            </div>
+          } @else {
+            <p class="text-base text-gray-600 dark:text-gray-400">
+              Chưa công bố. Học sinh chưa thấy điểm.
+            </p>
+            @if (!p.canPublish) {
+              <ul
+                class="list-inside list-disc rounded-xl border border-amber-200 bg-amber-50 p-3 text-base text-amber-800 dark:border-amber-800 dark:bg-amber-900/40 dark:text-amber-300"
+              >
+                <li>
+                  {{
+                    p.ungradedCount > 0
+                      ? 'Còn ' + p.ungradedCount + ' bài tự luận chưa chấm xong.'
+                      : 'Chưa đủ điều kiện công bố.'
+                  }}
+                </li>
+              </ul>
+            }
+          }
+          <p class="text-base text-gray-600 dark:text-gray-400">
+            {{ p.readyCount }} bài đã sẵn sàng / {{ p.ungradedCount }} bài chưa chấm xong /
+            {{ p.notSubmittedCount }} học sinh chưa nộp
           </p>
+          @if (p.staleCount > 0) {
+            <p class="flex items-center gap-1.5 text-base text-amber-800 dark:text-amber-300">
+              <app-icon name="alert-triangle" svgClass="h-4 w-4" /> {{ p.staleCount }} bài còn cần
+              chấm lại (đề đã đổi sau khi chấm).
+            </p>
+          }
+          @if (p.publishedAt && p.hiddenCount > 0) {
+            <p class="flex items-center gap-1.5 text-base text-amber-800 dark:text-amber-300">
+              <app-icon name="alert-triangle" svgClass="h-4 w-4" /> {{ p.hiddenCount }} bài đang bị
+              ẩn vì chưa chấm xong.
+            </p>
+          }
           @if (p.leak.otherOpenSittings > 0) {
             <p role="note" class="text-base text-amber-800 dark:text-amber-300">
-              Còn {{ p.leak.otherOpenSittings }} ca khác dùng cùng đề mẫu chưa đóng: công bố có thể
+              Đề mẫu này còn dùng ở {{ p.leak.otherOpenSittings }} ca khác chưa đóng; công bố có thể
               làm lộ đáp án ({{ leakTitles(p) }}).
             </p>
           }
-          @if (p.publishedAt) {
-            <p class="text-base font-semibold text-green-700 dark:text-green-300">
-              Đã công bố lúc {{ fmt(p.publishedAt) }}.
-            </p>
-            <button type="button" class="btn-danger" [disabled]="busy()" (click)="unpublish()">
-              Thu hồi công bố
-            </button>
-          } @else {
-            <button
-              type="button"
-              class="btn-primary"
-              [disabled]="busy() || !p.canPublish"
-              (click)="publish()"
-            >
-              <!-- Haihs: icon cho nút giống bản gốc - start -->
-              <!-- đóng code cũ -->
-              <!-- Công bố kết quả -->
-              <app-icon name="megaphone" svgClass="h-4 w-4" /> Công bố kết quả
-              <!-- Haihs: icon cho nút giống bản gốc - end -->
-            </button>
-            @if (!p.canPublish) {
-              <p class="text-sm text-gray-600 dark:text-gray-400">
-                Chưa công bố được: còn bài tự luận chưa chấm xong.
-              </p>
-            }
-          }
-        </div>
+        </section>
       }
       @if (progress(); as g) {
         <p class="text-base text-gray-700 dark:text-gray-300">
@@ -277,6 +550,7 @@ const PAGE_SIZE = 50;
       />
     }
   `,
+  // Haihs: thẻ công bố kết quả giống ResultsPublishCard của bản gốc - end
 })
 export class SittingResultsPanel implements OnDestroy {
   readonly sittingId = input.required<string>();
@@ -385,29 +659,78 @@ export class SittingResultsPanel implements OnDestroy {
     }
   }
   protected async publish(): Promise<void> {
-    const ok = await this.confirm.confirm(
-      'Học sinh sẽ xem được điểm của mình ngay sau khi công bố.',
-      { title: 'Công bố kết quả?', confirmText: 'Công bố', cancelText: 'Hủy' },
-    );
+    // Haihs: thẻ công bố kết quả giống ResultsPublishCard của bản gốc - start
+    // đóng code cũ
+    // const ok = await this.confirm.confirm(
+    // 'Học sinh sẽ xem được điểm của mình ngay sau khi công bố.',
+    // { title: 'Công bố kết quả?', confirmText: 'Công bố', cancelText: 'Hủy' },
+    // );
+    const p = this.pub();
+    const lines = p
+      ? [
+          `${p.readyCount} bài sẽ hiện điểm cho học sinh.`,
+          ...(p.notSubmittedCount > 0
+            ? [`${p.notSubmittedCount} học sinh chưa nộp sẽ không có kết quả.`]
+            : []),
+          ...(p.staleCount > 0
+            ? [`${p.staleCount} bài còn cần chấm lại (đề đã đổi sau khi chấm).`]
+            : []),
+          ...(p.leak.otherOpenSittings > 0
+            ? [
+                `Đề mẫu này còn dùng ở ${p.leak.otherOpenSittings} ca khác chưa đóng; công bố có thể làm lộ đáp án.`,
+                `Ca liên quan: ${p.leak.items
+                  .slice(0, 5)
+                  .map((i) => i.title)
+                  .join(', ')}.`,
+              ]
+            : []),
+        ]
+      : ['Học sinh sẽ xem được điểm của mình ngay sau khi công bố.'];
+    const ok = await this.confirm.confirm(lines.join('\n'), {
+      title: 'Công bố kết quả cho học sinh?',
+      confirmText: 'Công bố',
+      cancelText: 'Hủy',
+    });
+    // Haihs: thẻ công bố kết quả giống ResultsPublishCard của bản gốc - end
     if (ok)
       await this.run(
         () => firstValueFrom(this.api.publish(this.sittingId())),
         'Đã công bố kết quả.',
-        'Không công bố được.',
+        // Haihs: thẻ công bố kết quả giống ResultsPublishCard của bản gốc - start
+        // đóng code cũ
+        // 'Không công bố được.',
+        'Không công bố được kết quả.',
+        // Haihs: thẻ công bố kết quả giống ResultsPublishCard của bản gốc - end
       );
   }
   protected async unpublish(): Promise<void> {
-    const ok = await this.confirm.confirm('Học sinh sẽ không xem được điểm nữa.', {
-      title: 'Thu hồi công bố?',
-      confirmText: 'Thu hồi',
-      cancelText: 'Hủy',
-      danger: true,
-    });
+    // Haihs: thẻ công bố kết quả giống ResultsPublishCard của bản gốc - start
+    // đóng code cũ
+    // const ok = await this.confirm.confirm('Học sinh sẽ không xem được điểm nữa.', {
+    // title: 'Thu hồi công bố?',
+    // confirmText: 'Thu hồi',
+    // cancelText: 'Hủy',
+    // danger: true,
+    // });
+    const ok = await this.confirm.confirm(
+      'Học sinh sẽ không còn xem được điểm và bài làm của mình cho đến khi bạn công bố lại.',
+      {
+        title: 'Thu hồi công bố?',
+        confirmText: 'Thu hồi',
+        cancelText: 'Hủy',
+        danger: true,
+      },
+    );
+    // Haihs: thẻ công bố kết quả giống ResultsPublishCard của bản gốc - end
     if (ok)
       await this.run(
         () => firstValueFrom(this.api.unpublish(this.sittingId())),
         'Đã thu hồi công bố.',
-        'Không thu hồi được.',
+        // Haihs: thẻ công bố kết quả giống ResultsPublishCard của bản gốc - start
+        // đóng code cũ
+        // 'Không thu hồi được.',
+        'Không thu hồi được công bố.',
+        // Haihs: thẻ công bố kết quả giống ResultsPublishCard của bản gốc - end
       );
   }
 
