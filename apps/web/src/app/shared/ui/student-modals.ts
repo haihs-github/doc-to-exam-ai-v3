@@ -22,6 +22,7 @@ import { AlertService } from './alert.service';
 import { FormField } from './form-field';
 import { ModalFocus } from './modal-focus';
 import { SearchSelect } from './search-select';
+import { NgTemplateOutlet } from '@angular/common';
 
 const MODAL =
   'w-full max-w-md space-y-3 rounded-lg border border-gray-200 bg-white p-6 shadow-overlay dark:border-gray-700 dark:bg-gray-800 dark:shadow-overlay-dark';
@@ -120,7 +121,11 @@ type Found = ClassMemberDto & { alreadyMember?: boolean };
   // Haihs: ô thêm học sinh dùng SearchSelect như bản gốc - start
   // đóng code cũ
   // imports: [ModalFocus],
-  imports: [ModalFocus, SearchSelect],
+  // Haihs: form thêm học sinh nằm ngay trong tab như bản gốc - start
+  // đóng code cũ
+  // imports: [ModalFocus, SearchSelect],
+  imports: [ModalFocus, SearchSelect, NgTemplateOutlet],
+  // Haihs: form thêm học sinh nằm ngay trong tab như bản gốc - end
   // Haihs: ô thêm học sinh dùng SearchSelect như bản gốc - end
   changeDetection: ChangeDetectionStrategy.OnPush,
   // Haihs: ô thêm học sinh dùng SearchSelect như bản gốc - start
@@ -191,48 +196,98 @@ type Found = ClassMemberDto & { alreadyMember?: boolean };
   //       </div>
   //     </div>
   //   `,
+  // Haihs: form thêm học sinh nằm ngay trong tab như bản gốc - start
+  // đóng code cũ
+  //   template: `
+  //     <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+  //       <div
+  //         appModalFocus
+  //         (dismissed)="cancel()"
+  //         role="dialog"
+  //         aria-modal="true"
+  //         aria-labelledby="add-student-title"
+  //         [class]="modal"
+  //       >
+  //         <h2 id="add-student-title" class="text-lg font-bold text-gray-900 dark:text-gray-100">
+  //           Thêm học sinh
+  //         </h2>
+  //         <label
+  //           for="student-search"
+  //           class="block text-base font-medium text-gray-800 dark:text-gray-200"
+  //           >Tìm học sinh theo số điện thoại hoặc họ tên</label
+  //         >
+  //         <app-search-select
+  //           label="Số điện thoại hoặc họ tên"
+  //           placeholder="Số điện thoại hoặc họ tên"
+  //           emptyText="Không tìm thấy học sinh phù hợp"
+  //           [remote]="true"
+  //           [minChars]="3"
+  //           [error]="searchError()"
+  //           [options]="studentOptions()"
+  //           [disabledKeys]="memberKeys()"
+  //           (queryChange)="search($event)"
+  //           (picked)="addById($event)"
+  //         />
+  //         <div class="flex justify-end pt-1">
+  //           <button type="button" class="btn-secondary" (click)="cancel()">Đóng</button>
+  //         </div>
+  //       </div>
+  //     </div>
+  //   `,
   template: `
-    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div
-        appModalFocus
-        (dismissed)="cancel()"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="add-student-title"
-        [class]="modal"
-      >
-        <h2 id="add-student-title" class="text-lg font-bold text-gray-900 dark:text-gray-100">
-          Thêm học sinh
-        </h2>
-        <label
-          for="student-search"
-          class="block text-base font-medium text-gray-800 dark:text-gray-200"
-          >Tìm học sinh theo số điện thoại hoặc họ tên</label
+    @if (inline()) {
+      <ng-container [ngTemplateOutlet]="body" />
+    } @else {
+      <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+        <div
+          appModalFocus
+          (dismissed)="cancel()"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="add-student-title"
+          [class]="modal"
         >
-        <app-search-select
-          label="Số điện thoại hoặc họ tên"
-          placeholder="Số điện thoại hoặc họ tên"
-          emptyText="Không tìm thấy học sinh phù hợp"
-          [remote]="true"
-          [minChars]="3"
-          [error]="searchError()"
-          [options]="studentOptions()"
-          [disabledKeys]="memberKeys()"
-          (queryChange)="search($event)"
-          (picked)="addById($event)"
-        />
-        <div class="flex justify-end pt-1">
-          <button type="button" class="btn-secondary" (click)="cancel()">Đóng</button>
+          <h2 id="add-student-title" class="text-lg font-bold text-gray-900 dark:text-gray-100">
+            Thêm học sinh
+          </h2>
+          <ng-container [ngTemplateOutlet]="body" />
+          <div class="flex justify-end pt-1">
+            <button type="button" class="btn-secondary" (click)="cancel()">Đóng</button>
+          </div>
         </div>
       </div>
-    </div>
+    }
+    <ng-template #body>
+      <label
+        for="student-search"
+        class="block text-base font-medium text-gray-800 dark:text-gray-200"
+        >Tìm học sinh theo số điện thoại hoặc họ tên</label
+      >
+      <app-search-select
+        label="Số điện thoại hoặc họ tên"
+        placeholder="Số điện thoại hoặc họ tên"
+        emptyText="Không tìm thấy học sinh phù hợp"
+        [remote]="true"
+        [minChars]="3"
+        [error]="searchError()"
+        [options]="studentOptions()"
+        [disabledKeys]="memberKeys()"
+        (queryChange)="search($event)"
+        (picked)="addById($event)"
+      />
+    </ng-template>
   `,
+  // Haihs: form thêm học sinh nằm ngay trong tab như bản gốc - end
   // Haihs: ô thêm học sinh dùng SearchSelect như bản gốc - end
 })
 export class StudentAddModal implements OnDestroy {
   readonly classId = input.required<string>();
   readonly added = output<void>();
   readonly cancelled = output<void>();
+  // Haihs: form thêm học sinh nằm ngay trong tab như bản gốc - start
+  /** Shown in place (inside the tab) instead of as a dialog. */
+  readonly inline = input(false);
+  // Haihs: form thêm học sinh nằm ngay trong tab như bản gốc - end
   protected readonly modal = MODAL;
   private readonly api = inject(ClassesApi);
   private readonly alert = inject(AlertService);
