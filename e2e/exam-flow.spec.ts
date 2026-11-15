@@ -128,7 +128,11 @@ test('student takes the exam, teacher sees the submission and publishes, student
       .getByRole('radiogroup', { name: `Đáp án câu ${n}` })
       .getByLabel(/^B\./)
       .check();
-  await page.getByRole('button', { name: 'Nộp bài', exact: true }).click();
+  // Haihs: nút nộp bài của phòng thi theo bản gốc là 'Nộp Bài Thi' - start
+  // đóng code cũ
+  // await page.getByRole('button', { name: 'Nộp bài', exact: true }).click();
+  await page.getByRole('button', { name: 'Nộp Bài Thi', exact: true }).click();
+  // Haihs: nút nộp bài của phòng thi theo bản gốc là 'Nộp Bài Thi' - end
   await dialog(page).getByRole('button', { name: 'Nộp bài' }).click();
   await expect(page.getByRole('heading', { name: 'Nộp bài thành công!' })).toBeVisible();
 
