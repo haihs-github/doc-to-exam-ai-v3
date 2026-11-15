@@ -19,6 +19,7 @@ import { validateSittingForm } from '../shared/utils/sitting-form';
 import { describeSittingError } from '../shared/utils/sitting-ui';
 import { maskVnDateTime, parseVnDateTime } from '../shared/utils/vn-datetime';
 import { Icon } from '../shared/ui/icon';
+import { DatetimeField } from '../shared/ui/datetime-field';
 
 @Component({
   selector: 'app-sitting-editor',
@@ -29,7 +30,11 @@ import { Icon } from '../shared/ui/icon';
   // // imports: [RouterLink, FormField, QuestionsEditor, Skeleton],
   // imports: [RouterLink, FormField, QuestionsEditor, Skeleton, Icon],
   // Haihs: mũi tên quay lại và tiêu đề có icon giống bản gốc - end
-  imports: [RouterLink, FormField, QuestionsEditor, Skeleton, Icon],
+  // Haihs: ô giờ có bảng chọn ngày giờ như bản gốc - start
+  // đóng code cũ
+  // imports: [RouterLink, FormField, QuestionsEditor, Skeleton, Icon],
+  imports: [RouterLink, FormField, QuestionsEditor, Skeleton, Icon, DatetimeField],
+  // Haihs: ô giờ có bảng chọn ngày giờ như bản gốc - end
   // Haihs: khung báo lỗi có icon giống bản gốc - end
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -39,12 +44,14 @@ import { Icon } from '../shared/ui/icon';
       <!-- class="text-base font-semibold text-primary-800 hover:underline dark:text-sky-400" -->
       <!-- >← Chi tiết ca thi</a -->
       <!-- > -->
+      <!-- ><app-icon name="arrow-left" svgClass="h-5 w-5" /></a> -->
       <a
         [routerLink]="['/teacher/sittings', id]"
         class="inline-flex rounded-xl p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-100"
         title="Về chi tiết ca"
         aria-label="Về chi tiết ca"
-        ><app-icon name="arrow-left" svgClass="h-5 w-5" /></a>
+        ><app-icon name="arrow-left" svgClass="h-5 w-5"
+      /></a>
       <!-- Haihs: mũi tên quay lại và tiêu đề có icon giống bản gốc - end -->
       @if (loading()) {
         <app-skeleton variant="list" />
@@ -105,26 +112,34 @@ import { Icon } from '../shared/ui/icon';
                 [required]="true"
                 [error]="errors()['openAt'] ?? ''"
               >
-                <input
-                  class="input"
-                  name="openAt"
-                  inputmode="numeric"
-                  [value]="openAt()"
-                  (input)="openAt.set(mask($event))"
-                />
+                <!-- Haihs: ô giờ có bảng chọn ngày giờ như bản gốc - start -->
+                <!-- đóng code cũ -->
+                <!-- <input -->
+                <!-- class="input" -->
+                <!-- name="openAt" -->
+                <!-- inputmode="numeric" -->
+                <!-- [value]="openAt()" -->
+                <!-- (input)="openAt.set(mask($event))" -->
+                <!-- /> -->
+                <app-datetime-field name="openAt" [(value)]="openAt" />
+                <!-- Haihs: ô giờ có bảng chọn ngày giờ như bản gốc - end -->
               </app-form-field>
               <app-form-field
                 label="Giờ đóng ca"
                 [required]="true"
                 [error]="errors()['closeAt'] ?? ''"
               >
-                <input
-                  class="input"
-                  name="closeAt"
-                  inputmode="numeric"
-                  [value]="closeAt()"
-                  (input)="closeAt.set(mask($event))"
-                />
+                <!-- Haihs: ô giờ có bảng chọn ngày giờ như bản gốc - start -->
+                <!-- đóng code cũ -->
+                <!-- <input -->
+                <!-- class="input" -->
+                <!-- name="closeAt" -->
+                <!-- inputmode="numeric" -->
+                <!-- [value]="closeAt()" -->
+                <!-- (input)="closeAt.set(mask($event))" -->
+                <!-- /> -->
+                <app-datetime-field name="closeAt" [(value)]="closeAt" />
+                <!-- Haihs: ô giờ có bảng chọn ngày giờ như bản gốc - end -->
               </app-form-field>
               <app-form-field
                 label="Thời gian làm bài (phút)"
