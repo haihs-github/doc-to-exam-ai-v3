@@ -50,11 +50,15 @@ const isTab = (v: unknown): v is Tab => TABS.some((t) => t[0] === v);
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="container-fluid space-y-6 py-8">
+      <!-- Haihs: mũi tên quay lại và tiêu đề có icon giống bản gốc - start -->
+      <!-- đóng code cũ -->
+      <!-- class="text-base font-semibold text-primary-800 hover:underline dark:text-sky-400" -->
+      <!-- >← Danh sách lớp</a -->
       <a
         routerLink="/teacher/classes"
-        class="text-base font-semibold text-primary-800 hover:underline dark:text-sky-400"
-        >← Danh sách lớp</a
-      >
+        class="inline-flex items-center gap-1 text-base text-gray-600 hover:text-primary-700 dark:text-gray-400 dark:hover:text-sky-300"
+        ><app-icon name="arrow-left" svgClass="h-4 w-4" /> Lớp học</a>
+      <!-- Haihs: mũi tên quay lại và tiêu đề có icon giống bản gốc - end -->
       @if (loading()) {
         <app-skeleton variant="list" />
       } @else if (notFound()) {
