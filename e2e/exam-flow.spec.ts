@@ -126,8 +126,20 @@ test('student takes the exam, teacher sees the submission and publishes, student
   for (const n of [1, 2])
     await page
       .getByRole('radiogroup', { name: `Đáp án câu ${n}` })
-      .getByLabel(/^B\./)
-      .check();
+      // Haihs: nhãn đáp án phòng thi theo bản gốc không có dấu chấm - start
+      // đóng code cũ
+      // .getByLabel(/^B\./)
+      // Haihs: chọn ô radio theo role (nhãn bọc có khoảng trắng đầu) - start
+      // đóng code cũ
+      // .getByLabel(/^B/)
+      .getByRole('radio', { name: /^B\s/ })
+      // Haihs: chọn ô radio theo role (nhãn bọc có khoảng trắng đầu) - end
+      // Haihs: nhãn đáp án phòng thi theo bản gốc không có dấu chấm - end
+      // Haihs: ô radio của phòng thi ẩn (sr-only) trong nhãn bấm được, tick bằng force - start
+      // đóng code cũ
+      // .check();
+      .check({ force: true });
+  // Haihs: ô radio của phòng thi ẩn (sr-only) trong nhãn bấm được, tick bằng force - end
   // Haihs: nút nộp bài của phòng thi theo bản gốc là 'Nộp Bài Thi' - start
   // đóng code cũ
   // await page.getByRole('button', { name: 'Nộp bài', exact: true }).click();
@@ -157,7 +169,11 @@ test('student takes the exam, teacher sees the submission and publishes, student
 
   // student: the result is visible
   await page.goto(`/ca/${code}/result`);
-  await expect(page.getByLabel('Điểm số')).toHaveText('10/10', { timeout: 60_000 });
+  // Haihs: trang kết quả theo bản gốc: nhãn Tổng điểm, số dạng 10/10 - start
+  // đóng code cũ
+  // await expect(page.getByLabel('Điểm số')).toHaveText('10/10', { timeout: 60_000 });
+  await expect(page.getByLabel(/Tổng điểm/)).toContainText('10/10', { timeout: 60_000 });
+  // Haihs: trang kết quả theo bản gốc: nhãn Tổng điểm, số dạng 10/10 - end
 });
 
 test('a student without a grant cannot enter the sitting', async ({ page, request }) => {

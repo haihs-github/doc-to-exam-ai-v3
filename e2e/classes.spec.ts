@@ -118,8 +118,18 @@ test('teacher resets a password; the student must change it', async ({
 
   // the student joins through the invite link
   await page.getByRole('tab', { name: 'Mời tham gia' }).click();
-  await page.getByRole('button', { name: 'Hiện link' }).first().click();
-  const link = (await page.locator('p.font-mono').first().innerText()).trim();
+  // Haihs: link mời luôn hiện - start
+  // đóng code cũ
+  // await page.getByRole('button', { name: 'Hiện link' }).first().click();
+  await Promise.resolve(); // link luôn hiện, không còn nút Hiện link
+  // Haihs: link mời luôn hiện - end
+  // Haihs: link mời luôn hiện - start
+  // đóng code cũ
+  // const link = (await page.locator('p.font-mono').first().innerText()).trim();
+  const link = (
+    await page.getByRole('textbox', { name: /Link Mời học sinh/i }).inputValue()
+  ).trim();
+  // Haihs: link mời luôn hiện - end
   const student = await newDevice(browser, baseURL);
   await register(student.page, 'student', studentPhone, STUDENT_NAME);
   await student.page.goto(link);
