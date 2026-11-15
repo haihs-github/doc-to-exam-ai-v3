@@ -15,6 +15,7 @@ import { AuthService, Audience } from '../core/auth.service';
 import { errorMessage } from '../core/api-errors';
 import { AlertService } from '../shared/ui/alert.service';
 import { FormField } from '../shared/ui/form-field';
+import { Icon } from '../shared/ui/icon';
 import { PasswordField } from '../shared/ui/password-field';
 import {
   FormErrors,
@@ -31,7 +32,11 @@ const LINK =
 
 @Component({
   selector: 'app-login',
-  imports: [FormField, PasswordField, RouterLink],
+  // Haihs: icon và kiểu ô nhập giống bản gốc cho trang tài khoản - start
+  // đóng code cũ
+  // imports: [FormField, PasswordField, RouterLink],
+  imports: [FormField, PasswordField, RouterLink, Icon],
+  // Haihs: icon và kiểu ô nhập giống bản gốc cho trang tài khoản - end
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="min-h-[85vh] flex items-center justify-center px-4 sm:px-6 py-12">
@@ -57,30 +62,71 @@ const LINK =
               [required]="true"
               [error]="errors()['phoneNumber'] ?? ''"
             >
-              <input
-                class="input"
-                name="phoneNumber"
-                type="tel"
-                inputmode="numeric"
-                autocomplete="tel"
-                placeholder="0987654321"
-                [value]="phone()"
-                (input)="setPhone(val($event))"
-              />
+              <!-- Haihs: icon và kiểu ô nhập giống bản gốc cho trang tài khoản - start -->
+              <!-- đóng code cũ -->
+              <!-- <input -->
+              <!-- class="input" -->
+              <!-- name="phoneNumber" -->
+              <!-- type="tel" -->
+              <!-- inputmode="numeric" -->
+              <!-- autocomplete="tel" -->
+              <!-- placeholder="0987654321" -->
+              <!-- [value]="phone()" -->
+              <!-- (input)="setPhone(val($event))" -->
+              <!-- /> -->
+              <div class="relative">
+                <input
+                  [class]="authInput"
+                  name="phoneNumber"
+                  type="tel"
+                  inputmode="numeric"
+                  autocomplete="tel"
+                  placeholder="0987654321"
+                  [value]="phone()"
+                  (input)="setPhone(val($event))"
+                />
+                <app-icon
+                  name="phone"
+                  class="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2"
+                  svgClass="h-4 w-4 text-gray-500 dark:text-gray-400"
+                />
+              </div>
+              <!-- Haihs: icon và kiểu ô nhập giống bản gốc cho trang tài khoản - end -->
             </app-form-field>
             <app-form-field label="Mật Khẩu" [required]="true" [error]="errors()['password'] ?? ''">
+              <!-- Haihs: icon và kiểu ô nhập giống bản gốc cho trang tài khoản - start -->
               <app-password-field
                 name="password"
                 autocomplete="current-password"
                 placeholder="••••••••"
+                leadingIcon="lock"
+                inputClass="!rounded-xl !border-gray-200 !bg-gray-50 !py-3 pl-11 font-medium dark:!border-gray-700 dark:!bg-gray-700/50"
                 [value]="password()"
                 (valueChange)="setPassword($event)"
               />
+              <!-- Haihs: icon và kiểu ô nhập giống bản gốc cho trang tài khoản - end -->
             </app-form-field>
           </div>
           <div class="pt-2">
-            <button type="submit" class="btn-primary w-full" [disabled]="busy()">
-              {{ busy() ? 'Đang Đăng Nhập...' : 'Đăng Nhập Ngay' }}
+            <!-- Haihs: icon và kiểu ô nhập giống bản gốc cho trang tài khoản - start -->
+            <!-- đóng code cũ -->
+            <!-- <button type="submit" class="btn-primary w-full" [disabled]="busy()"> -->
+            <!-- {{ busy() ? 'Đang Đăng Nhập...' : 'Đăng Nhập Ngay' }} -->
+            <button
+              type="submit"
+              [disabled]="busy()"
+              class="flex w-full items-center justify-center gap-2 rounded-xl bg-primary-700 px-6 py-3.5 text-base font-bold text-white transition-all hover:bg-primary-800 disabled:opacity-50 dark:bg-sky-400 dark:text-gray-900 dark:hover:bg-sky-300"
+            >
+              @if (busy()) {
+                <span
+                  class="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"
+                ></span>
+                <span>Đang Đăng Nhập...</span>
+              } @else {
+                <app-icon name="log-in" svgClass="h-4 w-4" />
+                <span>Đăng Nhập Ngay</span>
+              }
+              <!-- Haihs: icon và kiểu ô nhập giống bản gốc cho trang tài khoản - end -->
             </button>
           </div>
           <div
@@ -94,6 +140,9 @@ const LINK =
                 [class]="link"
               >
                 Đăng ký tại đây
+                <!-- Haihs: icon và kiểu ô nhập giống bản gốc cho trang tài khoản - start -->
+                <app-icon name="arrow-right" class="inline-flex" svgClass="h-3 w-3" />
+                <!-- Haihs: icon và kiểu ô nhập giống bản gốc cho trang tài khoản - end -->
               </a>
             </div>
             <div>
@@ -123,6 +172,10 @@ export class Login {
   private readonly from = navigationFrom(this.router);
   protected readonly linkState = this.from ? { from: this.from } : undefined;
   protected readonly link = LINK;
+  // Haihs: icon và kiểu ô nhập giống bản gốc cho trang tài khoản - start
+  protected readonly authInput =
+    'input !rounded-xl !border-gray-200 !bg-gray-50 !py-3 pl-11 font-medium dark:!border-gray-700 dark:!bg-gray-700/50';
+  // Haihs: icon và kiểu ô nhập giống bản gốc cho trang tài khoản - end
 
   protected readonly phone = signal('');
   protected readonly password = signal('');
