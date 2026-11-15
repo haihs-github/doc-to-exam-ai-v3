@@ -39,12 +39,21 @@ describe('About', () => {
     expect(el.querySelectorAll('ol > li')).toHaveLength(5);
   });
 
-  it('mounts <app-api-health> inside a "Trạng thái hệ thống" section', async () => {
+  // Haihs: bỏ mục Trạng thái hệ thống - start
+  // đóng code cũ
+  //   it('mounts <app-api-health> inside a "Trạng thái hệ thống" section', async () => {
+  //     const el = await setup();
+  //     const sec = el.querySelector('section[aria-labelledby="about-health"]');
+  //     expect(sec?.querySelector('#about-health')?.textContent).toContain('Trạng thái hệ thống');
+  //     expect(sec?.querySelector('app-api-health')).not.toBeNull();
+  //   });
+  it('has no "Trạng thái hệ thống" section (the original has none)', async () => {
     const el = await setup();
-    const sec = el.querySelector('section[aria-labelledby="about-health"]');
-    expect(sec?.querySelector('#about-health')?.textContent).toContain('Trạng thái hệ thống');
-    expect(sec?.querySelector('app-api-health')).not.toBeNull();
+    expect(el.textContent).not.toContain('Trạng thái hệ thống');
+    expect(el.querySelector('app-api-health')).toBeNull();
   });
+
+  // Haihs: bỏ mục Trạng thái hệ thống - end
 
   it('every link has text; external ones are noopener; CTAs go to the auth routes', async () => {
     const el = await setup();
