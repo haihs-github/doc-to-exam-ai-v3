@@ -93,9 +93,17 @@ describe('TeacherClasses', () => {
     const s = await setup(of(paged([])));
     expect(s.el.textContent).toContain('Chưa có lớp nào.');
     s.api.list.mockReturnValue(of(paged([])));
-    s.btn('Thùng rác').click();
+    // Haihs: chữ thông báo/xác nhận lớp học giống bản gốc (mục Đã xoá) - start
+    // đóng code cũ
+    // s.btn('Thùng rác').click();
+    s.btn('Đã xoá').click();
+    // Haihs: chữ thông báo/xác nhận lớp học giống bản gốc (mục Đã xoá) - end
     await s.flush();
-    expect(s.el.textContent).toContain('Không có lớp nào trong thùng rác.');
+    // Haihs: chữ thông báo/xác nhận lớp học giống bản gốc (mục Đã xoá) - start
+    // đóng code cũ
+    // expect(s.el.textContent).toContain('Không có lớp nào trong thùng rác.');
+    expect(s.el.textContent).toContain('Không có lớp nào đã xoá.');
+    // Haihs: chữ thông báo/xác nhận lớp học giống bản gốc (mục Đã xoá) - end
     s.btn('Đã tốt nghiệp').click();
     await s.flush();
     expect(s.api.list).toHaveBeenLastCalledWith(expect.objectContaining({ view: 'graduated' }));
@@ -117,7 +125,11 @@ describe('TeacherClasses', () => {
   it('tab switch asks for view=deleted from page 1; deleted rows are not links and offer Khôi phục', async () => {
     const s = await setup();
     s.api.list.mockReturnValue(of(paged([mkClass('9', { deletedAt: '2026-01-01' })])));
-    s.btn('Thùng rác').click();
+    // Haihs: chữ thông báo/xác nhận lớp học giống bản gốc (mục Đã xoá) - start
+    // đóng code cũ
+    // s.btn('Thùng rác').click();
+    s.btn('Đã xoá').click();
+    // Haihs: chữ thông báo/xác nhận lớp học giống bản gốc (mục Đã xoá) - end
     await s.flush();
     expect(s.api.list).toHaveBeenLastCalledWith(
       expect.objectContaining({ view: 'deleted', page: 1 }),
@@ -164,7 +176,11 @@ describe('TeacherClasses', () => {
     const slow = new Subject<Paged<ClassDto>>();
     const s = await setup(slow);
     s.api.list.mockReturnValue(of(paged([mkClass('9', { deletedAt: 'd' })])));
-    s.btn('Thùng rác').click();
+    // Haihs: chữ thông báo/xác nhận lớp học giống bản gốc (mục Đã xoá) - start
+    // đóng code cũ
+    // s.btn('Thùng rác').click();
+    s.btn('Đã xoá').click();
+    // Haihs: chữ thông báo/xác nhận lớp học giống bản gốc (mục Đã xoá) - end
     await s.flush();
     slow.next(paged([mkClass('ACTIVE')]));
     await s.flush();

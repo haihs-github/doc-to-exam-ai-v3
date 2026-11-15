@@ -77,7 +77,13 @@ test('invite link -> student joins (pending) -> teacher approves -> student sees
   // đóng code cũ
   // await page.getByRole('button', { name: 'Hiện link' }).first().click();
   // const link = (await page.locator('p.font-mono').first().innerText()).trim();
-  const link = (await page.getByRole('textbox', { name: /Link Mời học sinh/i }).inputValue()).trim();
+  // Haihs: chữ mục Đã xoá của lớp giống bản gốc - start
+  // đóng code cũ
+  // const link = (await page.getByRole('textbox', { name: /Link Mời học sinh/i }).inputValue()).trim();
+  const link = (
+    await page.getByRole('textbox', { name: /Link Mời học sinh/i }).inputValue()
+  ).trim();
+  // Haihs: chữ mục Đã xoá của lớp giống bản gốc - end
   // Haihs: link mời luôn hiện trong ô chỉ-đọc như bản gốc - end
   expect(link).toContain('/join/');
 
@@ -153,7 +159,11 @@ test('delete moves the class to the trash and restore brings it back', async ({ 
   await page.getByRole('menuitem', { name: 'Xóa' }).click();
   await dialog(page).getByRole('button', { name: 'Xóa lớp' }).click();
   await expect(page.getByRole('link', { name: name.toUpperCase() })).toHaveCount(0); // the DELETE (cold-compiled by `next dev`) has finished
-  await page.getByRole('button', { name: 'Thùng rác' }).click();
+  // Haihs: chữ mục Đã xoá của lớp giống bản gốc - start
+  // đóng code cũ
+  // await page.getByRole('button', { name: 'Thùng rác' }).click();
+  await page.getByRole('button', { name: 'Đã xoá' }).click();
+  // Haihs: chữ mục Đã xoá của lớp giống bản gốc - end
   await expect(page.getByText(name.toUpperCase())).toBeVisible();
 
   await page.getByRole('button', { name: `Thao tác với lớp ${name.toUpperCase()}` }).click();

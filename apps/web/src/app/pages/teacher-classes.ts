@@ -28,7 +28,11 @@ type View = 'active' | 'graduated' | 'deleted';
 const TABS: [View, string][] = [
   ['active', 'Đang hoạt động'],
   ['graduated', 'Đã tốt nghiệp'],
-  ['deleted', 'Thùng rác'],
+  // Haihs: chữ thông báo/xác nhận lớp học giống bản gốc (mục Đã xoá) - start
+  // đóng code cũ
+  // ['deleted', 'Thùng rác'],
+  ['deleted', 'Đã xoá'],
+  // Haihs: chữ thông báo/xác nhận lớp học giống bản gốc (mục Đã xoá) - end
 ];
 
 @Component({
@@ -238,8 +242,12 @@ export class TeacherClasses implements OnDestroy {
   );
   protected readonly emptyText = computed(() =>
     this.view() === 'deleted'
-      ? 'Không có lớp nào trong thùng rác.'
-      : this.view() === 'graduated'
+      ? // Haihs: chữ thông báo/xác nhận lớp học giống bản gốc (mục Đã xoá) - start
+        // đóng code cũ
+        // ? 'Không có lớp nào trong thùng rác.'
+        'Không có lớp nào đã xoá.'
+      : // Haihs: chữ thông báo/xác nhận lớp học giống bản gốc (mục Đã xoá) - end
+        this.view() === 'graduated'
         ? 'Chưa có lớp nào đã tốt nghiệp.'
         : this.applied
           ? 'Không tìm thấy lớp phù hợp.'
@@ -337,7 +345,11 @@ export class TeacherClasses implements OnDestroy {
 
   private async remove(c: ClassDto): Promise<void> {
     const ok = await this.confirm.confirm(
-      `Lớp "${c.name}" sẽ chuyển sang Thùng rác và có thể khôi phục. Mã lớp được nhả ra; nếu bị lớp khác dùng, bạn sẽ phải đặt mã mới khi khôi phục.`,
+      // Haihs: chữ thông báo/xác nhận lớp học giống bản gốc (mục Đã xoá) - start
+      // đóng code cũ
+      // `Lớp "${c.name}" sẽ chuyển sang Thùng rác và có thể khôi phục. Mã lớp được nhả ra; nếu bị lớp khác dùng, bạn sẽ phải đặt mã mới khi khôi phục.`,
+      `Lớp "${c.name}" sẽ chuyển sang mục Đã xoá và có thể khôi phục. Mã lớp được nhả ra; nếu bị lớp khác dùng, bạn sẽ phải đặt mã mới khi khôi phục.`,
+      // Haihs: chữ thông báo/xác nhận lớp học giống bản gốc (mục Đã xoá) - end
       { title: 'Xóa lớp?', confirmText: 'Xóa lớp', cancelText: 'Hủy', danger: true },
     );
     if (!ok) return;
