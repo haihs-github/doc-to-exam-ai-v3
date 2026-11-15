@@ -103,7 +103,21 @@ export class ActionMenu {
     if (this.pos()) return this.close();
     const r = btn.getBoundingClientRect();
     this.pos.set({ top: r.bottom + 4, right: window.innerWidth - r.right });
-    afterNextRender(() => this.enabled()[0]?.focus(), { injector: this.injector });
+    // Haihs: menu thao tác mở lên trên khi sát đáy cửa sổ và focus không cuộn trang - start
+    // đóng code cũ
+    // afterNextRender(() => this.enabled()[0]?.focus(), { injector: this.injector });
+    afterNextRender(
+      () => {
+        // Near the bottom of the window the menu would fall outside the viewport (it is position: fixed): open it upwards.
+        const menu = this.host.querySelector<HTMLElement>('[role="menu"]');
+        const h = menu?.offsetHeight ?? 0;
+        if (h && r.bottom + 4 + h > window.innerHeight - 8)
+          this.pos.set({ top: Math.max(8, r.top - 4 - h), right: window.innerWidth - r.right });
+        this.enabled()[0]?.focus({ preventScroll: true }); // focus must not scroll: a scroll closes the menu
+      },
+      { injector: this.injector },
+    );
+    // Haihs: menu thao tác mở lên trên khi sát đáy cửa sổ và focus không cuộn trang - end
   }
 
   protected focusTrigger(): void {

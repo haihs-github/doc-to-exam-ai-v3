@@ -82,7 +82,18 @@ test('teacher builds a template and a sitting in the UI', async ({ page, request
   // Haihs: nhãn ô nội dung câu hỏi theo bản gốc - start
   // đóng code cũ
   // await page.getByLabel('Nội dung câu hỏi').first().fill('Thủ đô của Việt Nam?');
-  await page.getByLabel('Thân câu hỏi').first().fill('Thủ đô của Việt Nam?');
+  // Haihs: ô thân câu hỏi có thêm nút gạch chân trong nhãn - start
+  // đóng code cũ
+  // await page.getByLabel('Thân câu hỏi').first().fill('Thủ đô của Việt Nam?');
+  await page
+    // Haihs: ô thân câu hỏi nhận tên truy cập từ placeholder - start
+    // đóng code cũ
+    // .getByRole('textbox', { name: /Thân câu hỏi/ })
+    .getByPlaceholder(/When the church/)
+    // Haihs: ô thân câu hỏi nhận tên truy cập từ placeholder - end
+    .first()
+    .fill('Thủ đô của Việt Nam?');
+  // Haihs: ô thân câu hỏi có thêm nút gạch chân trong nhãn - end
   // Haihs: nhãn ô nội dung câu hỏi theo bản gốc - end
   await page.getByLabel('Phương án A của câu 1').fill('Hà Nội');
   await page.getByLabel('Phương án B của câu 1').fill('Huế');
@@ -197,5 +208,9 @@ test('student writes an essay, teacher grades it', async ({ page, browser, baseU
   await ctx.close();
 
   await page.goto(`/ca/${code}/result`);
-  await expect(page.getByLabel('Điểm số')).toHaveText('2.5/2.5');
+  // Haihs: trang kết quả theo bản gốc: nhãn Tổng điểm, số kiểu Việt - start
+  // đóng code cũ
+  // await expect(page.getByLabel('Điểm số')).toHaveText('2.5/2.5');
+  await expect(page.getByLabel(/Tổng điểm/)).toContainText('2,5/2,5');
+  // Haihs: trang kết quả theo bản gốc: nhãn Tổng điểm, số kiểu Việt - end
 });
