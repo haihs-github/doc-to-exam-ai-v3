@@ -42,7 +42,16 @@ const TABS: [View, string][] = [
   template: `
     <div class="container-fluid space-y-6 py-8">
       <div class="flex flex-wrap items-center justify-between gap-3">
-        <h1 class="text-2xl font-extrabold text-gray-900 dark:text-gray-100">Lớp học</h1>
+        <!-- Haihs: mũi tên quay lại và tiêu đề có icon giống bản gốc - start -->
+        <!-- đóng code cũ -->
+        <!-- <h1 class="text-2xl font-extrabold text-gray-900 dark:text-gray-100">Lớp học</h1> -->
+        <h1
+          class="flex items-center gap-2 text-2xl font-extrabold text-gray-900 dark:text-gray-100"
+        >
+          <app-icon name="graduation-cap" svgClass="h-6 w-6 text-primary-700 dark:text-sky-400" />
+          Lớp học
+        </h1>
+        <!-- Haihs: mũi tên quay lại và tiêu đề có icon giống bản gốc - end -->
         <div class="flex gap-2">
           <!-- Haihs: icon cho nút giống bản gốc - start -->
           <!-- đóng code cũ -->

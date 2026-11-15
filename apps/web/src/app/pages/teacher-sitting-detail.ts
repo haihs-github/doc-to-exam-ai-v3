@@ -37,17 +37,25 @@ const TABS: [Tab, string][] = [
   selector: 'app-teacher-sitting-detail',
   // Haihs: khung báo lỗi có icon giống bản gốc - start
   // đóng code cũ
-  // imports: [RouterLink, QrCode, SittingGrantsTab, SittingResultsPanel, Skeleton],
+  // Haihs: mũi tên quay lại và tiêu đề có icon giống bản gốc - start
+  // đóng code cũ
+  // // imports: [RouterLink, QrCode, SittingGrantsTab, SittingResultsPanel, Skeleton],
+  // imports: [RouterLink, QrCode, SittingGrantsTab, SittingResultsPanel, Skeleton, Icon],
+  // Haihs: mũi tên quay lại và tiêu đề có icon giống bản gốc - end
   imports: [RouterLink, QrCode, SittingGrantsTab, SittingResultsPanel, Skeleton, Icon],
   // Haihs: khung báo lỗi có icon giống bản gốc - end
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="container-fluid space-y-6 py-8">
+      <!-- Haihs: mũi tên quay lại và tiêu đề có icon giống bản gốc - start -->
+      <!-- đóng code cũ -->
+      <!-- class="text-base font-semibold text-primary-800 hover:underline dark:text-sky-400" -->
+      <!-- >← Ca thi</a -->
       <a
         routerLink="/teacher/sittings"
-        class="text-base font-semibold text-primary-800 hover:underline dark:text-sky-400"
-        >← Ca thi</a
-      >
+        class="inline-flex items-center gap-1 text-base text-gray-600 hover:text-primary-700 dark:text-gray-400 dark:hover:text-sky-300"
+        ><app-icon name="arrow-left" svgClass="h-4 w-4" /> Ca thi</a>
+      <!-- Haihs: mũi tên quay lại và tiêu đề có icon giống bản gốc - end -->
       @if (loading()) {
         <app-skeleton variant="list" />
       } @else if (notFound()) {

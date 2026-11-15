@@ -53,17 +53,28 @@ function readDraft(): Draft | null {
   selector: 'app-template-editor',
   // Haihs: khung báo lỗi có icon giống bản gốc - start
   // đóng code cũ
-  // imports: [RouterLink, FormField, QuestionsEditor, Skeleton],
+  // Haihs: mũi tên quay lại và tiêu đề có icon giống bản gốc - start
+  // đóng code cũ
+  // // imports: [RouterLink, FormField, QuestionsEditor, Skeleton],
+  // imports: [RouterLink, FormField, QuestionsEditor, Skeleton, Icon],
+  // Haihs: mũi tên quay lại và tiêu đề có icon giống bản gốc - end
   imports: [RouterLink, FormField, QuestionsEditor, Skeleton, Icon],
   // Haihs: khung báo lỗi có icon giống bản gốc - end
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="container-fluid space-y-6 py-8">
+      <!-- Haihs: mũi tên quay lại và tiêu đề có icon giống bản gốc - start -->
+      <!-- đóng code cũ -->
+      <!-- class="text-base font-semibold text-primary-800 hover:underline dark:text-sky-400" -->
+      <!-- >← Đề mẫu</a -->
+      <!-- > -->
       <a
         routerLink="/teacher/templates"
-        class="text-base font-semibold text-primary-800 hover:underline dark:text-sky-400"
-        >← Đề mẫu</a
-      >
+        class="inline-flex rounded-xl p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-100"
+        title="Về trang Đề mẫu"
+        aria-label="Về trang Đề mẫu"
+        ><app-icon name="arrow-left" svgClass="h-5 w-5" /></a>
+      <!-- Haihs: mũi tên quay lại và tiêu đề có icon giống bản gốc - end -->
       @if (loading()) {
         <app-skeleton variant="list" />
       } @else if (loadError()) {

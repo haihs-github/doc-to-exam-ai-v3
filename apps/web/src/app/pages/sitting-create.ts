@@ -32,17 +32,25 @@ import { Icon } from '../shared/ui/icon';
   selector: 'app-sitting-create',
   // Haihs: khung báo lỗi có icon giống bản gốc - start
   // đóng code cũ
-  // imports: [RouterLink, FormField, Skeleton],
+  // Haihs: mũi tên quay lại và tiêu đề có icon giống bản gốc - start
+  // đóng code cũ
+  // // imports: [RouterLink, FormField, Skeleton],
+  // imports: [RouterLink, FormField, Skeleton, Icon],
+  // Haihs: mũi tên quay lại và tiêu đề có icon giống bản gốc - end
   imports: [RouterLink, FormField, Skeleton, Icon],
   // Haihs: khung báo lỗi có icon giống bản gốc - end
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="container-fluid space-y-6 py-8">
+      <!-- Haihs: mũi tên quay lại và tiêu đề có icon giống bản gốc - start -->
+      <!-- đóng code cũ -->
+      <!-- class="text-base font-semibold text-primary-800 hover:underline dark:text-sky-400" -->
+      <!-- >← Ca thi</a -->
       <a
         routerLink="/teacher/sittings"
-        class="text-base font-semibold text-primary-800 hover:underline dark:text-sky-400"
-        >← Ca thi</a
-      >
+        class="inline-flex items-center gap-1 text-base text-gray-600 hover:text-primary-700 dark:text-gray-400 dark:hover:text-sky-300"
+        ><app-icon name="arrow-left" svgClass="h-4 w-4" /> Ca thi</a>
+      <!-- Haihs: mũi tên quay lại và tiêu đề có icon giống bản gốc - end -->
       <h1 class="text-2xl font-extrabold text-gray-900 dark:text-gray-100">Tạo ca thi</h1>
       @if (loading()) {
         <app-skeleton variant="list" />
