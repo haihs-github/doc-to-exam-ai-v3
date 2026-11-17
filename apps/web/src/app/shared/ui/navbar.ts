@@ -15,9 +15,15 @@ export const navbarVisible = (url: string): boolean => {
   return !(path.startsWith('/ca/') && !/^\/ca\/[^/]+\/result\/?$/.test(path));
 };
 
+// Haihs: thanh trên xanh đặc theo phong cách mới - start
+// đóng code cũ
+// const LINK =
+//   'flex min-h-[48px] items-center gap-2 rounded-lg px-3 text-base font-medium transition-colors text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800';
+// const ACTIVE = 'bg-primary-100 !text-primary-900 dark:bg-sky-900/50 dark:!text-sky-200';
 const LINK =
-  'flex min-h-[48px] items-center gap-2 rounded-lg px-3 text-base font-medium transition-colors text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800';
-const ACTIVE = 'bg-primary-100 !text-primary-900 dark:bg-sky-900/50 dark:!text-sky-200';
+  'flex min-h-[48px] items-center gap-2 rounded-lg px-3 text-base font-medium transition-colors text-white hover:bg-white/15';
+const ACTIVE = 'bg-white/20 !text-white';
+// Haihs: thanh trên xanh đặc theo phong cách mới - end
 
 @Component({
   selector: 'app-navbar',
@@ -26,16 +32,28 @@ const ACTIVE = 'bg-primary-100 !text-primary-900 dark:bg-sky-900/50 dark:!text-s
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (visible()) {
+      <!-- Haihs: thanh trên xanh đặc theo phong cách mới - start -->
+      <!-- đóng code cũ -->
+      <!-- <header -->
+      <!-- class="sticky top-0 z-40 h-[var(--nav-h)] border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900" -->
+      <!-- > -->
       <header
-        class="sticky top-0 z-40 h-[var(--nav-h)] border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900"
+        class="sticky top-0 z-40 h-[var(--nav-h)] border-b border-primary-700 bg-primary-700 text-white dark:border-primary-900 dark:bg-primary-900"
       >
+        <!-- Haihs: thanh trên xanh đặc theo phong cách mới - end -->
         <div
           class="flex h-full w-full items-center justify-between gap-2 px-4 sm:px-6 2xl:mx-auto 2xl:max-w-[1920px]"
         >
           <a routerLink="/" class="flex min-h-[48px] shrink-0 items-center gap-2.5 rounded-lg">
-            <span class="text-lg font-semibold tracking-tight text-gray-900 dark:text-gray-100"
-              >DocToExam<span class="text-primary-700 dark:text-sky-400"> AI</span></span
+            <!-- Haihs: thanh trên xanh đặc theo phong cách mới - start -->
+            <!-- đóng code cũ -->
+            <!-- <span class="text-lg font-semibold tracking-tight text-gray-900 dark:text-gray-100" -->
+            <!-- >DocToExam<span class="text-primary-700 dark:text-sky-400"> AI</span></span -->
+            <!-- > -->
+            <span class="text-lg font-semibold tracking-tight text-white"
+              >DocToExam<span class="text-white/80"> AI</span></span
             >
+            <!-- Haihs: thanh trên xanh đặc theo phong cách mới - end -->
           </a>
           <nav
             aria-label="Điều hướng chính"
@@ -76,11 +94,17 @@ const ACTIVE = 'bg-primary-100 !text-primary-900 dark:bg-sky-900/50 dark:!text-s
               <!-- >Giáo viên</a -->
               <!-- > -->
               <app-theme-toggle />
-              <a routerLink="/teacher/login" class="btn-ghost">
+              <!-- đóng code cũ -->
+              <!-- <a routerLink="/teacher/login" class="btn-ghost"> -->
+              <!-- <a routerLink="/teacher/register" class="btn-primary"> -->
+              <a routerLink="/teacher/login" class="btn-ghost !text-white hover:!bg-white/15">
                 <app-icon name="login" svgClass="h-5 w-5" />
                 <span>Đăng Nhập</span>
               </a>
-              <a routerLink="/teacher/register" class="btn-primary">
+              <a
+                routerLink="/teacher/register"
+                class="btn-primary !bg-white !text-primary-700 hover:!bg-white/90"
+              >
                 <app-icon name="userplus" svgClass="h-5 w-5" />
                 <span>Đăng Ký</span>
               </a>
@@ -150,14 +174,27 @@ const ACTIVE = 'bg-primary-100 !text-primary-900 dark:bg-sky-900/50 dark:!text-s
                 }
               }
               <app-theme-toggle />
-              <div
-                class="flex items-center gap-2 border-l border-gray-200 pl-2 dark:border-gray-700"
-              >
-                <span
-                  class="hidden text-base font-medium text-gray-900 xl:inline dark:text-gray-100"
-                  >{{ auth.user()?.fullName }}</span
+              <!-- Haihs: thanh trên xanh đặc theo phong cách mới - start -->
+              <!-- đóng code cũ -->
+              <!-- <div -->
+              <!-- class="flex items-center gap-2 border-l border-gray-200 pl-2 dark:border-gray-700" -->
+              <!-- > -->
+              <!-- <span -->
+              <!-- class="hidden text-base font-medium text-gray-900 xl:inline dark:text-gray-100" -->
+              <!-- >{{ auth.user()?.fullName }}</span -->
+              <!-- > -->
+              <!-- <button type="button" (click)="logout()" class="btn-ghost" title="Đăng xuất"> -->
+              <div class="flex items-center gap-2 border-l border-white/30 pl-2">
+                <span class="hidden text-base font-medium text-white xl:inline">{{
+                  auth.user()?.fullName
+                }}</span>
+                <button
+                  type="button"
+                  (click)="logout()"
+                  class="btn-ghost !text-white hover:!bg-white/15"
+                  title="Đăng xuất"
                 >
-                <button type="button" (click)="logout()" class="btn-ghost" title="Đăng xuất">
+                <!-- Haihs: thanh trên xanh đặc theo phong cách mới - end -->
                   Đăng xuất
                 </button>
               </div>

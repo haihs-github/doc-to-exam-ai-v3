@@ -8,13 +8,23 @@ import { applyTheme } from '../../theme';
   selector: 'app-theme-toggle',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
+    <!-- Haihs: nút theme đọc được trên thanh trên xanh - start -->
+    <!-- đóng code cũ -->
+    <!-- <button -->
+    <!-- type="button" -->
+    <!-- (click)="toggle()" -->
+    <!-- [attr.title]="label() + ' (bấm để đổi)'" -->
+    <!-- [attr.aria-label]="label() + '. Bấm để đổi chế độ'" -->
+    <!-- class="inline-flex h-12 w-12 cursor-pointer items-center justify-center rounded-full text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800" -->
+    <!-- > -->
     <button
       type="button"
       (click)="toggle()"
       [attr.title]="label() + ' (bấm để đổi)'"
       [attr.aria-label]="label() + '. Bấm để đổi chế độ'"
-      class="inline-flex h-12 w-12 cursor-pointer items-center justify-center rounded-full text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
+      class="inline-flex h-12 w-12 cursor-pointer items-center justify-center rounded-full text-white transition-colors hover:bg-white/15"
     >
+      <!-- Haihs: nút theme đọc được trên thanh trên xanh - end -->
       <svg
         class="h-6 w-6"
         viewBox="0 0 24 24"

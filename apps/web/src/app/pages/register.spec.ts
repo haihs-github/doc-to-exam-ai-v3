@@ -58,6 +58,7 @@ const setup = async (url = '/register', state?: Record<string, unknown>) => {
     await type('fullName', '  Hoàng   Thị Tuyến ');
     await type('phoneNumber', '0912.345.678');
     await type('password', 'secret-pw1');
+    await type('confirmPassword', 'secret-pw1'); // Haihs: thêm ô nhập lại mật khẩu theo yêu cầu người dùng - start - end
     if (teacher) await type('secretKey', ' key-123 ');
   };
   return { user, register, alertError, harness, router, el, input, type, submit, fill };
@@ -105,6 +106,7 @@ describe('Register (student)', () => {
       'Vui lòng nhập họ và tên.',
       'Vui lòng nhập số điện thoại.',
       'Mật khẩu phải có ít nhất 8 ký tự.',
+      'Vui lòng nhập lại mật khẩu', // Haihs: thêm ô nhập lại mật khẩu theo yêu cầu người dùng - start - end
     ]);
     expect(document.activeElement).toBe(s.input('fullName'));
     expect(s.register).not.toHaveBeenCalled();
@@ -229,6 +231,7 @@ describe('Register (teacher)', () => {
     await s.type('fullName', 'Hoàng Thị Tuyến');
     await s.type('phoneNumber', '0912345678');
     await s.type('password', 'secret-pw1');
+    await s.type('confirmPassword', 'secret-pw1'); // Haihs: thêm ô nhập lại mật khẩu theo yêu cầu người dùng - start - end
     await s.submit();
     expect(s.el.querySelector('[role="alert"]')?.textContent).toContain(
       'Vui lòng nhập mã bí mật giáo viên.',
@@ -271,3 +274,51 @@ describe('Register (teacher)', () => {
     expect(s.register.mock.calls[0][1].geminiApiKey).toBe('AIza-xyz');
   });
 });
+
+// Haihs: bỏ placeholder tên và thêm ô nhập lại mật khẩu theo yêu cầu người dùng - start
+describe.each(['/register', '/teacher/register'])('Register %s: tên và nhập lại mật khẩu', (url) => {
+  it('ô họ tên không có placeholder ví dụ', async () => {
+    const { input } = await setup(url);
+    expect(input('fullName').getAttribute('placeholder')).not.toBe('Ví dụ: Hoàng Thị Tuyến');
+  });
+
+  it('có ô Nhập lại mật khẩu', async () => {
+    const { input, el } = await setup(url);
+    expect(input('confirmPassword')).toBeTruthy();
+    expect(input('confirmPassword').getAttribute('placeholder')).toBe('Nhập lại mật khẩu');
+    expect(el.textContent).toContain('Nhập lại mật khẩu');
+  });
+
+  it('không khớp: báo lỗi, focus ô đó, không gọi API', async () => {
+    const s = await setup(url);
+    await s.fill(url.includes('teacher'));
+    await s.type('confirmPassword', 'khac-pw-123');
+    await s.submit();
+    expect(s.el.querySelector('[role="alert"]')?.textContent).toContain(
+      'Mật khẩu nhập lại không khớp',
+    );
+    expect(document.activeElement).toBe(s.input('confirmPassword'));
+    expect(s.register).not.toHaveBeenCalled();
+  });
+
+  it('để trống: báo lỗi, không gọi API', async () => {
+    const s = await setup(url);
+    await s.fill(url.includes('teacher'));
+    await s.type('confirmPassword', '');
+    await s.submit();
+    expect(s.el.querySelector('[role="alert"]')?.textContent).toContain(
+      'Vui lòng nhập lại mật khẩu',
+    );
+    expect(s.register).not.toHaveBeenCalled();
+  });
+
+  it('khớp: gọi API như cũ, body không có trường nhập lại', async () => {
+    const s = await setup(url);
+    s.register.mockReturnValue(of({ token: 't', user: mk() }));
+    await s.fill(url.includes('teacher'));
+    await s.submit();
+    expect(s.register).toHaveBeenCalledTimes(1);
+    expect(JSON.stringify(s.register.mock.calls[0][1])).not.toContain('confirmPassword');
+  });
+});
+// Haihs: bỏ placeholder tên và thêm ô nhập lại mật khẩu theo yêu cầu người dùng - end
