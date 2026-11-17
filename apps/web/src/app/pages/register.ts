@@ -35,6 +35,11 @@ const LINK =
   'text-primary-700 dark:text-sky-400 hover:text-primary-800 dark:hover:text-sky-300 font-bold ml-1';
 
 type Values = { fullName: string; phoneNumber: string; password: string; secretKey: string };
+// Haihs: thêm ô nhập lại mật khẩu theo yêu cầu người dùng - start
+// Client-only: confirmPassword is validated here and never sent to the API.
+type FormValues = Values & { confirmPassword: string };
+const ORDER = ['fullName', 'phoneNumber', 'password', 'confirmPassword', 'secretKey', 'geminiApiKey'];
+// Haihs: thêm ô nhập lại mật khẩu theo yêu cầu người dùng - end
 
 @Component({
   selector: 'app-register',
@@ -95,13 +100,13 @@ type Values = { fullName: string; phoneNumber: string; password: string; secretK
               <!-- [value]="fullName()" -->
               <!-- (input)="set('fullName', val($event))" -->
               <!-- /> -->
+              <!-- đóng code cũ: placeholder="Ví dụ: Hoàng Thị Tuyến" --> <!-- Haihs: bỏ placeholder tên theo yêu cầu người dùng - start - end -->
               <div class="relative">
                 <input
                   [class]="authInput"
                   name="fullName"
                   type="text"
                   autocomplete="name"
-                  placeholder="Ví dụ: Hoàng Thị Tuyến"
                   [attr.maxlength]="fullNameMax"
                   [value]="fullName()"
                   (input)="set('fullName', val($event))"
@@ -163,6 +168,23 @@ type Values = { fullName: string; phoneNumber: string; password: string; secretK
               />
               <!-- Haihs: icon và kiểu ô nhập giống bản gốc cho trang tài khoản - end -->
             </app-form-field>
+            <!-- Haihs: thêm ô nhập lại mật khẩu theo yêu cầu người dùng - start -->
+            <app-form-field
+              label="Nhập lại mật khẩu"
+              [required]="true"
+              [error]="errors()['confirmPassword'] ?? ''"
+            >
+              <app-password-field
+                name="confirmPassword"
+                autocomplete="new-password"
+                placeholder="Nhập lại mật khẩu"
+                leadingIcon="lock"
+                [inputClass]="authInputPw"
+                [value]="confirmPassword()"
+                (valueChange)="set('confirmPassword', $event)"
+              />
+            </app-form-field>
+            <!-- Haihs: thêm ô nhập lại mật khẩu theo yêu cầu người dùng - end -->
 
             @if (isTeacher) {
               <app-form-field
@@ -348,6 +370,7 @@ export class Register {
   protected readonly phone = signal('');
   protected readonly password = signal('');
   protected readonly secretKey = signal('');
+  protected readonly confirmPassword = signal(''); // Haihs: thêm ô nhập lại mật khẩu theo yêu cầu người dùng - start - end
   protected readonly geminiApiKey = signal('');
   protected readonly website = signal('');
   protected readonly errors = signal<FormErrors>({});
@@ -361,8 +384,19 @@ export class Register {
     });
   }
 
-  private values(): Values {
+  // Haihs: thêm ô nhập lại mật khẩu theo yêu cầu người dùng - start
+  private validate = (x: FormValues) => {
+    const e = validateRegisterForm(x, { isTeacher: this.isTeacher });
+    if (!x.confirmPassword) e['confirmPassword'] = 'Vui lòng nhập lại mật khẩu';
+    else if (x.confirmPassword !== x.password) e['confirmPassword'] = 'Mật khẩu nhập lại không khớp';
+    return e;
+  };
+  // Haihs: thêm ô nhập lại mật khẩu theo yêu cầu người dùng - end
+
+  // private values(): Values { // Haihs: đóng code cũ thêm trường nhập lại mật khẩu - start - end
+  private values(): FormValues { // Haihs: thêm trường nhập lại mật khẩu - start - end
     return {
+      confirmPassword: this.confirmPassword(), // Haihs: thêm trường nhập lại mật khẩu - start - end
       fullName: this.fullName(),
       phoneNumber: this.phone(),
       password: this.password(),
@@ -372,28 +406,35 @@ export class Register {
 
   protected val = (e: Event): string => (e.target as HTMLInputElement).value;
 
-  protected set(key: keyof Values, v: string): void {
+  // protected set(key: keyof Values, v: string): void { // Haihs: đóng code cũ thêm trường nhập lại mật khẩu - start - end
+  protected set(key: keyof FormValues, v: string): void { // Haihs: thêm trường nhập lại mật khẩu - start - end
     ({
+      confirmPassword: this.confirmPassword, // Haihs: thêm trường nhập lại mật khẩu - start - end
       fullName: this.fullName,
       phoneNumber: this.phone,
       password: this.password,
       secretKey: this.secretKey,
     })[key].set(v);
     this.errors.update((prev) =>
-      refreshErrors(
-        prev,
-        (x: Values) => validateRegisterForm(x, { isTeacher: this.isTeacher }),
-        this.values(),
-      ),
+      // Haihs: dùng validate có kiểm tra nhập lại mật khẩu - start
+      // refreshErrors(
+      //   prev,
+      //   (x: Values) => validateRegisterForm(x, { isTeacher: this.isTeacher }),
+      //   this.values(),
+      // ),
+      refreshErrors(prev, this.validate, this.values()),
+      // Haihs: dùng validate có kiểm tra nhập lại mật khẩu - end
     );
   }
 
   protected submit(e: Event): void {
     e.preventDefault();
     if (this.busy()) return; // single-flight
-    const found = validateRegisterForm(this.values(), { isTeacher: this.isTeacher });
+    // const found = validateRegisterForm(this.values(), { isTeacher: this.isTeacher }); // Haihs: đóng code cũ thêm kiểm tra nhập lại mật khẩu - start - end
+    const found = this.validate(this.values()); // Haihs: thêm kiểm tra nhập lại mật khẩu - start - end
     this.errors.set(found);
-    const first = REGISTER_ORDER.find((k) => found[k]);
+    // const first = REGISTER_ORDER.find((k) => found[k]); // Haihs: đóng code cũ ô nhập lại nằm trong thứ tự focus - start - end
+    const first = ORDER.find((k) => found[k]); // Haihs: ô nhập lại nằm trong thứ tự focus - start - end
     if (first) return focusField(this.host.nativeElement, first);
 
     const base = {

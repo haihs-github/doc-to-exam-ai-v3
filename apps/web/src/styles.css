@@ -5,46 +5,99 @@
 @tailwind utilities;
 
 @layer base {
+  /* Haihs: trả cỡ/khoảng cách về như cũ, người dùng chỉ muốn đổi phong cách - start */
+  /* đóng code cũ */
+  /* :root { */
+  /* --nav-h: 4.25rem; */
+  /* } */
+  /* đóng code cũ */
+  /* :root { */
+  /* --nav-h: 3.4rem; */
+  /* --control-h: 2.25rem; */
+  /* } */
+  /* @media (max-width: 767px) { :root { --nav-h: 3.5rem; --control-h: 2.75rem; } } */
   :root {
     --nav-h: 4.25rem;
+    --control-h: 3rem;
   }
+  /* Haihs: trả cỡ/khoảng cách về như cũ, người dùng chỉ muốn đổi phong cách - end */
   html {
     scroll-padding-top: var(--nav-h);
     scroll-behavior: smooth;
-    font-size: 17px;
+    /* Haihs: chữ gốc 14px trên máy tính - start */
+    /* đóng code cũ */
+    /* font-size: 17px; */
+    /* font-size: 14px; */
+    font-size: 17px; /* Haihs: trả cỡ/khoảng cách về như cũ, người dùng chỉ muốn đổi phong cách - start - end */
+    /* Haihs: chữ gốc 14px trên máy tính - end */
     color-scheme: light;
   }
   html.dark {
     color-scheme: dark;
   }
+  /* Haihs: trả cỡ/khoảng cách về như cũ, người dùng chỉ muốn đổi phong cách - start */
+  /* đóng code cũ */
+  /* @media (max-width: 767px) { html { font-size: 16px; } } */
+  /* Haihs: trả cỡ/khoảng cách về như cũ, người dùng chỉ muốn đổi phong cách - end */
   body {
     @apply bg-gray-50 text-gray-900 antialiased;
-    line-height: 1.6;
+    /* Haihs: mật độ dày hơn - start */
+    /* đóng code cũ */
+    /* line-height: 1.6; */
+    /* line-height: 1.5; */
+    line-height: 1.6; /* Haihs: trả cỡ/khoảng cách về như cũ, người dùng chỉ muốn đổi phong cách - start - end */
+    /* Haihs: mật độ dày hơn - end */
   }
   html.dark body {
     @apply bg-gray-900 text-gray-100;
   }
   :focus-visible {
-    outline: 3px solid #6d4fd6;
-    outline-offset: 2px;
+    /* Haihs: focus xanh - start */
+    /* đóng code cũ */
+    /* outline: 3px solid #6d4fd6; */
+    /* outline-offset: 2px; */
+    outline: 2px solid #1a67a3;
+    outline-offset: 1px;
+    /* Haihs: focus xanh - end */
   }
   html.dark :focus-visible {
-    outline-color: #b39dfa;
+    /* Haihs: focus xanh trên dark - start */
+    /* đóng code cũ */
+    /* outline-color: #b39dfa; */
+    outline-color: #5b9bd5;
+    /* Haihs: focus xanh trên dark - end */
   }
   input, select, textarea {
-    min-height: 48px;
+    /* Haihs: input/select/textarea/button dùng chiều cao token - start */
+    /* đóng code cũ */
+    /* min-height: 48px; */
+    /* } */
+    /* button, [role='button'] { */
+    /* min-height: 44px; */
+    /* min-height: var(--control-h); */
+    min-height: 48px; /* Haihs: trả cỡ/khoảng cách về như cũ, người dùng chỉ muốn đổi phong cách - start - end */
   }
   button, [role='button'] {
-    min-height: 44px;
+    /* min-height: var(--control-h); */
+    min-height: 44px; /* Haihs: trả cỡ/khoảng cách về như cũ, người dùng chỉ muốn đổi phong cách - start - end */
+    /* Haihs: input/select/textarea/button dùng chiều cao token - end */
   }
   input[type='checkbox'], input[type='radio'] {
     min-height: 0;
     width: 1.25rem;
     height: 1.25rem;
-    accent-color: #6d4fd6;
+    /* Haihs: accent xanh - start */
+    /* đóng code cũ */
+    /* accent-color: #6d4fd6; */
+    accent-color: #1a67a3;
+    /* Haihs: accent xanh - end */
   }
   html.dark input[type='checkbox'], html.dark input[type='radio'] {
-    accent-color: #b39dfa;
+    /* Haihs: accent xanh trên dark - start */
+    /* đóng code cũ */
+    /* accent-color: #b39dfa; */
+    accent-color: #5b9bd5;
+    /* Haihs: accent xanh trên dark - end */
   }
   ::placeholder {
     @apply text-gray-500;
@@ -56,62 +109,206 @@
 
 @layer components {
   .btn {
-    @apply inline-flex items-center justify-center gap-2 min-h-[48px] px-5 py-2 rounded-lg border text-base font-medium cursor-pointer transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed;
+    /* Haihs: trả cỡ/khoảng cách về như cũ, người dùng chỉ muốn đổi phong cách - start */
+    /* đóng code cũ */
+    /* @apply inline-flex items-center justify-center gap-2 min-h-[48px] px-5 py-2 rounded-lg border text-base font-medium cursor-pointer transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed; */
+    /* @apply inline-flex items-center justify-center gap-1.5 min-h-[var(--control-h)] px-3 py-1 rounded border text-base font-medium cursor-pointer transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed; */
+    @apply inline-flex items-center justify-center gap-2 min-h-[48px] px-5 py-2 rounded border text-base font-medium cursor-pointer transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed;
+    /* Haihs: trả cỡ/khoảng cách về như cũ, người dùng chỉ muốn đổi phong cách - end */
   }
   .btn-primary {
-    @apply btn border-primary-700 bg-primary-700 text-white hover:bg-primary-800 hover:shadow-floating dark:border-sky-400 dark:bg-sky-400 dark:text-gray-900 dark:hover:bg-sky-300;
+    /* Haihs: nút chính xanh, bỏ bóng khi hover - start */
+    /* đóng code cũ */
+    /* @apply btn border-primary-700 bg-primary-700 text-white hover:bg-primary-800 hover:shadow-floating dark:border-sky-400 dark:bg-sky-400 dark:text-gray-900 dark:hover:bg-sky-300; */
+    @apply btn border-primary-700 bg-primary-700 text-white hover:bg-primary-800 hover:border-primary-800 dark:border-primary-400 dark:bg-primary-400 dark:text-gray-900 dark:hover:bg-primary-300 dark:hover:border-primary-300;
+    /* Haihs: nút chính xanh, bỏ bóng khi hover - end */
   }
   .btn-secondary {
-    @apply btn border-gray-300 bg-white text-gray-800 hover:bg-gray-50 hover:shadow-raised dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700;
+    /* Haihs: nút phụ phẳng - start */
+    /* đóng code cũ */
+    /* @apply btn border-gray-300 bg-white text-gray-800 hover:bg-gray-50 hover:shadow-raised dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700; */
+    @apply btn border-gray-300 bg-white text-gray-800 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700;
+    /* Haihs: nút phụ phẳng - end */
   }
   .btn-danger {
-    @apply btn border-red-700 bg-red-700 text-white hover:bg-red-800 dark:border-red-500 dark:bg-red-500 dark:text-gray-900 dark:hover:bg-red-400;
+    /* Haihs: nút nguy hiểm theo palette mới, tương phản AA trên dark - start */
+    /* đóng code cũ */
+    /* @apply btn border-red-700 bg-red-700 text-white hover:bg-red-800 dark:border-red-500 dark:bg-red-500 dark:text-gray-900 dark:hover:bg-red-400; */
+    @apply btn border-red-700 bg-red-700 text-white hover:bg-red-800 dark:border-red-400 dark:bg-red-400 dark:text-gray-900 dark:hover:bg-red-300;
+    /* Haihs: nút nguy hiểm theo palette mới, tương phản AA trên dark - end */
   }
   .btn-ghost {
     @apply btn border-transparent bg-transparent text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800;
   }
+  /* Haihs: nút tạo mới xanh lá (Task 0) - start */
+  .btn-success {
+    @apply btn border-success-600 bg-success-600 text-white hover:bg-success-700 hover:border-success-700 dark:border-success-400 dark:bg-success-400 dark:text-gray-900 dark:hover:bg-success-300 dark:hover:border-success-300;
+  }
+  /* Haihs: nút tạo mới xanh lá (Task 0) - end */
   .card {
-    @apply rounded-lg border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-800;
+    /* Haihs: trả cỡ/khoảng cách về như cũ, người dùng chỉ muốn đổi phong cách - start */
+    /* đóng code cũ */
+    /* @apply rounded-lg border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-800; */
+    /* đóng code cũ */
+    /* @apply rounded border border-gray-300 bg-white p-4 shadow-raised dark:border-gray-700 dark:bg-gray-800 dark:shadow-raised-dark; */
+    @apply rounded border border-gray-300 bg-white p-5 shadow-raised dark:border-gray-700 dark:bg-gray-800 dark:shadow-raised-dark;
+    /* Haihs: trả cỡ/khoảng cách về như cũ, người dùng chỉ muốn đổi phong cách - end */
   }
   .card-hover {
     @apply transition-shadow duration-150 hover:shadow-floating dark:hover:shadow-floating-dark;
   }
   .card-header {
-    @apply flex flex-wrap items-center justify-between gap-2 rounded-t-lg border-b border-gray-200 bg-gray-50 px-5 py-3 text-lg font-medium text-gray-900 dark:border-gray-700 dark:bg-gray-900/60 dark:text-gray-100;
+    /* Haihs: trả cỡ/khoảng cách về như cũ, người dùng chỉ muốn đổi phong cách - start */
+    /* đóng code cũ */
+    /* @apply flex flex-wrap items-center justify-between gap-2 rounded-t-lg border-b border-gray-200 bg-gray-50 px-5 py-3 text-lg font-medium text-gray-900 dark:border-gray-700 dark:bg-gray-900/60 dark:text-gray-100; */
+    /* đóng code cũ */
+    /* @apply flex flex-wrap items-center justify-between gap-2 rounded-t border-b border-gray-300 bg-gray-100 px-4 py-2 text-base font-semibold text-gray-900 dark:border-gray-700 dark:bg-gray-900/60 dark:text-gray-100; */
+    @apply flex flex-wrap items-center justify-between gap-2 rounded-t border-b border-gray-300 bg-gray-100 px-5 py-3 text-lg font-semibold text-gray-900 dark:border-gray-700 dark:bg-gray-900/60 dark:text-gray-100;
+    /* Haihs: trả cỡ/khoảng cách về như cũ, người dùng chỉ muốn đổi phong cách - end */
   }
   .section-band {
-    @apply rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-900/60;
+    /* Haihs: vùng nền gọn, bo góc nhỏ - start */
+    /* đóng code cũ */
+    /* @apply rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-900/60; */
+    /* @apply rounded border border-gray-300 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-900/60; */
+    @apply rounded border border-gray-300 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-900/60; /* Haihs: trả cỡ/khoảng cách về như cũ, người dùng chỉ muốn đổi phong cách - start - end */
+    /* Haihs: vùng nền gọn, bo góc nhỏ - end */
   }
   .field-inset {
     @apply shadow-none;
   }
   .input {
-    @apply w-full min-h-[48px] px-3 py-2 text-base rounded-lg border border-gray-300 bg-white text-gray-900 transition-colors focus:border-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-700/40 disabled:bg-gray-100 disabled:text-gray-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-sky-400 dark:focus:ring-sky-400/40 dark:disabled:bg-gray-800 dark:disabled:text-gray-500;
+    /* Haihs: ô nhập dày theo token, focus xanh - start */
+    /* đóng code cũ */
+    /* @apply w-full min-h-[48px] px-3 py-2 text-base rounded-lg border border-gray-300 bg-white text-gray-900 transition-colors focus:border-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-700/40 disabled:bg-gray-100 disabled:text-gray-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-sky-400 dark:focus:ring-sky-400/40 dark:disabled:bg-gray-800 dark:disabled:text-gray-500; */
+    /* @apply w-full min-h-[var(--control-h)] px-2 py-1 text-base rounded border border-gray-300 bg-white text-gray-900 transition-colors focus:border-primary-700 focus:outline-none focus:ring-1 focus:ring-primary-700 disabled:bg-gray-100 disabled:text-gray-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-primary-400 dark:focus:ring-primary-400 dark:disabled:bg-gray-800 dark:disabled:text-gray-400; */
+    @apply w-full min-h-[48px] px-3 py-2 text-base rounded border border-gray-300 bg-white text-gray-900 transition-colors focus:border-primary-700 focus:outline-none focus:ring-1 focus:ring-primary-700 disabled:bg-gray-100 disabled:text-gray-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-primary-400 dark:focus:ring-primary-400 dark:disabled:bg-gray-800 dark:disabled:text-gray-400; /* Haihs: trả cỡ/khoảng cách về như cũ, người dùng chỉ muốn đổi phong cách - start - end */
+    /* Haihs: ô nhập dày theo token, focus xanh - end */
   }
   .row-hover {
-    @apply transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50;
+    /* Haihs: dòng hover xanh nhạt - start */
+    /* đóng code cũ */
+    /* @apply transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50; */
+    @apply transition-colors hover:bg-primary-50 dark:hover:bg-gray-700/50;
+    /* Haihs: dòng hover xanh nhạt - end */
   }
   .container-fluid {
     @apply w-full px-4 sm:px-6 lg:px-8 2xl:max-w-[1920px] 2xl:mx-auto;
   }
   .page-header {
-    @apply mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-gray-300 pb-4 dark:border-gray-700;
+    /* Haihs: đầu trang gọn - start */
+    /* đóng code cũ */
+    /* @apply mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-gray-300 pb-4 dark:border-gray-700; */
+    /* @apply mb-4 flex flex-wrap items-center justify-between gap-2 border-b border-gray-300 pb-2 dark:border-gray-700; */
+    @apply mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-gray-300 pb-4 dark:border-gray-700; /* Haihs: trả cỡ/khoảng cách về như cũ, người dùng chỉ muốn đổi phong cách - start - end */
+    /* Haihs: đầu trang gọn - end */
   }
   .page-title {
-    @apply text-2xl font-medium text-gray-900 dark:text-gray-100;
+    /* Haihs: tiêu đề trang nhỏ hơn - start */
+    /* đóng code cũ */
+    /* @apply text-2xl font-medium text-gray-900 dark:text-gray-100; */
+    /* @apply text-xl font-semibold text-gray-900 dark:text-gray-100; */
+    @apply text-2xl font-semibold text-gray-900 dark:text-gray-100; /* Haihs: trả cỡ/khoảng cách về như cũ, người dùng chỉ muốn đổi phong cách - start - end */
+    /* Haihs: tiêu đề trang nhỏ hơn - end */
   }
   .page-subtitle {
     @apply mt-1 text-base text-gray-600 dark:text-gray-300;
   }
   .empty-state {
-    @apply flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-gray-300 px-6 py-12 text-center text-gray-600 dark:border-gray-600 dark:text-gray-300;
+    /* Haihs: trạng thái rỗng gọn - start */
+    /* đóng code cũ */
+    /* @apply flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-gray-300 px-6 py-12 text-center text-gray-600 dark:border-gray-600 dark:text-gray-300; */
+    /* @apply flex flex-col items-center justify-center gap-2 rounded border border-dashed border-gray-300 px-4 py-8 text-center text-gray-600 dark:border-gray-600 dark:text-gray-300; */
+    @apply flex flex-col items-center justify-center gap-3 rounded border border-dashed border-gray-300 px-6 py-12 text-center text-gray-600 dark:border-gray-600 dark:text-gray-300; /* Haihs: trả cỡ/khoảng cách về như cũ, người dùng chỉ muốn đổi phong cách - start - end */
+    /* Haihs: trạng thái rỗng gọn - end */
   }
   .badge {
-    @apply inline-flex items-center justify-center gap-1 whitespace-nowrap rounded border border-transparent px-2.5 py-1 text-sm font-semibold leading-5;
+    /* Haihs: badge gọn, bo góc 2px - start */
+    /* đóng code cũ */
+    /* @apply inline-flex items-center justify-center gap-1 whitespace-nowrap rounded border border-transparent px-2.5 py-1 text-sm font-semibold leading-5; */
+    /* @apply inline-flex items-center justify-center gap-1 whitespace-nowrap rounded-sm border border-transparent px-2 py-0.5 text-sm font-semibold leading-5; */
+    @apply inline-flex items-center justify-center gap-1 whitespace-nowrap rounded-sm border border-transparent px-2.5 py-1 text-sm font-semibold leading-5; /* Haihs: trả cỡ/khoảng cách về như cũ, người dùng chỉ muốn đổi phong cách - start - end */
+    /* Haihs: badge gọn, bo góc 2px - end */
   }
   .link-accent {
-    @apply text-primary-700 underline-offset-2 hover:underline dark:text-sky-300;
+    /* Haihs: link xanh, dùng primary thay alias sky - start */
+    /* đóng code cũ */
+    /* @apply text-primary-700 underline-offset-2 hover:underline dark:text-sky-300; */
+    @apply text-primary-700 underline-offset-2 hover:underline dark:text-primary-300;
+    /* Haihs: link xanh, dùng primary thay alias sky - end */
   }
+  /* Haihs: class dùng chung cho breadcrumb, toolbar, bảng dày, bộ lọc, chấm trạng thái, nhãn loại (Task 1) - start */
+  .breadcrumb {
+    @apply flex flex-wrap items-center gap-1 text-sm text-gray-600 dark:text-gray-300;
+  }
+  .breadcrumb a {
+    @apply text-primary-700 hover:underline dark:text-primary-300;
+  }
+  .breadcrumb > * + *::before {
+    content: '/';
+    @apply mr-1 text-gray-400 dark:text-gray-500;
+  }
+  .toolbar {
+    @apply flex flex-wrap items-center gap-2 border-b border-gray-300 bg-gray-100 px-3 py-2 dark:border-gray-700 dark:bg-gray-800;
+  }
+  .table-dense {
+    @apply w-full border-collapse text-base text-gray-900 dark:text-gray-100;
+  }
+  .table-dense th {
+    @apply border-b border-gray-300 bg-gray-100 px-2 py-1.5 text-left text-sm font-semibold text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200;
+  }
+  .table-dense td {
+    @apply border-b border-gray-200 px-2 py-1.5 align-middle dark:border-gray-700;
+  }
+  .table-dense .col-actions {
+    @apply w-px whitespace-nowrap text-right;
+  }
+  @media (max-width: 767px) {
+    .table-dense[data-stack] thead {
+      @apply sr-only;
+    }
+    .table-dense[data-stack] tr {
+      @apply mb-2 block rounded border border-gray-300 dark:border-gray-700;
+    }
+    .table-dense[data-stack] td {
+      @apply flex min-h-[44px] items-center justify-between gap-3 border-b border-gray-200 text-right dark:border-gray-700;
+    }
+    .table-dense[data-stack] td::before {
+      content: attr(data-label);
+      @apply text-left text-sm font-semibold text-gray-600 dark:text-gray-300;
+    }
+    .table-dense[data-stack] .col-actions {
+      @apply w-auto;
+    }
+  }
+  .filter-panel {
+    @apply rounded border border-gray-300 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-900/60;
+  }
+  .filter-row {
+    @apply grid grid-cols-1 items-center gap-1 py-1 sm:grid-cols-[10rem_1fr] sm:gap-3;
+  }
+  .filter-row > :first-child {
+    @apply text-sm font-semibold text-gray-700 dark:text-gray-200;
+  }
+  .status-dot {
+    @apply inline-flex items-center gap-1.5 text-sm text-gray-800 dark:text-gray-100;
+  }
+  .status-dot::before {
+    content: '';
+    @apply inline-block h-2.5 w-2.5 shrink-0 rounded-full bg-gray-500;
+  }
+  .status-dot.is-new::before { @apply bg-status-new dark:bg-primary-300; }
+  .status-dot.is-progress::before { @apply bg-status-progress dark:bg-amber-400; }
+  .status-dot.is-confirmed::before { @apply bg-status-confirmed dark:bg-success-300; }
+  .status-dot.is-resolved::before { @apply bg-status-resolved dark:bg-teal-300; }
+  .status-dot.is-closed::before { @apply bg-status-closed dark:bg-gray-400; }
+  .type-label {
+    @apply text-sm font-semibold text-gray-700 dark:text-gray-200;
+  }
+  .type-label.is-bug { @apply text-type-bug dark:text-red-300; }
+  .type-label.is-feature { @apply text-type-feature dark:text-success-300; }
+  .type-label.is-task { @apply text-type-task dark:text-primary-300; }
+  /* Haihs: class dùng chung cho breadcrumb, toolbar, bảng dày, bộ lọc, chấm trạng thái, nhãn loại (Task 1) - end */
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -128,23 +325,49 @@
   height: 10px;
 }
 ::-webkit-scrollbar-track {
-  background: #f4f4f5;
+  /* Haihs: scrollbar theo ink xanh đen - start */
+  /* đóng code cũ */
+  /* background: #f4f4f5; */
+  /* } */
+  background: #f6f8fa;
 }
+  /* Haihs: scrollbar theo ink xanh đen - end */
 ::-webkit-scrollbar-thumb {
-  background: #d4d4d8;
-  border-radius: 4px;
+  /* Haihs: scrollbar theo ink xanh đen - start */
+  /* đóng code cũ */
+  /* background: #d4d4d8; */
+  /* border-radius: 4px; */
+  background: #c3ccd6;
+  border-radius: 2px;
+  /* Haihs: scrollbar theo ink xanh đen - end */
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #a1a1aa;
+  /* Haihs: scrollbar theo ink xanh đen - start */
+  /* đóng code cũ */
+  /* background: #a1a1aa; */
+  background: #9aa7b6;
+  /* Haihs: scrollbar theo ink xanh đen - end */
 }
 html.dark ::-webkit-scrollbar-track {
-  background: #18181b;
+  /* Haihs: scrollbar dark xanh đen - start */
+  /* đóng code cũ */
+  /* background: #18181b; */
+  background: #1b2430;
+  /* Haihs: scrollbar dark xanh đen - end */
 }
 html.dark ::-webkit-scrollbar-thumb {
-  background: #52525b;
+  /* Haihs: scrollbar dark xanh đen - start */
+  /* đóng code cũ */
+  /* background: #52525b; */
+  background: #4b5a6c;
+  /* Haihs: scrollbar dark xanh đen - end */
 }
 html.dark ::-webkit-scrollbar-thumb:hover {
-  background: #71717a;
+  /* Haihs: scrollbar dark xanh đen - start */
+  /* đóng code cũ */
+  /* background: #71717a; */
+  background: #647385;
+  /* Haihs: scrollbar dark xanh đen - end */
 }
 
 @media print {
