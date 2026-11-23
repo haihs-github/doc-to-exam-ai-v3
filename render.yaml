@@ -7,7 +7,8 @@ services:
     runtime: node
     plan: free # shortcut: free ngủ khi không dùng và chỉ 1 instance; đổi sang starter khi chạy thật
     numInstances: 1 # rate limit, cache đề, semaphore upload nằm trong RAM nên không scale ngang
-    buildCommand: npm ci && npm run build -w apps/api
+    # buildCommand: npm ci && npm run build -w apps/api # Haihs: đóng code cũ, NODE_ENV=production làm npm ci bỏ devDependencies nên next build thiếu module - start - end
+    buildCommand: npm ci --include=dev && npm run build -w apps/api # Haihs: cài cả devDependencies để build - start - end
     startCommand: npm run start -w apps/api
     healthCheckPath: /api/auth/config
     envVars:
@@ -33,7 +34,8 @@ services:
   - type: web
     name: doc-to-exam-web
     runtime: static
-    buildCommand: npm ci && npm run build -w apps/web
+    # buildCommand: npm ci && npm run build -w apps/web # Haihs: đóng code cũ, cài cả devDependencies (Angular CLI) để build - start - end
+    buildCommand: npm ci --include=dev && npm run build -w apps/web # Haihs: cài cả devDependencies để build - start - end
     staticPublishPath: apps/web/dist/web/browser
     routes:
       # Thứ tự quan trọng: /api trước, còn lại về index.html cho Angular router.
