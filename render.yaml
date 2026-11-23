@@ -1,0 +1,46 @@
+# Created by Haihs on 23/11/2026
+# Render Blueprint: API (Next.js web service) + giao diện (Angular static site) + rewrite /api để web và API cùng origin.
+# Cần MongoDB ngoài (vd MongoDB Atlas); Render không có MongoDB sẵn.
+services:
+  - type: web
+    name: doc-to-exam-api
+    runtime: node
+    plan: free # shortcut: free ngủ khi không dùng và chỉ 1 instance; đổi sang starter khi chạy thật
+    numInstances: 1 # rate limit, cache đề, semaphore upload nằm trong RAM nên không scale ngang
+    buildCommand: npm ci && npm run build -w apps/api
+    startCommand: npm run start -w apps/api
+    healthCheckPath: /api/auth/config
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "3000" # script start của apps/api cố định cổng 3000
+      - key: MONGODB_URI
+        sync: false # nhập chuỗi mongodb+srv://... khi tạo Blueprint
+      - key: JWT_SECRET
+        generateValue: true
+      - key: API_KEY_ENCRYPTION_SECRET
+        generateValue: true
+      - key: ENABLE_TEACHER_SECRET
+        value: "false" # false: ai cũng đăng ký được tài khoản giáo viên; đặt "true" để bắt nhập mã bí mật
+      - key: TEACHER_SECRET_KEY
+        sync: false # mã bí mật giáo viên, >= 8 ký tự; chỉ cần khi ENABLE_TEACHER_SECRET=true (có thể bỏ trống)
+      # - key: TRUST_PROXY
+      #   value: "2" # bật nếu rate limit tính sai IP vì request đi qua thêm lớp proxy của static site
+
+  - type: web
+    name: doc-to-exam-web
+    runtime: static
+    buildCommand: npm ci && npm run build -w apps/web
+    staticPublishPath: apps/web/dist/web/browser
+    routes:
+      # Thứ tự quan trọng: /api trước, còn lại về index.html cho Angular router.
+      # shortcut: URL API cố định theo tên dịch vụ; nếu Render đổi tên (tên bị trùng) thì sửa lại dòng này.
+      - type: rewrite
+        source: /api/*
+        destination: https://doc-to-exam-api.onrender.com/api/*
+      - type: rewrite
+        source: /*
+        destination: /index.html
