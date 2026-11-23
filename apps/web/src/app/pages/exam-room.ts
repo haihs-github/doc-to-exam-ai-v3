@@ -262,16 +262,34 @@ const pad = (n: number) => String(n).padStart(2, '0');
           </div>
         </div>
       } @else if (exam(); as ex) {
+        <!-- Haihs: thiết kế lại phòng thi (đồng hồ viên, vạch tiến độ, thẻ chọn lớn, bảng câu hỏi) - start -->
+        <!-- đóng code cũ
         <header
           class="sticky top-0 z-40 border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900"
         >
+        -->
+        <header
+          class="sticky top-0 z-40 border-b border-gray-200 bg-white shadow-raised dark:border-gray-700 dark:bg-gray-900"
+        ><!-- Haihs: thiết kế lại phòng thi (đồng hồ viên, vạch tiến độ, thẻ chọn lớn, bảng câu hỏi) - end -->
+          <!-- Haihs: thiết kế lại phòng thi (đồng hồ viên, vạch tiến độ, thẻ chọn lớn, bảng câu hỏi) - start -->
+          <!-- đóng code cũ
           <div
             class="mx-auto flex h-16 w-full items-center justify-between gap-4 px-4 sm:h-20 sm:px-6 lg:px-8"
           >
+          -->
+          <div
+            class="mx-auto flex h-[60px] w-full items-center justify-between gap-2 px-3 sm:h-[72px] sm:gap-4 sm:px-6 lg:px-8"
+          ><!-- Haihs: thiết kế lại phòng thi (đồng hồ viên, vạch tiến độ, thẻ chọn lớn, bảng câu hỏi) - end -->
             <div class="flex items-center gap-3 overflow-hidden sm:gap-4">
+              <!-- Haihs: thiết kế lại phòng thi (đồng hồ viên, vạch tiến độ, thẻ chọn lớn, bảng câu hỏi) - start -->
+              <!-- đóng code cũ
               <div
                 class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-primary-700 text-white sm:h-11 sm:w-11 dark:bg-sky-400 dark:text-gray-900"
               >
+              -->
+              <div
+                class="hidden h-9 w-9 flex-shrink-0 items-center justify-center rounded-[10px] bg-primary-700 text-white sm:flex sm:h-11 sm:w-11 dark:bg-sky-400 dark:text-gray-900"
+              ><!-- Haihs: thiết kế lại phòng thi (đồng hồ viên, vạch tiến độ, thẻ chọn lớn, bảng câu hỏi) - end -->
                 <app-icon name="file-question" svgClass="h-5 w-5" />
               </div>
               <div class="overflow-hidden">
@@ -301,6 +319,8 @@ const pad = (n: number) => String(n).padStart(2, '0');
             </div>
             <div class="flex flex-shrink-0 items-center gap-2 sm:gap-4">
               <app-theme-toggle />
+              <!-- Haihs: thiết kế lại phòng thi (đồng hồ viên, vạch tiến độ, thẻ chọn lớn, bảng câu hỏi) - start -->
+              <!-- đóng code cũ
               <div
                 role="timer"
                 [attr.aria-label]="'Thời gian còn lại ' + clock()"
@@ -308,6 +328,14 @@ const pad = (n: number) => String(n).padStart(2, '0');
                 class="flex items-center gap-2 rounded-xl border px-3.5 py-1.5 font-mono text-base font-bold transition-all"
                 [class]="timerCls()"
               >
+              -->
+              <div
+                role="timer"
+                [attr.aria-label]="'Thời gian còn lại ' + clock()"
+                title="Thời gian còn lại do máy chủ quản lý"
+                class="flex items-center gap-2 rounded-full border px-4 py-1.5 font-mono text-lg font-bold transition-all"
+                [class]="timerCls()"
+              ><!-- Haihs: thiết kế lại phòng thi (đồng hồ viên, vạch tiến độ, thẻ chọn lớn, bảng câu hỏi) - end -->
                 @if (remaining() <= 60) {
                   <app-icon
                     name="alert-triangle"
@@ -338,6 +366,14 @@ const pad = (n: number) => String(n).padStart(2, '0');
               </button>
             </div>
           </div>
+          <!-- Haihs: vạch tiến độ mỏng ở đáy thanh trên phòng thi - start -->
+          <div class="h-1 bg-gray-200 dark:bg-gray-700" aria-hidden="true">
+            <i
+              class="block h-full bg-green-600 transition-all duration-300"
+              [style.width.%]="progress()"
+            ></i>
+          </div>
+          <!-- Haihs: vạch tiến độ mỏng ở đáy thanh trên phòng thi - end -->
         </header>
 
         <main class="mx-auto w-full px-4 py-8 sm:px-6 lg:px-8">
@@ -356,9 +392,15 @@ const pad = (n: number) => String(n).padStart(2, '0');
           }
           <div class="grid grid-cols-1 items-start gap-8 lg:grid-cols-12">
             <div class="space-y-6 lg:col-span-8" [class.select-none]="ex.antiCheat">
+              <!-- Haihs: thiết kế lại phòng thi (đồng hồ viên, vạch tiến độ, thẻ chọn lớn, bảng câu hỏi) - start -->
+              <!-- đóng code cũ
               <div
                 class="flex items-center justify-between rounded-xl border border-primary-300 bg-primary-50/70 p-4 text-base text-primary-700 dark:border-sky-400/40 dark:bg-sky-400/10 dark:text-sky-400"
               >
+              -->
+              <div
+                class="flex flex-col gap-1.5 rounded-lg border border-primary-300 bg-primary-50/70 p-4 text-base text-primary-700 sm:flex-row sm:items-center sm:justify-between dark:border-sky-400/40 dark:bg-sky-400/10 dark:text-sky-400"
+              ><!-- Haihs: thiết kế lại phòng thi (đồng hồ viên, vạch tiến độ, thẻ chọn lớn, bảng câu hỏi) - end -->
                 <div>
                   @if (essayCount() > 0) {
                     Đề thi gồm
@@ -378,18 +420,35 @@ const pad = (n: number) => String(n).padStart(2, '0');
 
               @for (q of questions(); track q.id; let i = $index) {
                 @if (showContext(i)) {
+                  <!-- Haihs: thiết kế lại phòng thi (đồng hồ viên, vạch tiến độ, thẻ chọn lớn, bảng câu hỏi) - start -->
+                  <!-- đóng code cũ
                   <div
                     class="rounded-xl border border-primary-200/70 bg-primary-50/50 p-4 text-base leading-relaxed text-gray-800 dark:border-sky-800 dark:bg-sky-900/30 dark:text-gray-100"
                   >
+                  -->
+                  <div
+                    class="rounded-lg border border-l-4 border-primary-200/70 border-l-primary-600 bg-primary-50/50 p-4 text-base leading-relaxed text-gray-800 dark:border-sky-800 dark:border-l-sky-400 dark:bg-sky-900/30 dark:text-gray-100"
+                  ><!-- Haihs: thiết kế lại phòng thi (đồng hồ viên, vạch tiến độ, thẻ chọn lớn, bảng câu hỏi) - end -->
                     <app-formatted-text [text]="q.context" />
                   </div>
                 }
+                <!-- Haihs: thiết kế lại phòng thi (đồng hồ viên, vạch tiến độ, thẻ chọn lớn, bảng câu hỏi) - start -->
+                <!-- đóng code cũ
                 <div
                   [id]="'q-' + q.id"
                   class="relative scroll-mt-24 rounded-xl border border-gray-200/80 bg-white p-5 transition-all sm:p-6 dark:border-gray-700 dark:bg-gray-800"
                   [attr.aria-label]="'Câu ' + (i + 1)"
                 >
-                  <div class="mb-3 flex flex-wrap items-start gap-3">
+                -->
+                <div
+                  [id]="'q-' + q.id"
+                  class="relative scroll-mt-24 rounded-[10px] border border-gray-200/80 bg-white p-4 shadow-raised transition-all sm:p-6 dark:border-gray-700 dark:bg-gray-800 dark:shadow-raised-dark"
+                  [attr.aria-label]="'Câu ' + (i + 1)"
+                ><!-- Haihs: thiết kế lại phòng thi (đồng hồ viên, vạch tiến độ, thẻ chọn lớn, bảng câu hỏi) - end -->
+                  <!-- Haihs: thiết kế lại phòng thi (đồng hồ viên, vạch tiến độ, thẻ chọn lớn, bảng câu hỏi) - start -->
+                  <!-- đóng code cũ -->
+                  <!-- <div class="mb-3 flex flex-wrap items-start gap-3"> -->
+                  <div class="mb-3 flex flex-wrap items-start gap-3 border-b border-gray-200 pb-3 dark:border-gray-700"><!-- Haihs: thiết kế lại phòng thi (đồng hồ viên, vạch tiến độ, thẻ chọn lớn, bảng câu hỏi) - end -->
                     <span
                       class="inline-flex flex-shrink-0 items-center justify-center rounded-lg bg-primary-700 px-2.5 py-1 text-sm font-bold text-white sm:text-base dark:bg-sky-400 dark:text-gray-900"
                     >
@@ -559,6 +618,8 @@ const pad = (n: number) => String(n).padStart(2, '0');
                     >
                       @for (k of keys; track k) {
                         @if (q.options?.[k]) {
+                          <!-- Haihs: thiết kế lại phòng thi (đồng hồ viên, vạch tiến độ, thẻ chọn lớn, bảng câu hỏi) - start -->
+                          <!-- đóng code cũ
                           <label
                             class="flex min-h-[56px] cursor-pointer select-none items-center gap-3 rounded-xl border p-3 px-4 text-lg transition-all"
                             [class]="
@@ -567,6 +628,15 @@ const pad = (n: number) => String(n).padStart(2, '0');
                                 : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700'
                             "
                           >
+                          -->
+                          <label
+                            class="flex min-h-[56px] cursor-pointer select-none items-center gap-3 rounded-lg border-[1.5px] p-3 px-4 text-lg transition-all"
+                            [class]="
+                              answers()[q.id] === k
+                                ? 'border-primary-600 bg-primary-50 text-primary-900 ring-2 ring-primary-600/20 dark:border-sky-400 dark:bg-sky-900/30 dark:text-sky-400 dark:ring-sky-400'
+                                : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700'
+                            "
+                          ><!-- Haihs: thiết kế lại phòng thi (đồng hồ viên, vạch tiến độ, thẻ chọn lớn, bảng câu hỏi) - end -->
                             <input
                               type="radio"
                               class="sr-only"
@@ -574,6 +644,8 @@ const pad = (n: number) => String(n).padStart(2, '0');
                               [checked]="answers()[q.id] === k"
                               (change)="setAnswer(q.id, k)"
                             />
+                            <!-- Haihs: thiết kế lại phòng thi (đồng hồ viên, vạch tiến độ, thẻ chọn lớn, bảng câu hỏi) - start -->
+                            <!-- đóng code cũ
                             <div
                               class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded text-base font-bold transition-colors"
                               [class]="
@@ -582,6 +654,15 @@ const pad = (n: number) => String(n).padStart(2, '0');
                                   : 'border border-gray-300 bg-gray-100 text-gray-600 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400'
                               "
                             >
+                            -->
+                            <div
+                              class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-base font-bold transition-colors"
+                              [class]="
+                                answers()[q.id] === k
+                                  ? 'bg-primary-700 text-white dark:bg-sky-400'
+                                  : 'border border-gray-300 bg-gray-100 text-gray-600 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400'
+                              "
+                            ><!-- Haihs: thiết kế lại phòng thi (đồng hồ viên, vạch tiến độ, thẻ chọn lớn, bảng câu hỏi) - end -->
                               {{ k }}
                             </div>
                             <span
@@ -642,7 +723,10 @@ const pad = (n: number) => String(n).padStart(2, '0');
                   </div>
                 </div>
                 <div class="max-h-[50vh] flex-1 overflow-y-auto py-3 pr-1 sm:max-h-[420px]">
-                  <div class="grid grid-cols-4 gap-2 sm:grid-cols-5">
+                  <!-- Haihs: thiết kế lại phòng thi (đồng hồ viên, vạch tiến độ, thẻ chọn lớn, bảng câu hỏi) - start -->
+                  <!-- đóng code cũ -->
+                  <!-- <div class="grid grid-cols-4 gap-2 sm:grid-cols-5"> -->
+                  <div class="grid grid-cols-5 gap-2"><!-- Haihs: thiết kế lại phòng thi (đồng hồ viên, vạch tiến độ, thẻ chọn lớn, bảng câu hỏi) - end -->
                     @for (q of questions(); track q.id; let i = $index) {
                       <button
                         type="button"

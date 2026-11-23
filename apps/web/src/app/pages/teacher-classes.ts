@@ -56,7 +56,11 @@ const TABS: [View, string][] = [
           Lớp học
         </h1>
         <!-- Haihs: mũi tên quay lại và tiêu đề có icon giống bản gốc - end -->
-        <div class="flex gap-2">
+        <!-- Haihs: header/tab điện thoại không bị cắt chữ - start -->
+        <!-- đóng code cũ -->
+        <!-- <div class="flex gap-2"> -->
+        <div class="flex w-full flex-wrap gap-2 md:w-auto">
+        <!-- Haihs: header/tab điện thoại không bị cắt chữ - end -->
           <!-- Haihs: icon cho nút giống bản gốc - start -->
           <!-- đóng code cũ -->
           <!-- <a routerLink="/join" class="btn-secondary">Tham gia lớp bằng link</a> -->
@@ -75,6 +79,9 @@ const TABS: [View, string][] = [
       </div>
 
       <div class="flex flex-wrap items-center justify-between gap-3">
+        <!-- Haihs: header/tab điện thoại không bị cắt chữ - start -->
+        <!-- đóng code cũ -->
+        <!--
         <div class="flex gap-2 border-b border-gray-200 dark:border-gray-700">
           @for (t of tabs; track t[0]) {
             <button
@@ -92,6 +99,25 @@ const TABS: [View, string][] = [
             </button>
           }
         </div>
+        -->
+        <div class="flex w-full flex-wrap gap-x-1 border-b border-gray-200 md:w-auto md:gap-x-2 dark:border-gray-700">
+          @for (t of tabs; track t[0]) {
+            <button
+              type="button"
+              [attr.aria-pressed]="view() === t[0]"
+              (click)="switchView(t[0])"
+              class="-mb-px border-b-2 min-h-[44px] flex-1 px-2 py-2 text-center text-base md:flex-none md:px-4 font-semibold"
+              [class]="
+                view() === t[0]
+                  ? 'border-primary-700 text-primary-700 dark:border-sky-400 dark:text-sky-400'
+                  : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100'
+              "
+            >
+              {{ t[1] }}
+            </button>
+          }
+        </div>
+        <!-- Haihs: header/tab điện thoại không bị cắt chữ - end -->
         <input
           type="search"
           name="q"
@@ -152,7 +178,31 @@ const TABS: [View, string][] = [
                   Mã {{ r.c.code }} · {{ year(r.c)
                   }}{{ r.pending ? '' : ' · ' + r.c.studentCount + ' học sinh' }}
                 </p>
+                <!-- Haihs: nút hiện đủ trên web, nhãn trạng thái to ở hàng dưới tiêu đề, ⋮ chỉ trên điện thoại - start -->
+                <div class="mt-1.5 flex flex-wrap items-center gap-2">
+                  @if (r.pending) {
+                    <span
+                      class="badge border-amber-200 bg-amber-50 px-3 py-1 text-base text-amber-800 dark:border-amber-800 dark:bg-amber-900/40 dark:text-amber-300"
+                      >Chờ duyệt</span
+                    >
+                  }
+                  <span
+                    class="badge px-3 py-1 text-base"
+                    [class]="
+                      r.deleted || r.c.status !== 'active'
+                        ? 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-200'
+                        : 'border-green-200 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-900/40 dark:text-green-300'
+                    "
+                    >{{
+                      r.deleted ? 'Đã xoá' : r.c.status === 'active' ? 'Đang học' : 'Đã tốt nghiệp'
+                    }}</span
+                  >
+                </div>
+                <!-- Haihs: nút hiện đủ trên web, nhãn trạng thái to ở hàng dưới tiêu đề, ⋮ chỉ trên điện thoại - end -->
               </div>
+              <!-- Haihs: nút hiện đủ trên web, nhãn trạng thái to ở hàng dưới tiêu đề, ⋮ chỉ trên điện thoại - start -->
+              <!-- đóng code cũ -->
+              <!--
               <div class="flex flex-wrap items-center gap-2">
                 @if (r.pending) {
                   <span
@@ -175,6 +225,33 @@ const TABS: [View, string][] = [
                   <app-action-menu [items]="r.menu" [label]="'Thao tác với lớp ' + r.c.name" />
                 }
               </div>
+              -->
+              @if (r.menu.length) {
+                <div class="flex flex-none items-center gap-2">
+                  <div class="hidden flex-wrap justify-end gap-2 md:flex">
+                    @for (it of r.menu; track it.label) {
+                      @if (it.to) {
+                        <a [routerLink]="it.to" class="btn-secondary">{{ it.label }}</a>
+                      } @else {
+                        <button
+                          type="button"
+                          [class]="it.danger ? 'btn-danger' : 'btn-secondary'"
+                          [disabled]="it.disabled"
+                          (click)="it.onClick?.()"
+                        >
+                          {{ it.label }}
+                        </button>
+                      }
+                    }
+                  </div>
+                  <app-action-menu
+                    class="md:hidden"
+                    [items]="r.menu"
+                    [label]="'Thao tác với lớp ' + r.c.name"
+                  />
+                </div>
+              }
+              <!-- Haihs: nút hiện đủ trên web, nhãn trạng thái to ở hàng dưới tiêu đề, ⋮ chỉ trên điện thoại - end -->
             </li>
           }
         </ul>

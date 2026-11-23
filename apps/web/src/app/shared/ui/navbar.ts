@@ -7,13 +7,18 @@ import { filter } from 'rxjs';
 import { AuthService } from '../../core/auth.service';
 import { ConfirmService } from './confirm-modal';
 import { Icon } from './icon';
+import { ShellState, navbarVisible } from './shell-state';
 import { ThemeToggle } from './theme-toggle';
 
-/** Student exam pages (/ca/*) hide the navbar, except the result page (source Navbar.jsx Pha 4G). */
-export const navbarVisible = (url: string): boolean => {
-  const path = url.split(/[?#]/)[0];
-  return !(path.startsWith('/ca/') && !/^\/ca\/[^/]+\/result\/?$/.test(path));
-};
+// Haihs: navbarVisible chuyển sang shell-state.ts để tránh import vòng với sidebar, vẫn export lại từ đây - start
+// đóng code cũ
+// /** Student exam pages (/ca/*) hide the navbar, except the result page (source Navbar.jsx Pha 4G). */
+// export const navbarVisible = (url: string): boolean => {
+//   const path = url.split(/[?#]/)[0];
+//   return !(path.startsWith('/ca/') && !/^\/ca\/[^/]+\/result\/?$/.test(path));
+// };
+export { navbarVisible };
+// Haihs: navbarVisible chuyển sang shell-state.ts để tránh import vòng với sidebar, vẫn export lại từ đây - end
 
 // Haihs: thanh trên xanh đặc theo phong cách mới - start
 // đóng code cũ
@@ -41,9 +46,41 @@ const ACTIVE = 'bg-white/20 !text-white';
         class="sticky top-0 z-40 h-[var(--nav-h)] border-b border-primary-700 bg-primary-700 text-white dark:border-primary-900 dark:bg-primary-900"
       >
         <!-- Haihs: thanh trên xanh đặc theo phong cách mới - end -->
+        <!-- Haihs: khung sidebar: nút hamburger/thu gọn bên trái, nav đẩy sang phải bằng ml-auto - start -->
+        <!-- đóng code cũ -->
+        <!-- <div -->
+        <!-- class="flex h-full w-full items-center justify-between gap-2 px-4 sm:px-6 2xl:mx-auto 2xl:max-w-[1920px]" -->
+        <!-- > -->
         <div
-          class="flex h-full w-full items-center justify-between gap-2 px-4 sm:px-6 2xl:mx-auto 2xl:max-w-[1920px]"
+          class="flex h-full w-full items-center gap-2 px-4 sm:px-6 2xl:mx-auto 2xl:max-w-[1920px]"
         >
+          @if (shell.hasSidebar()) {
+            <button
+              type="button"
+              id="navToggle"
+              aria-controls="sidebar"
+              (click)="shell.toggleOpen()"
+              [attr.aria-expanded]="shell.open()"
+              aria-label="Mở menu"
+              title="Mở menu"
+              class="inline-flex h-12 w-12 shrink-0 cursor-pointer items-center justify-center rounded-full text-white transition-colors hover:bg-white/15 md:hidden"
+            >
+              <app-icon name="menu" svgClass="h-6 w-6" />
+            </button>
+            <button
+              type="button"
+              id="sbToggle"
+              aria-controls="sidebar"
+              (click)="shell.toggleCollapsed()"
+              [attr.aria-expanded]="!shell.collapsed()"
+              [attr.aria-label]="shell.collapsed() ? 'Mở rộng thanh bên' : 'Thu gọn thanh bên'"
+              [attr.title]="shell.collapsed() ? 'Mở rộng thanh bên' : 'Thu gọn thanh bên'"
+              class="hidden h-12 w-12 shrink-0 cursor-pointer items-center justify-center rounded-full text-white transition-colors hover:bg-white/15 md:inline-flex"
+            >
+              <app-icon name="menu" svgClass="h-6 w-6" />
+            </button>
+          }
+          <!-- Haihs: khung sidebar: nút hamburger/thu gọn bên trái, nav đẩy sang phải bằng ml-auto - end -->
           <a routerLink="/" class="flex min-h-[48px] shrink-0 items-center gap-2.5 rounded-lg">
             <!-- Haihs: thanh trên xanh đặc theo phong cách mới - start -->
             <!-- đóng code cũ -->
@@ -55,10 +92,17 @@ const ACTIVE = 'bg-white/20 !text-white';
             >
             <!-- Haihs: thanh trên xanh đặc theo phong cách mới - end -->
           </a>
+          <!-- Haihs: nav đẩy sang phải bằng ml-auto vì container bỏ justify-between - start -->
+          <!-- đóng code cũ -->
+          <!-- <nav -->
+          <!-- aria-label="Điều hướng chính" -->
+          <!-- class="flex min-w-0 flex-nowrap items-center gap-1 overflow-x-auto sm:gap-2 [&>*]:shrink-0" -->
+          <!-- > -->
           <nav
             aria-label="Điều hướng chính"
-            class="flex min-w-0 flex-nowrap items-center gap-1 overflow-x-auto sm:gap-2 [&>*]:shrink-0"
+            class="ml-auto flex min-w-0 flex-nowrap items-center gap-1 overflow-x-auto sm:gap-2 [&>*]:shrink-0"
           >
+            <!-- Haihs: nav đẩy sang phải bằng ml-auto vì container bỏ justify-between - end -->
             @if (!auth.isAuthenticated()) {
               <!-- TODO(web): M4 — route /about chưa tồn tại -->
               <!-- Haihs: đã xử lý, route /about đã có ở app.routes.ts - start - end -->
@@ -110,7 +154,10 @@ const ACTIVE = 'bg-white/20 !text-white';
               </a>
               <!-- Haihs: header khách giống bản cũ: bỏ Giới thiệu/Giáo viên, nút Đăng Nhập + Đăng Ký có icon - end -->
             } @else {
-              @if (!auth.user()?.mustChangePassword) {
+              <!-- Haihs: link theo vai trò, Đổi mật khẩu, API Key chuyển sang <app-sidebar>; khối cũ giữ nguyên nhưng không còn hiển thị - start -->
+              <!-- đóng code cũ -->
+              <!-- @if (!auth.user()?.mustChangePassword) { -->
+              @if (false) {
                 @if (auth.isStudent()) {
                   <!-- TODO(web): M2/M3 — route chưa tồn tại -->
                   <a
@@ -173,6 +220,7 @@ const ACTIVE = 'bg-white/20 !text-white';
                   </button>
                 }
               }
+              <!-- Haihs: link theo vai trò, Đổi mật khẩu, API Key chuyển sang <app-sidebar>; khối cũ giữ nguyên nhưng không còn hiển thị - end -->
               <app-theme-toggle />
               <!-- Haihs: thanh trên xanh đặc theo phong cách mới - start -->
               <!-- đóng code cũ -->
@@ -184,20 +232,26 @@ const ACTIVE = 'bg-white/20 !text-white';
               <!-- >{{ auth.user()?.fullName }}</span -->
               <!-- > -->
               <!-- <button type="button" (click)="logout()" class="btn-ghost" title="Đăng xuất"> -->
-              <div class="flex items-center gap-2 border-l border-white/30 pl-2">
-                <span class="hidden text-base font-medium text-white xl:inline">{{
-                  auth.user()?.fullName
-                }}</span>
-                <button
-                  type="button"
-                  (click)="logout()"
-                  class="btn-ghost !text-white hover:!bg-white/15"
-                  title="Đăng xuất"
-                >
-                <!-- Haihs: thanh trên xanh đặc theo phong cách mới - end -->
-                  Đăng xuất
-                </button>
-              </div>
+              <!-- Haihs: thanh trên xanh đặc theo phong cách mới - end -->
+              <!-- Haihs: Đăng xuất chuyển xuống sidebar; thanh trên chỉ còn tên người dùng - start -->
+              <!-- đóng code cũ -->
+              <!-- <div class="flex items-center gap-2 border-l border-white/30 pl-2"> -->
+              <!--   <span class="hidden text-base font-medium text-white xl:inline">{{ -->
+              <!--     auth.user()?.fullName -->
+              <!--   }}</span> -->
+              <!--   <button -->
+              <!--     type="button" -->
+              <!--     (click)="logout()" -->
+              <!--     class="btn-ghost !text-white hover:!bg-white/15" -->
+              <!--     title="Đăng xuất" -->
+              <!--   > -->
+              <!--     Đăng xuất -->
+              <!--   </button> -->
+              <!-- </div> -->
+              <span class="hidden border-l border-white/30 pl-2 text-base font-medium text-white md:inline">{{
+                auth.user()?.fullName
+              }}</span>
+              <!-- Haihs: Đăng xuất chuyển xuống sidebar; thanh trên chỉ còn tên người dùng - end -->
             }
           </nav>
         </div>
@@ -209,6 +263,7 @@ export class Navbar {
   protected readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly confirm = inject(ConfirmService);
+  protected readonly shell = inject(ShellState); // Haihs: nút hamburger/thu gọn sidebar - start - end
   protected readonly link = LINK;
   protected readonly active = ACTIVE;
   protected readonly visible = signal(navbarVisible(this.router.url));

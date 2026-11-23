@@ -105,13 +105,19 @@ const STATUSES: SittingStatus[] = ['not_started', 'open', 'ended'];
             </p>
           }
         </div>
+        <!-- Haihs: ô lọc trạng thái dài bằng ô lọc lớp - start -->
+        <!-- đóng code cũ -->
+        <!-- <app-select -->
+        <!-- label="Lọc theo trạng thái" -->
+        <!-- class="w-48" -->
         <app-select
           label="Lọc theo trạng thái"
-          class="w-48"
+          class="w-64 max-w-full"
           [options]="statusOptions"
           [value]="status()"
           (valueChange)="setStatus($event)"
         />
+        <!-- Haihs: ô lọc trạng thái dài bằng ô lọc lớp - end -->
         <!-- Haihs: bộ lọc lớp dùng ô tìm kiếm, bộ lọc trạng thái dùng Select như bản gốc - end -->
       </div>
       @if (loadError()) {
@@ -140,15 +146,27 @@ const STATUSES: SittingStatus[] = ['not_started', 'open', 'ended'];
         }
         <ul class="space-y-3">
           @for (r of rows(); track r.s.id) {
+            <!-- Haihs: thẻ ca thi - tiêu đề đủ, nhãn dưới tiêu đề, nút bên phải trên web - start -->
+            <!-- đóng code cũ -->
+            <!-- <li -->
+            <!-- class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800" -->
+            <!-- > -->
+            <!-- <div class="min-w-0 flex-1"> -->
+            <!-- <a -->
+            <!-- [routerLink]="['/teacher/sittings', r.s.id]" -->
+            <!-- class="line-clamp-2 font-bold text-primary-800 hover:underline dark:text-sky-400" -->
+            <!-- >{{ r.s.title }}</a -->
+            <!-- > -->
             <li
-              class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800"
+              class="flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-4 md:flex-row md:items-center md:justify-between md:gap-4 dark:border-gray-700 dark:bg-gray-800"
             >
               <div class="min-w-0 flex-1">
                 <a
                   [routerLink]="['/teacher/sittings', r.s.id]"
-                  class="line-clamp-2 font-bold text-primary-800 hover:underline dark:text-sky-400"
+                  class="break-words font-bold text-primary-800 [overflow-wrap:anywhere] hover:underline dark:text-sky-400"
                   >{{ r.s.title }}</a
                 >
+            <!-- Haihs: thẻ ca thi - tiêu đề đủ, nhãn dưới tiêu đề, nút bên phải trên web - end -->
                 <p class="text-base text-gray-600 dark:text-gray-400">
                   Mã {{ r.s.code }} · {{ fmt(r.s.openAt) }} → {{ fmt(r.s.closeAt) }} ·
                   <!-- Haihs: icon cho nút giống bản gốc - start -->
@@ -160,22 +178,57 @@ const STATUSES: SittingStatus[] = ['not_started', 'open', 'ended'];
                   <!-- Haihs: icon cho nút giống bản gốc - end -->
                   đã nộp
                 </p>
+            <!-- Haihs: thẻ ca thi - tiêu đề đủ, nhãn dưới tiêu đề, nút bên phải trên web - start -->
+            <!-- đóng code cũ -->
+            <!-- </div> -->
+            <!-- <div class="flex items-center gap-2"> -->
+            <!-- <span -->
+            <!-- class="badge" -->
+            <!-- [class]=" -->
+            <!-- r.s.status === 'open' -->
+            <!-- ? 'border-green-200 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-900/40 dark:text-green-300' -->
+            <!-- : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-200' -->
+            <!-- " -->
+            <!-- >{{ label[r.s.status] }}</span -->
+            <!-- > -->
+            <!-- @if (r.s.resultsPublishedAt) { -->
+            <!-- <span class="badge border-sky-200 bg-sky-50 text-sky-800">Đã công bố</span> -->
+            <!-- } -->
+            <!-- <app-action-menu [items]="r.menu" [label]="'Thao tác với ca ' + r.s.title" /> -->
+            <!-- </div> -->
+                <div class="mt-2 flex flex-wrap gap-2">
+                  <span
+                    class="badge px-3.5 py-1 text-base"
+                    [class]="
+                      r.s.status === 'open'
+                        ? 'border-green-200 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-900/40 dark:text-green-300'
+                        : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-200'
+                    "
+                    >{{ label[r.s.status] }}</span
+                  >
+                  @if (r.s.resultsPublishedAt) {
+                    <span class="badge border-sky-200 bg-sky-50 px-3.5 py-1 text-base text-sky-800"
+                      >Đã công bố</span
+                    >
+                  }
+                </div>
               </div>
-              <div class="flex items-center gap-2">
-                <span
-                  class="badge"
-                  [class]="
-                    r.s.status === 'open'
-                      ? 'border-green-200 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-900/40 dark:text-green-300'
-                      : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-200'
-                  "
-                  >{{ label[r.s.status] }}</span
+              <div class="hidden flex-none items-center gap-2 md:flex">
+                <a [routerLink]="['/teacher/sittings', r.s.id]" class="btn-secondary">Xem chi tiết</a>
+                <a [routerLink]="['/teacher/sittings', r.s.id, 'edit']" class="btn-secondary">Sửa</a>
+                <button
+                  type="button"
+                  class="btn-danger"
+                  [disabled]="busy()"
+                  (click)="remove(r.s)"
                 >
-                @if (r.s.resultsPublishedAt) {
-                  <span class="badge border-sky-200 bg-sky-50 text-sky-800">Đã công bố</span>
-                }
+                  Xóa
+                </button>
+              </div>
+              <div class="md:hidden">
                 <app-action-menu [items]="r.menu" [label]="'Thao tác với ca ' + r.s.title" />
               </div>
+            <!-- Haihs: thẻ ca thi - tiêu đề đủ, nhãn dưới tiêu đề, nút bên phải trên web - end -->
             </li>
           }
         </ul>

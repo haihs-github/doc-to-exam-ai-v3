@@ -516,7 +516,27 @@ const PAGE_SIZE = 50;
                 ><span class="font-bold">{{ r.s.fullName }}</span>
                 <span class="text-gray-600 dark:text-gray-400"> · {{ r.s.phoneNumber }}</span></span
               >
-              <app-action-menu [items]="r.menu" [label]="'Thao tác với ' + r.s.fullName" />
+              <!-- Haihs: nút hiện đủ trên web, ⋮ chỉ trên điện thoại - start -->
+              <!-- đóng code cũ -->
+              <!-- <app-action-menu [items]="r.menu" [label]="'Thao tác với ' + r.s.fullName" /> -->
+              <div class="hidden flex-wrap justify-end gap-2 md:flex">
+                @for (it of r.menu; track it.label) {
+                  <button
+                    type="button"
+                    [class]="it.danger ? 'btn-danger' : 'btn-secondary'"
+                    [disabled]="it.disabled"
+                    (click)="it.onClick?.()"
+                  >
+                    {{ it.label }}
+                  </button>
+                }
+              </div>
+              <app-action-menu
+                class="md:hidden"
+                [items]="r.menu"
+                [label]="'Thao tác với ' + r.s.fullName"
+              />
+              <!-- Haihs: nút hiện đủ trên web, ⋮ chỉ trên điện thoại - end -->
             </li>
           }
         </ul>

@@ -375,3 +375,52 @@ html.dark ::-webkit-scrollbar-thumb:hover {
     display: none !important;
   }
 }
+
+/* Haihs: thanh cuộn overlay: ẩn thanh gốc ở mọi vùng cuộn, thanh mảnh phủ do overlay-scroll.ts dựng (hiện khi cuộn/di chuột) - start */
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+*::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+.osb {
+  position: fixed;
+  z-index: 9999;
+  border-radius: 4px;
+  background: rgb(107 114 128);
+  opacity: 0;
+  transition: opacity 0.2s, width 0.12s, height 0.12s;
+  pointer-events: none;
+  touch-action: none;
+}
+.osb.on {
+  opacity: 0.65;
+  pointer-events: auto;
+}
+.osb:hover,
+.osb.drag {
+  opacity: 0.9;
+}
+.osb-v {
+  width: 6px;
+}
+.osb-v:hover,
+.osb-v.drag {
+  width: 10px;
+}
+.osb-h {
+  height: 6px;
+}
+.osb-h:hover,
+.osb-h.drag {
+  height: 10px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .osb {
+    transition: none;
+  }
+}
+/* Haihs: thanh cuộn overlay: ẩn thanh gốc ở mọi vùng cuộn, thanh mảnh phủ do overlay-scroll.ts dựng (hiện khi cuộn/di chuột) - end */

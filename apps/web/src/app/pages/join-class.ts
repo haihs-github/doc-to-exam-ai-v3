@@ -109,7 +109,8 @@ const INVALID = 'Link mời không hợp lệ hoặc đã hết hiệu lực. H�
                 : 'Bạn đã là thành viên của lớp'
             }}
           </div>
-          <div>Lớp {{ c.name }} (mã {{ c.code }}, {{ c.startYear }}-{{ c.endYear }})</div>
+          <!-- <div>Lớp {{ c.name }} (mã {{ c.code }}, {{ c.startYear }}-{{ c.endYear }})</div> --><!-- Haihs: tên lớp dài không làm tràn ngang - start - end -->
+          <div class="break-words">Lớp {{ c.name }} (mã {{ c.code }}, {{ c.startYear }}-{{ c.endYear }})</div><!-- Haihs: tên lớp dài không làm tràn ngang - start - end -->
           <a
             [routerLink]="home()"
             class="inline-block font-semibold text-primary-700 dark:text-sky-400"

@@ -4,6 +4,7 @@
 // đóng code cũ
 // import { ChangeDetectionStrategy, Component, computed, input, model } from '@angular/core';
 import { ChangeDetectionStrategy, Component, computed, input, model, signal } from '@angular/core';
+import { DestroyRef, inject } from '@angular/core';
 // Haihs: trình soạn câu hỏi có chế độ Xem như học sinh, Chèn câu và nhãn như bản gốc - end
 import {
   EditorQuestion,
@@ -24,6 +25,7 @@ import {
 } from '../utils/exam-questions';
 import { FormattedText } from './formatted-text';
 import { Icon } from './icon';
+import { scrollBehaviorFor } from './scroll-to-top';
 
 const OPTS: OptionKey[] = ['A', 'B', 'C', 'D'];
 const AREA = 'input min-h-[72px] w-full';
@@ -36,6 +38,7 @@ const AREA = 'input min-h-[72px] w-full';
   imports: [FormattedText, Icon],
   // Haihs: icon cho nút giống bản gốc - end
   changeDetection: ChangeDetectionStrategy.OnPush,
+  // host: { '(window:scroll)': 'onWindowScroll()' }, // Haihs: đóng code cũ, host listener đánh dấu dirty mỗi lần cuộn, thay bằng listener passive trong constructor - start - end
   // Haihs: trình soạn câu hỏi có chế độ Xem như học sinh, Chèn câu và nhãn như bản gốc - start
   // đóng code cũ
   //   template: `
@@ -1533,7 +1536,11 @@ const AREA = 'input min-h-[72px] w-full';
                       [attr.aria-label]="'Đáp án đúng của câu ' + (i + 1)"
                     >
                       @for (k of opts; track k) {
-                        <div class="flex items-center gap-2">
+                        <!-- Haihs: nhãn Gạch chân hiện khi hover hàng - start -->
+                        <!-- đóng code cũ -->
+                        <!-- <div class="flex items-center gap-2"> -->
+                        <div class="group flex items-center gap-2">
+                          <!-- Haihs: nhãn Gạch chân hiện khi hover hàng - end -->
                           <input
                             type="radio"
                             [name]="'correct-' + q.id"
@@ -1543,14 +1550,20 @@ const AREA = 'input min-h-[72px] w-full';
                             title="Đặt làm đáp án đúng"
                           />
                           <span class="w-5 font-bold">{{ k }}</span>
+                          <!-- Haihs: nhãn Gạch chân thay chữ U, hiện khi hover/focus trên web - start -->
+                          <!-- đóng code cũ -->
+                          <!-- <button type="button" (click)="underline(q.id, k)" title="Gạch chân phần đang bôi đen (hoặc cả đáp án)" class="rounded px-1.5 text-sm font-semibold text-primary-700 hover:underline dark:text-sky-400"> -->
+                          <!-- <u>U</u> -->
                           <button
                             type="button"
                             (click)="underline(q.id, k)"
                             title="Gạch chân phần đang bôi đen (hoặc cả đáp án)"
-                            class="rounded px-1.5 text-sm font-semibold text-primary-700 hover:underline dark:text-sky-400"
+                            aria-label="Gạch chân phương án {{ k }}"
+                            class="min-h-[44px] rounded px-1.5 text-sm font-semibold text-primary-700 hover:underline focus:opacity-100 md:min-h-0 md:opacity-0 md:group-hover:opacity-100 dark:text-sky-400"
                           >
-                            <u>U</u>
+                            Gạch chân
                           </button>
+                          <!-- Haihs: nhãn Gạch chân thay chữ U, hiện khi hover/focus trên web - end -->
                           <input
                             class="input flex-1"
                             [value]="q.options[k]"
@@ -1678,8 +1691,37 @@ const AREA = 'input min-h-[72px] w-full';
                 Bảng điểm để chấm tay lại các bài đó.
               </p>
             }
+            <!-- Haihs: nút Lưu cố định dưới Bảng đáp án và nút Lên đầu trang (web) - start -->
+            @if (saveLabel()) {
+              <div class="hidden items-center gap-2 border-t border-gray-100 pt-4 md:flex dark:border-gray-700">
+                <button type="submit" class="btn-primary flex-1" [disabled]="saving()">
+                  {{ saveLabel() }}
+                </button>
+                @if (scrolled()) {
+                  <button
+                    type="button"
+                    class="btn-secondary h-11 w-11 !p-0"
+                    title="Lên đầu trang"
+                    aria-label="Lên đầu trang"
+                    (click)="toTop()"
+                  >
+                    <app-icon name="arrow-up" svgClass="h-5 w-5" />
+                  </button>
+                }
+              </div>
+            }
+            <!-- Haihs: nút Lưu cố định dưới Bảng đáp án và nút Lên đầu trang (web) - end -->
           </div>
         </aside>
+        <!-- Haihs: điện thoại: nút Lưu nổi (nút Lên đầu trang chung của app nằm bên phải) - start -->
+        @if (saveLabel()) {
+          <div class="fixed bottom-4 right-16 z-30 md:hidden">
+            <button type="submit" class="btn-primary min-h-[48px] shadow-raised" [disabled]="saving()">
+              {{ saveLabel() }}
+            </button>
+          </div>
+        }
+        <!-- Haihs: điện thoại: nút Lưu nổi (nút Lên đầu trang chung của app nằm bên phải) - end -->
       </div>
     </section>
   `,
@@ -1688,6 +1730,36 @@ const AREA = 'input min-h-[72px] w-full';
   // Haihs: trình soạn câu hỏi có chế độ Xem như học sinh, Chèn câu và nhãn như bản gốc - end
 })
 export class QuestionsEditor {
+  // Haihs: nút Lưu cố định và Lên đầu trang cho trình soạn đề mẫu - start
+  /** Chữ nút Lưu; rỗng = không hiện nút (nút submit form cha). */
+  readonly saveLabel = input('');
+  readonly saving = input(false);
+  protected readonly scrolled = signal(false);
+  protected onWindowScroll(): void {
+    this.scrolled.set(window.scrollY > 300);
+  }
+  // Haihs: listener passive chỉ gắn khi có nút Lưu, signal chỉ đổi khi vượt ngưỡng nên không chạy change detection mỗi lần cuộn - start
+  constructor() {
+    const onScroll = () => {
+      if (this.saveLabel()) this.onWindowScroll();
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    inject(DestroyRef).onDestroy(() => window.removeEventListener('scroll', onScroll));
+  }
+  // Haihs: listener passive chỉ gắn khi có nút Lưu, signal chỉ đổi khi vượt ngưỡng nên không chạy change detection mỗi lần cuộn - end
+  // đóng code cũ
+  // protected toTop(): void {
+  //   window.scrollTo({ top: 0, behavior: 'smooth' });
+  // }
+  // Haihs: toTop tôn trọng prefers-reduced-motion - start
+  protected toTop(): void {
+    window.scrollTo({
+      top: 0,
+      behavior: scrollBehaviorFor(window.matchMedia('(prefers-reduced-motion: reduce)').matches),
+    });
+  }
+  // Haihs: toTop tôn trọng prefers-reduced-motion - end
+  // Haihs: nút Lưu cố định và Lên đầu trang cho trình soạn đề mẫu - end
   /** Two-way: the parent owns the list. */
   readonly questions = model.required<EditorQuestion[]>();
   readonly errors = input<Record<string, string>>({});

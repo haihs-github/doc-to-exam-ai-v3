@@ -384,7 +384,8 @@ const ICON_OK = 'mt-1 h-5 w-5 flex-none text-primary-700 dark:text-sky-400';
             </div>
             <div [class]="peek + ' min-[900px]:order-1'">
               <div class="card min-w-0 overflow-x-auto">
-                <table class="w-full border-collapse text-[15px]" aria-label="Ví dụ bảng điểm">
+                <!-- <table class="w-full border-collapse text-[15px]" aria-label="Ví dụ bảng điểm"> --><!-- Haihs: bảng điểm không bẻ chữ, cuộn ngang trong thẻ trên điện thoại - start - end -->
+                <table class="w-full whitespace-nowrap border-collapse text-[15px]" aria-label="Ví dụ bảng điểm"><!-- Haihs: bảng điểm không bẻ chữ, cuộn ngang trong thẻ trên điện thoại - start - end -->
                   <thead>
                     <tr
                       class="border-b border-gray-200 text-left text-xs uppercase tracking-wider text-gray-500 dark:border-gray-700 dark:text-gray-400"

@@ -96,7 +96,11 @@ function readDraft(): Draft | null {
           }
         </div>
       } @else {
-        <form (submit)="save($event)" novalidate class="space-y-6">
+        <!-- Haihs: chừa chỗ cho nút Lưu nổi trên điện thoại - start -->
+        <!-- đóng code cũ -->
+        <!-- <form (submit)="save($event)" novalidate class="space-y-6"> -->
+        <form (submit)="save($event)" novalidate class="space-y-6 pb-20 md:pb-0">
+        <!-- Haihs: chừa chỗ cho nút Lưu nổi trên điện thoại - end -->
           <div class="flex flex-wrap items-center justify-between gap-3">
             <h1 class="text-2xl font-extrabold text-gray-900 dark:text-gray-100">
               {{ isNew ? 'Tạo đề mẫu' : 'Sửa đề mẫu' }}
@@ -123,7 +127,16 @@ function readDraft(): Draft | null {
               (input)="description.set($any($event.target).value); clear('description')"
             />
           </app-form-field>
-          <app-questions-editor [(questions)]="questions" [errors]="errors()" />
+          <!-- Haihs: truyền chữ nút Lưu cho nút cố định dưới Bảng đáp án - start -->
+          <!-- đóng code cũ -->
+          <!-- <app-questions-editor [(questions)]="questions" [errors]="errors()" /> -->
+          <app-questions-editor
+            [(questions)]="questions"
+            [errors]="errors()"
+            [saveLabel]="isNew ? 'Lưu đề mẫu' : 'Lưu thay đổi'"
+            [saving]="busy()"
+          />
+          <!-- Haihs: truyền chữ nút Lưu cho nút cố định dưới Bảng đáp án - end -->
         </form>
       }
     </div>

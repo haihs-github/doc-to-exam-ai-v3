@@ -34,18 +34,34 @@ export const submissionResultKey = (code: string): string => `submission_result_
     <!-- @if (s.submittedAt) { -->
     <!-- <p class="text-base text-gray-600 dark:text-gray-400"> -->
     <!-- Đã nộp lúc {{ fmt(s.submittedAt) }} -->
+    <!-- Haihs: thiết kế lại trang nộp xong (nền gradient, thẻ bo 10px, vòng halo, nút cao 56px) - start -->
+    <!-- đóng code cũ -->
+    <!-- <div class="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 dark:bg-gray-900"> -->
     <div
-      class="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 dark:bg-gray-900"
+      class="flex min-h-screen items-center justify-center bg-gradient-to-b from-primary-100 to-gray-50 px-3 pb-8 pt-16 sm:px-6 dark:from-gray-800 dark:to-gray-900"
     >
       <div class="fixed right-3 top-3 z-30"><app-theme-toggle /></div>
+      <!-- đóng code cũ -->
+      <!-- <div -->
+      <!-- class="animate-fadeIn w-full max-w-md space-y-6 rounded-xl border border-gray-200/80 bg-white p-6 text-center shadow-raised sm:p-8 dark:border-gray-700 dark:bg-gray-800 dark:shadow-raised-dark" -->
+      <!-- > -->
       <div
-        class="animate-fadeIn w-full max-w-md space-y-6 rounded-xl border border-gray-200/80 bg-white p-6 text-center shadow-raised sm:p-8 dark:border-gray-700 dark:bg-gray-800 dark:shadow-raised-dark"
+        class="animate-fadeIn w-full max-w-md space-y-5 rounded-[10px] border border-gray-200/80 bg-white p-6 text-center shadow-raised sm:p-9 dark:border-gray-700 dark:bg-gray-800 dark:shadow-raised-dark"
       >
-        <div
-          class="mx-auto flex h-20 w-20 items-center justify-center rounded-xl bg-green-50 text-green-700 dark:bg-green-900/40 dark:text-green-300"
-        >
-          <app-icon name="check-circle-2" svgClass="h-12 w-12" />
+        <!-- đóng code cũ -->
+        <!-- <div -->
+        <!-- class="mx-auto flex h-20 w-20 items-center justify-center rounded-xl bg-green-50 text-green-700 dark:bg-green-900/40 dark:text-green-300" -->
+        <!-- > -->
+        <!-- <app-icon name="check-circle-2" svgClass="h-12 w-12" /> -->
+        <!-- </div> -->
+        <div class="mx-auto w-fit rounded-full bg-green-50 p-3 dark:bg-green-900/30">
+          <div
+            class="flex h-20 w-20 items-center justify-center rounded-full border border-green-200 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-900/40 dark:text-green-300"
+          >
+            <app-icon name="check-circle-2" svgClass="h-12 w-12" />
+          </div>
         </div>
+        <!-- Haihs: thiết kế lại trang nộp xong (nền gradient, thẻ bo 10px, vòng halo, nút cao 56px) - end -->
         <div>
           <span
             class="badge mb-2 border-green-200 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-900/40 dark:text-green-300"
@@ -101,13 +117,21 @@ export const submissionResultKey = (code: string): string => `submission_result_
         <!-- <p role="status" class="text-base">Đang tải...</p> -->
         <!-- } -->
         <div class="pt-2">
+          <!-- Haihs: nút về trang chủ cao 56px - start -->
+          <!-- đóng code cũ
           <a
             routerLink="/"
             class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gray-100 px-4 py-3 text-base font-bold text-gray-700 transition-colors hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200"
           >
+          -->
+          <a
+            routerLink="/"
+            class="inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-lg bg-gray-100 px-4 py-3 text-base font-bold text-gray-700 transition-colors hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200"
+          >
             <app-icon name="home" svgClass="h-4 w-4" />
             <span>Trở Về Trang Chủ</span>
           </a>
+          <!-- Haihs: nút về trang chủ cao 56px - end -->
         </div>
       </div>
       <!-- Haihs: trang nộp xong giống bản gốc (icon, confetti, thông báo mất tệp) - end -->

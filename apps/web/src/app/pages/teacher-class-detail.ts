@@ -98,7 +98,11 @@ const isTab = (v: unknown): v is Tab => TABS.some((t) => t[0] === v);
               {{ deleted() ? 'Đã xóa' : c.status === 'active' ? 'Đang học' : 'Đã tốt nghiệp' }}
             </p>
           </div>
-          <div class="flex flex-wrap gap-2">
+          <!-- Haihs: header/tab điện thoại không bị cắt chữ - start -->
+          <!-- đóng code cũ -->
+          <!-- <div class="flex flex-wrap gap-2"> -->
+          <div class="flex w-full flex-wrap gap-2 md:w-auto [&>button]:flex-1 md:[&>button]:flex-none">
+          <!-- Haihs: header/tab điện thoại không bị cắt chữ - end -->
             @if (deleted()) {
               <button type="button" class="btn-primary" [disabled]="busy()" (click)="restore()">
                 <!-- Haihs: icon cho nút giống bản gốc - start -->
@@ -119,6 +123,9 @@ const isTab = (v: unknown): v is Tab => TABS.some((t) => t[0] === v);
         </header>
 
         @if (!deleted()) {
+          <!-- Haihs: header/tab điện thoại không bị cắt chữ - start -->
+          <!-- đóng code cũ -->
+          <!--
           <div
             role="tablist"
             aria-label="Quản lý lớp"
@@ -141,6 +148,30 @@ const isTab = (v: unknown): v is Tab => TABS.some((t) => t[0] === v);
               </button>
             }
           </div>
+          -->
+          <div
+            role="tablist"
+            aria-label="Quản lý lớp"
+            class="flex flex-wrap gap-x-1 border-b border-gray-200 md:gap-x-2 dark:border-gray-700"
+          >
+            @for (t of tabs; track t[0]) {
+              <button
+                type="button"
+                role="tab"
+                [attr.aria-selected]="tab() === t[0]"
+                (click)="setTab(t[0])"
+                class="-mb-px min-h-[44px] flex-1 border-b-2 px-2 py-2 text-center text-base font-semibold md:flex-none md:px-4"
+                [class]="
+                  tab() === t[0]
+                    ? 'border-primary-700 text-primary-700 dark:border-sky-400 dark:text-sky-400'
+                    : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100'
+                "
+              >
+                {{ t[1] }}
+              </button>
+            }
+          </div>
+          <!-- Haihs: header/tab điện thoại không bị cắt chữ - end -->
           <div role="tabpanel">
             @switch (tab()) {
               @case ('students') {

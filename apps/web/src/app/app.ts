@@ -9,20 +9,24 @@
 // import { ApiClient } from './core/api-client'; // Haihs: gọi /api/health - start - end
 // import { errorMessage } from './core/api-errors'; // Haihs: thông báo lỗi tiếng Việt - start - end
 import { Component } from '@angular/core';
+import { DestroyRef, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { installOverlayScroll } from './shared/ui/overlay-scroll';
 import { AlertHost } from './shared/ui/alert-modal';
 import { ApiKeyModal } from './shared/ui/api-key-modal';
 import { ApiProgress } from './shared/ui/api-progress';
 import { ConfirmHost } from './shared/ui/confirm-modal';
 import { Navbar } from './shared/ui/navbar';
 import { ScrollToTop } from './shared/ui/scroll-to-top';
+import { Sidebar } from './shared/ui/sidebar';
 // Haihs: shell: tách trạng thái health sang pages/api-health.ts, app.ts chỉ còn vỏ ứng dụng (Task 13a) - end
 
 @Component({
   // imports: [], // Haihs: đóng code cũ, component không import gì - start - end
   // imports: [ApiProgress, Navbar, RouterOutlet, AlertHost, ConfirmHost], // Haihs: vỏ ứng dụng cần các thành phần UI chung - start - end
   // imports: [ApiProgress, Navbar, RouterOutlet, AlertHost, ConfirmHost, ApiKeyModal], // Haihs: thêm modal API Key vào vỏ ứng dụng (Task 13b) - start - end
-  imports: [ApiProgress, Navbar, RouterOutlet, AlertHost, ConfirmHost, ApiKeyModal, ScrollToTop], // Haihs: thêm nút cuộn lên đầu trang - start - end
+  // imports: [ApiProgress, Navbar, RouterOutlet, AlertHost, ConfirmHost, ApiKeyModal, ScrollToTop], // Haihs: thêm nút cuộn lên đầu trang - start - end
+  imports: [ApiProgress, Navbar, RouterOutlet, AlertHost, ConfirmHost, ApiKeyModal, ScrollToTop, Sidebar], // Haihs: thêm Sidebar cho khung shell - start - end
   selector: 'app-root',
   // styleUrl: './app.css', // Haihs: đóng code cũ, app.css rỗng đã bị xóa khi tối giản scaffold - start - end
   // templateUrl: './app.html', // Haihs: đóng code cũ, app.html là trang placeholder 20KB của CLI - start - end
@@ -38,9 +42,13 @@ import { ScrollToTop } from './shared/ui/scroll-to-top';
   template: `
     <app-api-progress />
     <app-navbar />
-    <main id="main">
+    <div class="md:flex"><!-- Haihs: khung shell: sidebar bên trái khi đăng nhập - start - end -->
+      <app-sidebar /><!-- Haihs: khung shell: sidebar bên trái khi đăng nhập - start - end -->
+    <!-- <main id="main"> -->
+      <main id="main" class="min-w-0 flex-1"><!-- Haihs: khung shell: nội dung co giãn bên phải sidebar - start - end -->
       <router-outlet />
     </main>
+    </div><!-- Haihs: khung shell: sidebar bên trái khi đăng nhập - start - end -->
     <app-alert-host />
     <app-confirm-host />
     <app-api-key-modal />
@@ -50,6 +58,7 @@ import { ScrollToTop } from './shared/ui/scroll-to-top';
   // Haihs: hiển thị tiêu đề + trạng thái API health - end
 })
 export class App {
+  protected readonly overlayScroll = inject(DestroyRef).onDestroy(installOverlayScroll()); // Haihs: thanh cuộn overlay cho trang/sidebar/modal/bảng, gỡ khi destroy - start - end
   // protected readonly title = signal('web'); // Haihs: đóng code cũ, title không được dùng - start - end
   // Haihs: gọi /api/health, giữ trạng thái bằng signal - start
   // đóng code cũ

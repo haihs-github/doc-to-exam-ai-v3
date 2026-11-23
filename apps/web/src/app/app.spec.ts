@@ -5,6 +5,10 @@ import { App } from './app';
 import { provideRouter } from '@angular/router';
 import { Subject, throwError } from 'rxjs'; // Haihs: mock Observable cho test health - start - end
 import { ApiClient } from './core/api-client'; // Haihs: mock ApiClient cho test health - start - end
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { Router } from '@angular/router';
+import { AuthService } from './core/auth.service';
 
 describe('App', () => {
   beforeEach(async () => {
@@ -102,4 +106,41 @@ describe('App', () => {
   //   });
   // });
   // Haihs: test trạng thái API health (loading / OK / lỗi) - end
+
+  // Haihs: layout shell: khách chỉ navbar, đăng nhập có sidebar, phòng thi không có gì - start
+  describe('shell layout', () => {
+    const run = async (loggedIn: boolean, url: string) => {
+      TestBed.resetTestingModule();
+      await TestBed.configureTestingModule({
+        imports: [App],
+        providers: [provideRouter([{ path: '**', children: [] }]), provideHttpClient(), provideHttpClientTesting()],
+      }).compileComponents();
+      if (loggedIn)
+        (TestBed.inject(AuthService) as unknown as { _user: { set(u: unknown): void } })._user.set({
+          id: 's', phoneNumber: '0900000001', fullName: 'Em An', role: 'student', mustChangePassword: false,
+        });
+      await TestBed.inject(Router).navigateByUrl(url);
+      const fixture = TestBed.createComponent(App);
+      await fixture.whenStable();
+      return fixture.nativeElement as HTMLElement;
+    };
+    it('guest: navbar only, no sidebar', async () => {
+      const el = await run(false, '/');
+      expect(el.querySelector('app-navbar header')).not.toBeNull();
+      expect(el.querySelector('aside')).toBeNull();
+    });
+    it('logged in: navbar + sidebar', async () => {
+      const el = await run(true, '/sittings');
+      expect(el.querySelector('app-navbar header')).not.toBeNull();
+      expect(el.querySelector('aside')).not.toBeNull();
+    });
+    it('exam room: no navbar, no sidebar; result page has both', async () => {
+      const room = await run(true, '/ca/ABC/room');
+      expect(room.querySelector('header')).toBeNull();
+      expect(room.querySelector('aside')).toBeNull();
+      const res = await run(true, '/ca/ABC/result');
+      expect(res.querySelector('aside')).not.toBeNull();
+    });
+  });
+  // Haihs: layout shell: khách chỉ navbar, đăng nhập có sidebar, phòng thi không có gì - end
 });

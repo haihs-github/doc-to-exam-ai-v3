@@ -224,6 +224,8 @@ type View = 'active' | 'deleted';
     <div class="container-fluid space-y-6 py-8">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <h1 class="text-2xl font-extrabold text-gray-900 dark:text-gray-100">Đề mẫu</h1>
+        <!-- Haihs: khung AI giữa trang, nút Tạo đề từ file to, không icon - start -->
+        <!-- đóng code cũ
         <div class="flex flex-wrap gap-2">
           <input
             #file
@@ -239,7 +241,38 @@ type View = 'active' | 'deleted';
           </button>
           <a routerLink="/teacher/templates/new" class="btn-primary">Tạo đề mẫu</a>
         </div>
+        -->
+        <a routerLink="/teacher/templates/new" class="btn-primary">Tạo đề mẫu</a>
       </div>
+      <section
+        aria-label="Tạo đề từ file bằng AI"
+        class="flex flex-col items-center gap-3 rounded-xl border border-dashed border-primary-300 bg-primary-50 p-6 text-center dark:border-sky-800 dark:bg-sky-900/20"
+      >
+        <input
+          #file
+          type="file"
+          class="sr-only"
+          tabindex="-1"
+          aria-hidden="true"
+          accept=".pdf,.doc,.docx,.txt"
+          (change)="onFile($event)"
+        />
+        <button
+          type="button"
+          class="btn-primary min-h-[48px] px-8 text-lg"
+          [disabled]="parsing()"
+          (click)="file.click()"
+        >
+          {{ parsing() ? 'Đang phân tích đề...' : 'Tạo đề từ file (AI)' }}
+        </button>
+        <p class="text-base text-gray-700 dark:text-gray-300">
+          Tải đề thi có sẵn lên, AI sẽ tách thành các câu hỏi để bạn chỉnh sửa.
+        </p>
+        <p class="text-sm text-gray-500 dark:text-gray-400">
+          Hỗ trợ file PDF, Word (.doc, .docx), TXT · tối đa 20MB
+        </p>
+      </section>
+      <!-- Haihs: khung AI giữa trang, nút Tạo đề từ file to, không icon - end -->
 
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div class="flex gap-2 border-b border-gray-200 dark:border-gray-700">
@@ -341,7 +374,31 @@ type View = 'active' | 'deleted';
                   }
                 </p>
               </div>
-              <app-action-menu [items]="r.menu" [label]="'Thao tác với đề ' + r.t.title" />
+              <!-- Haihs: web hiện đủ nút chức năng, ⋮ chỉ dưới 768px - start -->
+              <!-- đóng code cũ -->
+              <!-- <app-action-menu [items]="r.menu" [label]="'Thao tác với đề ' + r.t.title" /> -->
+              <div class="hidden flex-wrap gap-2 md:flex">
+                @for (it of r.menu; track it.label) {
+                  @if (it.to) {
+                    <a [routerLink]="it.to" class="btn-secondary">{{ it.label }}</a>
+                  } @else {
+                    <button
+                      type="button"
+                      class="btn-secondary"
+                      [class.text-red-600]="it.danger"
+                      [class.dark:text-red-400]="it.danger"
+                      [disabled]="it.disabled"
+                      (click)="it.onClick?.()"
+                    >
+                      {{ it.label }}
+                    </button>
+                  }
+                }
+              </div>
+              <span class="md:hidden">
+                <app-action-menu [items]="r.menu" [label]="'Thao tác với đề ' + r.t.title" />
+              </span>
+              <!-- Haihs: web hiện đủ nút chức năng, ⋮ chỉ dưới 768px - end -->
             </li>
           }
         </ul>
