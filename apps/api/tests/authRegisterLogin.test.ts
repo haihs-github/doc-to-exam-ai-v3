@@ -43,6 +43,7 @@ beforeAll(async () => {
   vi.stubEnv('JWT_SECRET', 'test-secret-0123456789-abcdef');
   vi.stubEnv('BCRYPT_COST', '4');
   vi.stubEnv('TEACHER_SECRET_KEY', TEACHER_KEY);
+  vi.stubEnv('ENABLE_TEACHER_SECRET', 'true'); // Haihs: mã bí mật chỉ kiểm khi bật cờ - start - end
   db = await startTestDb();
   vi.stubEnv('MONGODB_URI', db.uri);
   await connectDb();
@@ -209,6 +210,17 @@ describe('register validation (400 with field, before DB/bcrypt)', () => {
     });
   });
 });
+
+// Haihs: ENABLE_TEACHER_SECRET mặc định false thì đăng ký giáo viên không cần mã - start
+describe('teacher secret key disabled (default)', () => {
+  it('registers a teacher without secretKey', async () => {
+    vi.stubEnv('ENABLE_TEACHER_SECRET', '');
+    const r = await post(teacherRegister, reg({ secretKey: undefined }));
+    vi.stubEnv('ENABLE_TEACHER_SECRET', 'true'); // khôi phục cho các test sau
+    expect(r.status).toBe(201);
+  });
+});
+// Haihs: ENABLE_TEACHER_SECRET mặc định false thì đăng ký giáo viên không cần mã - end
 
 describe('teacher secret key', () => {
   it.each([[{ secretKey: 'wrong-key-123456' }], [{ secretKey: undefined }], [{ secretKey: 123 }]])(

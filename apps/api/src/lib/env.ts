@@ -12,6 +12,7 @@ export interface Env {
   hasMongoUri: boolean; // Haihs: phân biệt URI do người dùng cấu hình với URI mặc định dev - start - end
   // jwtExpiresIn: string; // Haihs: thời hạn token đăng nhập (JWT_EXPIRES_IN, mặc định 7d) - start - end // đóng code cũ, số thuần là giây nên kiểu string | number
   jwtExpiresIn: string | number; // Haihs: JWT_EXPIRES_IN dạng số là giây nên kiểu number - start - end
+  enableTeacherSecret: boolean; // Haihs: ENABLE_TEACHER_SECRET (mặc định false): true mới bắt nhập mã bí mật khi đăng ký giáo viên - start - end
   trustProxy: number; // Haihs: số proxy tin cậy phía trước app (X-Forwarded-For), dùng cho rate limit - start - end
 }
 
@@ -39,14 +40,19 @@ export function loadEnv(src: Record<string, string | undefined> = process.env): 
   const teacherSecretKey = get('TEACHER_SECRET_KEY');
   const mongodbUri = get('MONGODB_URI');
 
+  const enableTeacherSecret = get('ENABLE_TEACHER_SECRET').toLowerCase() === 'true'; // Haihs: chỉ đúng chuỗi 'true' mới bật, mặc định false - start - end
+
   if (isProd) {
     // names only: never put a value in the message
     const checks: [string, string, number][] = [
       ['JWT_SECRET', jwtSecret, MIN_SECRET],
       ['API_KEY_ENCRYPTION_SECRET', apiKeyEncryptionSecret, MIN_SECRET],
-      ['TEACHER_SECRET_KEY', teacherSecretKey, MIN_TEACHER_KEY],
+      // ['TEACHER_SECRET_KEY', teacherSecretKey, MIN_TEACHER_KEY], // Haihs: đóng code cũ, chỉ bắt buộc khi ENABLE_TEACHER_SECRET=true - start - end
       ['MONGODB_URI', mongodbUri, 1],
     ];
+    // Haihs: TEACHER_SECRET_KEY chỉ bắt buộc khi bật ENABLE_TEACHER_SECRET - start
+    if (enableTeacherSecret) checks.splice(2, 0, ['TEACHER_SECRET_KEY', teacherSecretKey, MIN_TEACHER_KEY]);
+    // Haihs: TEACHER_SECRET_KEY chỉ bắt buộc khi bật ENABLE_TEACHER_SECRET - end
     const bad = checks.filter(([, v, min]) => v.length < min).map(([k]) => k);
     if (bad.length) throw new Error(`Invalid environment: missing or too short: ${bad.join(', ')}`);
   }
@@ -62,6 +68,7 @@ export function loadEnv(src: Record<string, string | undefined> = process.env): 
     hasMongoUri: mongodbUri !== '', // Haihs: phân biệt URI do người dùng cấu hình với URI mặc định dev - start - end
     // jwtExpiresIn: get('JWT_EXPIRES_IN') || '7d', // Haihs: thời hạn token đăng nhập, mặc định 7d như nguồn - start - end // đóng code cũ, validate (số thuần bị jsonwebtoken đọc là mili giây)
     jwtExpiresIn: readJwtExpiresIn(get('JWT_EXPIRES_IN')), // Haihs: validate JWT_EXPIRES_IN (số thuần bị jsonwebtoken đọc là mili giây) - start - end
+    enableTeacherSecret, // Haihs: ENABLE_TEACHER_SECRET - start - end
     trustProxy: readTrustProxy(src), // Haihs: trust proxy mặc định 1 ở production, 0 nơi khác - start - end
   };
 }

@@ -24,7 +24,8 @@ const mk = (over: Partial<AuthUser> = {}): AuthUser => ({
   ...over,
 });
 
-const setup = async (url = '/register', state?: Record<string, unknown>) => {
+// const setup = async (url = '/register', state?: Record<string, unknown>) => { // Haihs: đóng code cũ, thêm tham số cờ mã bí mật - start - end
+const setup = async (url = '/register', state?: Record<string, unknown>, secretRequired = true) => { // Haihs: thêm tham số cờ mã bí mật - start - end
   const user = signal<AuthUser | null>(null);
   const register = vi.fn();
   TestBed.configureTestingModule({
@@ -34,7 +35,8 @@ const setup = async (url = '/register', state?: Record<string, unknown>) => {
         { path: 'teacher/register', component: Register, data: { audience: 'teacher' } },
         { path: '**', component: Dummy },
       ]),
-      { provide: AuthService, useValue: { user, register } },
+      // { provide: AuthService, useValue: { user, register } }, // Haihs: đóng code cũ, mock thêm cờ mã bí mật - start - end
+      { provide: AuthService, useValue: { user, register, registerConfig: () => of({ teacherSecretRequired: secretRequired }) } }, // Haihs: mock cờ mã bí mật - start - end
     ],
   });
   const alertError = vi.spyOn(TestBed.inject(AlertService), 'error').mockResolvedValue();
@@ -225,6 +227,25 @@ describe('Register (teacher)', () => {
     expect(input('geminiApiKey')).toBeTruthy();
     expect(el.querySelector('a[href="/teacher/login"]')).toBeTruthy();
   });
+
+  // Haihs: cờ ENABLE_TEACHER_SECRET tắt thì ẩn ô mã và không gửi secretKey - start
+  it('hides the secret key and does not send it when the API says it is not required', async () => {
+    const s = await setup('/teacher/register', undefined, false);
+    expect(s.el.querySelector('input[name="secretKey"]')).toBeNull();
+    s.register.mockReturnValue(of({ token: 't', user: mk({ role: 'teacher' }) }));
+    await s.type('fullName', 'Hoàng Thị Tuyến');
+    await s.type('phoneNumber', '0912345678');
+    await s.type('password', 'secret-pw1');
+    await s.type('confirmPassword', 'secret-pw1');
+    await s.submit();
+    expect(s.register).toHaveBeenCalledWith('teacher', {
+      phoneNumber: '0912345678',
+      fullName: 'Hoàng Thị Tuyến',
+      password: 'secret-pw1',
+      website: '',
+    });
+  });
+  // Haihs: cờ ENABLE_TEACHER_SECRET tắt thì ẩn ô mã và không gửi secretKey - end
 
   it('requires the secret key', async () => {
     const s = await setup('/teacher/register');

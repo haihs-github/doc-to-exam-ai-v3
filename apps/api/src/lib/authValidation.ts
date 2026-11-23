@@ -66,14 +66,26 @@ export function validateRegister(body: unknown, audience: 'teacher' | 'student')
   assertPasswordPolicy(password);
   const out: RegisterBody = { phoneNumber, fullName, password };
   if (audience === 'teacher') {
+    // Haihs: chỉ kiểm tra mã bí mật khi ENABLE_TEACHER_SECRET=true - start
+    // đóng code cũ
+    // if (
+    //   typeof b.secretKey !== 'string' ||
+    //   !secretMatches(b.secretKey.trim(), loadEnv().teacherSecretKey)
+    // )
+    //   throw new HttpError(
+    //     'SECRET_KEY_INVALID',
+    //     'Mã bí mật (Secret Key) không chính xác. Bạn không có quyền đăng ký tài khoản giáo viên.',
+    //   );
+    const env = loadEnv();
     if (
-      typeof b.secretKey !== 'string' ||
-      !secretMatches(b.secretKey.trim(), loadEnv().teacherSecretKey)
+      env.enableTeacherSecret &&
+      (typeof b.secretKey !== 'string' || !secretMatches(b.secretKey.trim(), env.teacherSecretKey))
     )
       throw new HttpError(
         'SECRET_KEY_INVALID',
         'Mã bí mật (Secret Key) không chính xác. Bạn không có quyền đăng ký tài khoản giáo viên.',
       );
+    // Haihs: chỉ kiểm tra mã bí mật khi ENABLE_TEACHER_SECRET=true - end
     // Haihs: giới hạn độ dài geminiApiKey ≤ 512 - start
     // đóng code cũ
     // if (typeof b.geminiApiKey === 'string' && b.geminiApiKey.trim())

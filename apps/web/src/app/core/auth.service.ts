@@ -99,6 +99,12 @@ export class AuthService {
       .pipe(tap((r) => this.applyAuth(r)));
   }
 
+  /** Haihs: trang đăng ký hỏi API có cần mã bí mật giáo viên không - start */
+  registerConfig(): Observable<{ teacherSecretRequired: boolean }> {
+    return this.api.get<{ teacherSecretRequired: boolean }>('/api/auth/config');
+  }
+  /** Haihs: trang đăng ký hỏi API có cần mã bí mật giáo viên không - end */
+
   register(audience: Audience, body: RegisterBody): Observable<AuthResult> {
     return this.api
       .post<AuthResult>(`/api/auth/${audience}/register`, body)

@@ -28,6 +28,7 @@ beforeAll(async () => {
   vi.stubEnv('JWT_SECRET', 'test-secret-0123456789-abcdef');
   vi.stubEnv('BCRYPT_COST', '4');
   vi.stubEnv('TEACHER_SECRET_KEY', TEACHER_KEY);
+  vi.stubEnv('ENABLE_TEACHER_SECRET', 'true'); // Haihs: mã bí mật chỉ kiểm khi bật cờ - start - end
   db = await startTestDb();
   vi.stubEnv('MONGODB_URI', db.uri);
   await connectDb();
@@ -50,6 +51,7 @@ afterEach(() => {
   vi.stubEnv('JWT_SECRET', 'test-secret-0123456789-abcdef');
   vi.stubEnv('BCRYPT_COST', '4');
   vi.stubEnv('TEACHER_SECRET_KEY', TEACHER_KEY);
+  vi.stubEnv('ENABLE_TEACHER_SECRET', 'true'); // Haihs: mã bí mật chỉ kiểm khi bật cờ - start - end
   vi.stubEnv('MONGODB_URI', db.uri);
 });
 

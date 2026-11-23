@@ -187,6 +187,7 @@ const ORDER = ['fullName', 'phoneNumber', 'password', 'confirmPassword', 'secret
             <!-- Haihs: thêm ô nhập lại mật khẩu theo yêu cầu người dùng - end -->
 
             @if (isTeacher) {
+              @if (needSecret()) { <!-- Haihs: chỉ hiện ô mã bí mật khi API bật ENABLE_TEACHER_SECRET - start - end -->
               <app-form-field
                 label="Mã Bí Mật Giáo Viên (Secret Key)"
                 [required]="true"
@@ -205,6 +206,7 @@ const ORDER = ['fullName', 'phoneNumber', 'password', 'confirmPassword', 'secret
                 />
                 <!-- Haihs: icon và kiểu ô nhập giống bản gốc cho trang tài khoản - end -->
               </app-form-field>
+              } <!-- Haihs: đóng khối @if ô mã bí mật - start - end -->
               <div>
                 <div class="mb-1.5 flex items-center justify-between gap-2">
                   <label
@@ -375,8 +377,18 @@ export class Register {
   protected readonly website = signal('');
   protected readonly errors = signal<FormErrors>({});
   protected readonly busy = signal(false);
+  // Haihs: cờ ENABLE_TEACHER_SECRET từ API; lỗi tải thì coi như bắt buộc (an toàn hơn) - start
+  protected readonly needSecret = signal(false);
+  // Haihs: cờ ENABLE_TEACHER_SECRET từ API; lỗi tải thì coi như bắt buộc (an toàn hơn) - end
 
   constructor() {
+    // Haihs: lấy cờ mã bí mật từ API (chỉ trang giáo viên) - start
+    if (this.isTeacher)
+      this.auth.registerConfig().subscribe({
+        next: (c) => this.needSecret.set(c.teacherSecretRequired),
+        error: () => this.needSecret.set(true),
+      });
+    // Haihs: lấy cờ mã bí mật từ API (chỉ trang giáo viên) - end
     // Keyed on user(), never on the token: a stored token alone is not a session.
     effect(() => {
       const u = this.auth.user();
@@ -386,7 +398,8 @@ export class Register {
 
   // Haihs: thêm ô nhập lại mật khẩu theo yêu cầu người dùng - start
   private validate = (x: FormValues) => {
-    const e = validateRegisterForm(x, { isTeacher: this.isTeacher });
+    // const e = validateRegisterForm(x, { isTeacher: this.isTeacher }); // Haihs: đóng code cũ, chỉ bắt buộc mã khi API bật - start - end
+    const e = validateRegisterForm(x, { isTeacher: this.isTeacher && this.needSecret() }); // Haihs: chỉ bắt buộc mã khi API bật - start - end
     if (!x.confirmPassword) e['confirmPassword'] = 'Vui lòng nhập lại mật khẩu';
     else if (x.confirmPassword !== x.password) e['confirmPassword'] = 'Mật khẩu nhập lại không khớp';
     return e;
@@ -446,7 +459,8 @@ export class Register {
     const body: RegisterBody = this.isTeacher
       ? {
           ...base,
-          secretKey: this.secretKey().trim(),
+          // secretKey: this.secretKey().trim(), // Haihs: đóng code cũ, chỉ gửi mã khi API bật - start - end
+          ...(this.needSecret() && { secretKey: this.secretKey().trim() }), // Haihs: chỉ gửi mã khi API bật - start - end
           ...(gemini && { geminiApiKey: gemini }),
           website: this.website(),
         }

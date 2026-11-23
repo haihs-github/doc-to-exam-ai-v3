@@ -9,6 +9,7 @@ const prod = {
   JWT_SECRET: 'jwt-secret-value-0123456789',
   API_KEY_ENCRYPTION_SECRET: 'enc-secret-value-0123456789',
   TEACHER_SECRET_KEY: 'teacher-key-value',
+  ENABLE_TEACHER_SECRET: 'true', // Haihs: TEACHER_SECRET_KEY chỉ bắt buộc khi bật cờ - start - end
 };
 
 describe('loadEnv', () => {
@@ -26,7 +27,8 @@ describe('loadEnv', () => {
   });
 
   it('production lists every missing variable', () => {
-    expect(() => loadEnv({ NODE_ENV: 'production' })).toThrow(
+    // expect(() => loadEnv({ NODE_ENV: 'production' })).toThrow( // Haihs: đóng code cũ, TEACHER_SECRET_KEY chỉ bắt buộc khi bật cờ - start - end
+    expect(() => loadEnv({ NODE_ENV: 'production', ENABLE_TEACHER_SECRET: 'true' })).toThrow( // Haihs: TEACHER_SECRET_KEY chỉ bắt buộc khi bật cờ - start - end
       /JWT_SECRET.*API_KEY_ENCRYPTION_SECRET.*TEACHER_SECRET_KEY.*MONGODB_URI/s,
     );
   });
@@ -54,6 +56,17 @@ describe('loadEnv', () => {
     expect(loadEnv({ ALLOW_IN_MEMORY_DB: 'false' }).allowInMemoryDb).toBe(false);
     expect(loadEnv({ ...prod, ALLOW_IN_MEMORY_DB: 'true' }).allowInMemoryDb).toBe(false);
   });
+
+  // Haihs: cờ ENABLE_TEACHER_SECRET - start
+  it('ENABLE_TEACHER_SECRET defaults to false and then TEACHER_SECRET_KEY is not required in production', () => {
+    const rest: Record<string, string | undefined> = { ...prod };
+    delete rest.TEACHER_SECRET_KEY;
+    delete rest.ENABLE_TEACHER_SECRET;
+    expect(loadEnv(rest).enableTeacherSecret).toBe(false);
+    expect(loadEnv({ ...rest, ENABLE_TEACHER_SECRET: 'true', TEACHER_SECRET_KEY: 'x'.repeat(8) }).enableTeacherSecret).toBe(true);
+    expect(() => loadEnv({ ...rest, ENABLE_TEACHER_SECRET: 'true' })).toThrow(/TEACHER_SECRET_KEY/);
+  });
+  // Haihs: cờ ENABLE_TEACHER_SECRET - end
 
   it('length boundaries in production', () => {
     expect(() => loadEnv({ ...prod, JWT_SECRET: 'x'.repeat(16) })).not.toThrow();
