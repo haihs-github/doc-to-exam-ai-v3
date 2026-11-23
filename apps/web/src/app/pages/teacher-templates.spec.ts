@@ -2,6 +2,7 @@
 // Specs cho <app-teacher-templates>: khung AI giữa trang, nút chức năng hiện đủ trên web, ⋮ chỉ điện thoại.
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { Router } from '@angular/router';
 import { of } from 'rxjs';
 import type { TemplateSummary } from '@doc-to-exam/contract';
 import { TemplatesApi } from '../core/templates.api';
@@ -45,3 +46,15 @@ describe('TeacherTemplates layout', () => {
     expect(api.duplicate).toHaveBeenCalledWith('t1');
   });
 });
+
+// Haihs: nút Tạo ca thi từ đề ở mỗi đề đang dùng - start
+describe('TeacherTemplates "Tạo ca thi từ đề"', () => {
+  it('navigates to the sitting create page with the template preselected', async () => {
+    const { el } = await setup();
+    const nav = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    const web = el.querySelector('li div.md\\:flex')!;
+    ([...web.querySelectorAll('button')].find((b) => b.textContent?.trim() === 'Tạo ca thi từ đề') as HTMLElement).click();
+    expect(nav).toHaveBeenCalledWith(['/teacher/sittings/new'], { queryParams: { templateId: 't1' } });
+  });
+});
+// Haihs: nút Tạo ca thi từ đề ở mỗi đề đang dùng - end

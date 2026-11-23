@@ -502,6 +502,15 @@ export class TeacherTemplates implements OnDestroy {
             ]
           : [
               { label: 'Sửa', to: `/teacher/templates/${t.id}/edit` },
+              // Haihs: nút Tạo ca thi từ đề, mở trang tạo ca thi với đề này đã chọn - start
+              {
+                label: 'Tạo ca thi từ đề',
+                onClick: () =>
+                  void this.router.navigate(['/teacher/sittings/new'], {
+                    queryParams: { templateId: t.id },
+                  }),
+              },
+              // Haihs: nút Tạo ca thi từ đề, mở trang tạo ca thi với đề này đã chọn - end
               { label: 'Tạo bản sao', disabled: this.busy(), onClick: () => this.duplicate(t) },
               {
                 label: 'Xóa',
