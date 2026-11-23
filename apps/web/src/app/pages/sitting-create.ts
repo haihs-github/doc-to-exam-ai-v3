@@ -94,14 +94,17 @@ import { DatetimeField } from '../shared/ui/datetime-field';
             <!-- @for (t of templates(); track t.id) { -->
             <!-- <option [value]="t.id">{{ t.title }} ({{ t.totalQuestions }} câu)</option> -->
             <div>
+              <!-- Haihs: ô Đề mẫu hiện tên đề đã chọn (thêm selectedLabel) - start -->
               <app-search-select
                 label="Đề mẫu"
                 placeholder="Tìm đề mẫu theo tên"
                 emptyText="Không tìm thấy đề mẫu"
                 [options]="templateOptions()"
                 [selectedKeys]="templateId() ? [templateId()] : []"
+                [selectedLabel]="selected()?.title ?? ''"
                 (picked)="pickTemplate($event)"
               />
+              <!-- Haihs: ô Đề mẫu hiện tên đề đã chọn (thêm selectedLabel) - end -->
               @if (selected(); as t) {
                 <p class="mt-2 text-base text-gray-700 dark:text-gray-200">
                   Đã chọn:

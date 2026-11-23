@@ -13,6 +13,7 @@ import type { TemplateBody } from '@doc-to-exam/contract';
 import { Subscription, finalize } from 'rxjs';
 import { TemplatesApi } from '../core/templates.api';
 import { AlertService } from '../shared/ui/alert.service';
+import { ConfirmService } from '../shared/ui/confirm-modal'; // Haihs: popup xác nhận lưu đề và tạo ca thi - start - end
 import { FormField } from '../shared/ui/form-field';
 import { QuestionsEditor } from '../shared/ui/questions-editor';
 import { Skeleton } from '../shared/ui/skeleton';
@@ -105,9 +106,16 @@ function readDraft(): Draft | null {
             <h1 class="text-2xl font-extrabold text-gray-900 dark:text-gray-100">
               {{ isNew ? 'Tạo đề mẫu' : 'Sửa đề mẫu' }}
             </h1>
+            <div class="flex flex-wrap items-center gap-2"> <!-- Haihs: gom nút Lưu và Tạo ca thi cùng phía phải - start - end -->
             <button type="submit" class="btn-primary" [disabled]="busy()">
               {{ isNew ? 'Lưu đề mẫu' : 'Lưu thay đổi' }}
             </button>
+            <!-- Haihs: nút Tạo ca thi từ đề (chỉ khi đề đã lưu) bên phải nút Lưu - start -->
+            <button type="button" class="btn-secondary" [disabled]="busy()" (click)="createSitting()">
+              Tạo ca thi từ đề
+            </button>
+            <!-- Haihs: nút Tạo ca thi từ đề (chỉ khi đề đã lưu) bên phải nút Lưu - end -->
+            </div> <!-- Haihs: đóng nhóm nút - start - end -->
           </div>
           <app-form-field label="Tên đề mẫu" [required]="true" [error]="errors()['title'] ?? ''">
             <input
@@ -135,6 +143,7 @@ function readDraft(): Draft | null {
             [errors]="errors()"
             [saveLabel]="isNew ? 'Lưu đề mẫu' : 'Lưu thay đổi'"
             [saving]="busy()"
+            (createSitting)="createSitting()"
           />
           <!-- Haihs: truyền chữ nút Lưu cho nút cố định dưới Bảng đáp án - end -->
         </form>
@@ -145,6 +154,7 @@ function readDraft(): Draft | null {
 export class TemplateEditor implements OnDestroy {
   private readonly api = inject(TemplatesApi);
   private readonly alert = inject(AlertService);
+  private readonly confirm = inject(ConfirmService); // Haihs: popup xác nhận lưu đề và tạo ca thi - start - end
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly id = this.route.snapshot.paramMap.get('id');
@@ -158,6 +168,58 @@ export class TemplateEditor implements OnDestroy {
   protected readonly notFound = signal(false);
   protected readonly busy = signal(false);
   private sub?: Subscription;
+  // Haihs: nút Tạo ca thi từ đề: nhận biết đề chưa lưu, hỏi xác nhận rồi lưu và chuyển sang trang tạo ca thi - start
+  private readonly saved = signal('');
+  private snapshot = (): string =>
+    JSON.stringify([this.title(), this.description(), this.questions()]);
+
+  protected async createSitting(): Promise<void> {
+    if (this.busy()) return;
+    const toSittings = (id: string): void =>
+      void this.router.navigate(['/teacher/sittings/new'], { queryParams: { templateId: id } });
+    if (this.id && this.snapshot() === this.saved()) return toSittings(this.id); // đã lưu: chuyển luôn
+    const ok = await this.confirm.confirm(
+      this.id
+        ? 'Đề mẫu có thay đổi chưa lưu. Lưu đề mẫu và tạo ca thi?'
+        : 'Đề mẫu chưa được lưu. Lưu đề mẫu và tạo ca thi?',
+      { title: 'Lưu đề và tạo ca thi', confirmText: 'Lưu và tạo ca thi', cancelText: 'Hủy' },
+    );
+    if (!ok) return;
+    const errs = validateTemplateForm({
+      title: this.title(),
+      description: this.description(),
+      questions: this.questions(),
+    });
+    this.errors.set(errs);
+    const first = Object.values(errs)[0];
+    if (first) return void this.alert.error(first);
+    const body: TemplateBody = {
+      title: this.title().trim(),
+      description: this.description().trim(),
+      questions: this.questions().map(toPayloadQuestion) as unknown as TemplateBody['questions'],
+    };
+    this.busy.set(true);
+    const op = this.id ? this.api.update(this.id, body) : this.api.create(body);
+    op.pipe(finalize(() => this.busy.set(false))).subscribe({
+      next: (t) => {
+        try {
+          sessionStorage.removeItem(DRAFT_KEY);
+        } catch {
+          /* ignore */
+        }
+        this.saved.set(this.snapshot());
+        toSittings(t.id);
+      },
+      error: (err: unknown) => {
+        if (isTitleTaken(err)) {
+          this.errors.update((m) => ({ ...m, title: 'Tên đề mẫu đã tồn tại. Vui lòng chọn tên khác!' }));
+          void this.alert.error('Tên đề mẫu đã tồn tại. Vui lòng chọn tên khác!');
+        } else void this.alert.error(describeTemplateError(err, 'Không lưu được đề mẫu.'));
+      },
+    });
+  }
+  // Haihs: nút Tạo ca thi từ đề: nhận biết đề chưa lưu, hỏi xác nhận rồi lưu và chuyển sang trang tạo ca thi - end
+
   protected readonly dirty = computed(() => this.questions().length > 0 || this.title() !== '');
 
   constructor() {
@@ -185,6 +247,7 @@ export class TemplateEditor implements OnDestroy {
         this.title.set(t.title);
         this.description.set(t.description);
         this.questions.set(ensureUniqueIds(t.questions as unknown as Record<string, unknown>[]));
+        this.saved.set(this.snapshot()); // Haihs: mốc để biết đề có thay đổi chưa lưu - start - end
         this.loading.set(false);
       },
       error: (e: unknown) => {

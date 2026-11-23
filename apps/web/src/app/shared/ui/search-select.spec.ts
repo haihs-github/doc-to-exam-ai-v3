@@ -21,3 +21,24 @@ describe('search-select helpers', () => {
     expect(nextActiveIndex('ArrowDown', -1, 0)).toBe(-1);
   });
 });
+
+// Haihs: ô tìm hiện tên mục đã chọn khi chưa gõ - start
+import { TestBed } from '@angular/core/testing';
+import { SearchSelect } from './search-select';
+
+describe('SearchSelect selectedLabel', () => {
+  it('shows the selected label in the box until the user types', async () => {
+    const f = TestBed.createComponent(SearchSelect);
+    f.componentRef.setInput('options', [{ key: '1', label: 'Đề A' }]);
+    f.componentRef.setInput('selectedKeys', ['1']);
+    f.componentRef.setInput('selectedLabel', 'Đề A');
+    await f.whenStable();
+    const input = (f.nativeElement as HTMLElement).querySelector('input')!;
+    expect(input.value).toBe('Đề A');
+    input.value = 'xyz';
+    input.dispatchEvent(new Event('input'));
+    await f.whenStable();
+    expect(input.value).toBe('xyz');
+  });
+});
+// Haihs: ô tìm hiện tên mục đã chọn khi chưa gõ - end

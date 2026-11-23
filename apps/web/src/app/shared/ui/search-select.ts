@@ -123,6 +123,10 @@ let uid = 0;
   //     }
   //   `,
   template: `
+    <!-- Haihs: ô hiện tên mục đã chọn (selectedLabel) khi chưa gõ - start -->
+    <!-- đóng code cũ -->
+    <!-- [value]="query()" -->
+    <!-- (focus)="open.set(true)" -->
     <input
       type="text"
       role="combobox"
@@ -132,13 +136,14 @@ let uid = 0;
       [attr.aria-controls]="open() ? listId : null"
       aria-autocomplete="list"
       [attr.aria-activedescendant]="open() && active() >= 0 ? listId + '-opt-' + active() : null"
-      [value]="query()"
+      [value]="touched() ? query() : selectedLabel()"
       [placeholder]="placeholder()"
       (input)="onInput($event)"
-      (focus)="open.set(true)"
+      (focus)="open.set(true); $any($event.target).select()"
       (keydown)="onKey($event)"
       class="min-h-[48px] w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-700 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:focus:ring-sky-400"
     />
+    <!-- Haihs: ô hiện tên mục đã chọn (selectedLabel) khi chưa gõ - end -->
     @if (open()) {
       <ul
         [id]="listId"
@@ -213,6 +218,8 @@ export class SearchSelect {
   readonly minChars = input(0);
   readonly loading = input(false);
   readonly error = input('');
+  /** Tên mục đã chọn, hiện trong ô khi người dùng chưa gõ gì. */
+  readonly selectedLabel = input(''); // Haihs: tên mục đã chọn hiện trong ô - start - end
   // Haihs: SearchSelect có chế độ tìm phía server, ô thêm giáo viên dùng nó như bản gốc - end
   readonly picked = output<string>();
   // Haihs: SearchSelect có chế độ tìm phía server, ô thêm giáo viên dùng nó như bản gốc - start
@@ -221,6 +228,7 @@ export class SearchSelect {
 
   protected readonly listId = `app-search-select-${++uid}`;
   protected readonly query = signal('');
+  protected readonly touched = signal(false); // Haihs: đã gõ thì ô hiện chữ đang gõ thay vì tên mục đã chọn - start - end
   protected readonly open = signal(false);
   protected readonly active = signal(-1);
   // Haihs: SearchSelect có chế độ tìm phía server, ô thêm giáo viên dùng nó như bản gốc - start
@@ -248,6 +256,7 @@ export class SearchSelect {
 
   protected onInput(e: Event): void {
     this.query.set((e.target as HTMLInputElement).value);
+    this.touched.set(true); // Haihs: đã gõ - start - end
     // Haihs: SearchSelect có chế độ tìm phía server, ô thêm giáo viên dùng nó như bản gốc - start
     this.queryChange.emit(this.query());
     // Haihs: SearchSelect có chế độ tìm phía server, ô thêm giáo viên dùng nó như bản gốc - end
@@ -259,6 +268,7 @@ export class SearchSelect {
     this.picked.emit(o.key);
     this.open.set(false);
     this.query.set('');
+    this.touched.set(false); // Haihs: chọn xong thì ô quay về hiện tên mục đã chọn - start - end
     // Haihs: SearchSelect có chế độ tìm phía server, ô thêm giáo viên dùng nó như bản gốc - start
     if (this.remote()) this.queryChange.emit('');
     // Haihs: SearchSelect có chế độ tìm phía server, ô thêm giáo viên dùng nó như bản gốc - end

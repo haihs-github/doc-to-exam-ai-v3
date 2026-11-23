@@ -4,6 +4,7 @@
 // đóng code cũ
 // import { ChangeDetectionStrategy, Component, computed, input, model } from '@angular/core';
 import { ChangeDetectionStrategy, Component, computed, input, model, signal } from '@angular/core';
+import { output } from '@angular/core';
 import { DestroyRef, inject } from '@angular/core';
 // Haihs: trình soạn câu hỏi có chế độ Xem như học sinh, Chèn câu và nhãn như bản gốc - end
 import {
@@ -1697,6 +1698,16 @@ const AREA = 'input min-h-[72px] w-full';
                 <button type="submit" class="btn-primary flex-1" [disabled]="saving()">
                   {{ saveLabel() }}
                 </button>
+                <!-- Haihs: nút Tạo ca thi từ đề bên phải nút Lưu - start -->
+                <button
+                  type="button"
+                  class="btn-secondary h-11 whitespace-nowrap"
+                  [disabled]="saving()"
+                  (click)="createSitting.emit()"
+                >
+                  Tạo ca thi từ đề
+                </button>
+                <!-- Haihs: nút Tạo ca thi từ đề bên phải nút Lưu - end -->
                 @if (scrolled()) {
                   <button
                     type="button"
@@ -1734,6 +1745,7 @@ export class QuestionsEditor {
   /** Chữ nút Lưu; rỗng = không hiện nút (nút submit form cha). */
   readonly saveLabel = input('');
   readonly saving = input(false);
+  readonly createSitting = output<void>(); // Haihs: nút Tạo ca thi từ đề báo lên trang cha - start - end
   protected readonly scrolled = signal(false);
   protected onWindowScroll(): void {
     this.scrolled.set(window.scrollY > 300);
